@@ -9,7 +9,7 @@
 		<NoWarn>1591</NoWarn> <!-- TODO: Address public-facing documentation -->
 
 		<!-- Package metadata -->
-		<PackageId>Momento.Sdk</PackageId>
+		<PackageId>Momento.Sdk.Incubating</PackageId>
 		<Authors>Momento</Authors>
 		<Company>Momento Inc</Company>
 		<Description>

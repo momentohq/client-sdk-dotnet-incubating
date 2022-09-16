@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Momento.Sdk\Momento.Sdk.csproj" />
+    <ProjectReference Include="..\..\..\src\Momento.Sdk.Incubating\Momento.Sdk.Incubating.csproj" />
   </ItemGroup>
+
 </Project>
