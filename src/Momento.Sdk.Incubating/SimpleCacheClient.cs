@@ -99,25 +99,25 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc />
     public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys)
     {
-        return await this.simpleCacheClient.GetBatchAsync(cacheName, keys);
+        return await this.dataClient.GetBatchAsync(cacheName, keys);
     }
 
     /// <inheritdoc />
     public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys)
     {
-        return await this.simpleCacheClient.GetBatchAsync(cacheName, keys);
+        return await this.dataClient.GetBatchAsync(cacheName, keys);
     }
 
     /// <inheritdoc />
     public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
     {
-        return await this.simpleCacheClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(cacheName, items, ttlSeconds);
     }
 
     /// <inheritdoc />
     public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
     {
-        return await this.simpleCacheClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(cacheName, items, ttlSeconds);
     }
 
     /// <summary>

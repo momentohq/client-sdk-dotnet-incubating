@@ -18,6 +18,111 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
     }
 
+    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys)
+    {
+        return await GetBatchAsync(cacheName, keys.Select(key => key.ToByteString()));
+    }
+
+    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys)
+    {
+        return await GetBatchAsync(cacheName, keys.Select(key => key.ToByteString()));
+    }
+
+    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<ByteString> keys)
+    {
+        // Gather the tasks
+        var tasks = keys.Select(key => SendGetAsync(cacheName, key));
+
+        // Run the tasks
+        var continuation = Task.WhenAll(tasks);
+        try
+        {
+            await continuation;
+        }
+        catch (Exception e)
+        {
+            return new CacheGetBatchResponse.Error(CacheExceptionMapper.Convert(e));
+        }
+
+        // Handle failures
+        if (continuation.Status == TaskStatus.Faulted)
+        {
+            return new CacheGetBatchResponse.Error(
+                CacheExceptionMapper.Convert(continuation.Exception)
+            );
+        }
+        else if (continuation.Status != TaskStatus.RanToCompletion)
+        {
+            return new CacheGetBatchResponse.Error(
+                CacheExceptionMapper.Convert(
+                    new Exception(String.Format("Failure issuing multi-get: {0}", continuation.Status))
+                )
+            );
+        }
+
+        // preserve old behavior of failing on first error
+        foreach (CacheGetResponse response in continuation.Result)
+        {
+            if (response is CacheGetResponse.Error errorResponse)
+            {
+                return new CacheGetBatchResponse.Error(errorResponse.Exception);
+            }
+        }
+
+        // Package results
+        return new CacheGetBatchResponse.Success(continuation.Result);
+    }
+
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
+    {
+        return await SendSetBatchAsync(cacheName: cacheName,
+            items: items.Select(item => new KeyValuePair<ByteString, ByteString>(item.Key.ToByteString(), item.Value.ToByteString())),
+            ttlSeconds: ttlSeconds);
+    }
+
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    {
+        return await SendSetBatchAsync(cacheName: cacheName,
+            items: items.Select(item => new KeyValuePair<ByteString, ByteString>(item.Key.ToByteString(), item.Value.ToByteString())),
+            ttlSeconds: ttlSeconds);
+    }
+
+    public async Task<CacheSetBatchResponse> SendSetBatchAsync(string cacheName, IEnumerable<KeyValuePair<ByteString, ByteString>> items, uint? ttlSeconds = null)
+    {
+        // Gather the tasks
+        var tasks = items.Select(item => SendSetAsync(cacheName, item.Key, item.Value, ttlSeconds));
+
+        // Run the tasks
+        var continuation = Task.WhenAll(tasks);
+        try
+        {
+            await continuation;
+        }
+        catch (Exception e)
+        {
+            return new CacheSetBatchResponse.Error(
+                CacheExceptionMapper.Convert(e)
+            );
+        }
+
+        // Handle failures
+        if (continuation.Status == TaskStatus.Faulted)
+        {
+            return new CacheSetBatchResponse.Error(
+                CacheExceptionMapper.Convert(continuation.Exception)
+            );
+        }
+        else if (continuation.Status != TaskStatus.RanToCompletion)
+        {
+            return new CacheSetBatchResponse.Error(
+                CacheExceptionMapper.Convert(
+                    new Exception(String.Format("Failure issuing multi-set: {0}", continuation.Status))
+                )
+            );
+        }
+        return new CacheSetBatchResponse.Success();
+    }
+
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(byte[] field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, string value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
