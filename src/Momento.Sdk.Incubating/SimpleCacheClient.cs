@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
 using Momento.Sdk.Incubating.Responses;
@@ -25,33 +28,35 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// Enables preview features.
     /// </summary>
     /// <param name="simpleCacheClient">Instance of release cache client to delegate operations to.</param>
+    /// <param name="config">Configuration to use for the transport, retries, middlewares. See <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs"/> for out-of-the-box configuration choices, eg <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs#L22"/></param>
     /// <param name="authToken">Momento JWT.</param>
     /// <param name="defaultTtlSeconds">Default time to live for the item in cache.</param>
-    /// <param name="dataClientOperationTimeoutMilliseconds">Deadline (timeout) for communicating to the server. Defaults to 5 seconds.</param>
-    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, string authToken, uint defaultTtlSeconds, uint? dataClientOperationTimeoutMilliseconds = null)
+    /// <param name="loggerFactory">Logger factory to create loggers for contained instances.</param>
+    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, IConfiguration config, string authToken, uint defaultTtlSeconds, ILoggerFactory? loggerFactory = null)
     {
         this.simpleCacheClient = simpleCacheClient;
 
+        var _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         var claims = Momento.Sdk.Internal.JwtUtils.DecodeJwt(authToken);
-        this.dataClient = new(authToken, claims.CacheEndpoint, defaultTtlSeconds, dataClientOperationTimeoutMilliseconds);
+        this.dataClient = new(config, authToken, claims.CacheEndpoint, defaultTtlSeconds, _loggerFactory);
     }
 
     /// <inheritdoc />
-    public CreateCacheResponse CreateCache(string cacheName)
+    public async Task<CreateCacheResponse> CreateCacheAsync(string cacheName)
     {
-        return this.simpleCacheClient.CreateCache(cacheName);
+        return await this.simpleCacheClient.CreateCacheAsync(cacheName);
     }
 
     /// <inheritdoc />
-    public DeleteCacheResponse DeleteCache(string cacheName)
+    public async Task<DeleteCacheResponse> DeleteCacheAsync(string cacheName)
     {
-        return this.simpleCacheClient.DeleteCache(cacheName);
+        return await this.simpleCacheClient.DeleteCacheAsync(cacheName);
     }
 
     /// <inheritdoc />
-    public ListCachesResponse ListCaches(string? nextPageToken = null)
+    public async Task<ListCachesResponse> ListCachesAsync(string? nextPageToken = null)
     {
-        return this.simpleCacheClient.ListCaches(nextPageToken);
+        return await this.simpleCacheClient.ListCachesAsync(nextPageToken);
     }
 
     /// <inheritdoc />
@@ -97,27 +102,27 @@ public class SimpleCacheClient : ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys)
+    public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<byte[]> keys)
     {
-        return await this.dataClient.GetBatchAsync(cacheName, keys);
+        return await this.dataClient.GetBatchAsync(simpleCacheClient, cacheName, keys);
     }
 
     /// <inheritdoc />
-    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys)
+    public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
     {
-        return await this.dataClient.GetBatchAsync(cacheName, keys);
+        return await this.dataClient.GetBatchAsync(simpleCacheClient, cacheName, keys);
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
     {
-        return await this.dataClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(simpleCacheClient, cacheName, items, ttlSeconds);
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
     {
-        return await this.dataClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(simpleCacheClient, cacheName, items, ttlSeconds);
     }
 
     /// <summary>

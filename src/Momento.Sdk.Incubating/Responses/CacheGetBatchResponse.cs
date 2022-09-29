@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Momento.Sdk.Exceptions;
+using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
