@@ -7,55 +7,56 @@ The `Momento.Sdk.Incubating` namespace has work-in-progress features that may or
 This demonstrates the methods and response types for a dictionary data type in the cache:
 
 ```csharp
+using System.Linq;
 using Momento.Sdk.Incubating;
 
-class Driver
-{
-    public static void Main()
-    {
-        using var client = SimpleCacheClientFactory.CreateClient(authToken: "YOUR-AUTH-TOKEN", defaultTtlSeconds: 60);
-        var cacheName = "my-cache";
-
-public static class Driver
+public class Driver
 {
     public async static Task Main()
     {
         var authToken = System.Environment.GetEnvironmentVariable("TEST_AUTH_TOKEN")!;
-        //using var client = new SimpleCacheClient(authToken, 60);
         var cacheName = "my-example-cache";
 
         using var client = Momento.Sdk.Incubating.SimpleCacheClientFactory.CreateClient(authToken, 60);
 
         // Set a value
         await client.DictionarySetAsync(cacheName: cacheName, dictionaryName: "my-dictionary",
-            field: "my-key", value: "my-value", refreshTtl: false, ttlSeconds: 60);
+            field: "my-field", value: "my-value", refreshTtl: false, ttlSeconds: 60);
 
         // Set multiple values
         await client.DictionarySetBatchAsync(
             cacheName: cacheName,
             dictionaryName: "my-dictionary",
             new Dictionary<string, string>() {
-                { "key1", "value1" },
-                { "key2", "value2" },
-                { "key3", "value3" }},
+                { "field1", "value1" },
+                { "field2", "value2" },
+                { "field3", "value3" }},
             refreshTtl: false);
 
         // Get a value
+        var field = "field1";
         var getResponse = await client.DictionaryGetAsync(
             cacheName: cacheName,
             dictionaryName: "my-dictionary",
-            field: "key1");
+            field: field);
         var status = getResponse.Status; // HIT
         string value = getResponse.String()!; // "value1"
+        Console.WriteLine($"Dictionary get of {field}: status={status}; value={value}");
 
         // Get multiple values
+        var batchFieldList = new string[] { "field1", "field2", "field3", "field4" };
         var getBatchResponse = await client.DictionaryGetBatchAsync(
             cacheName: cacheName,
             dictionaryName: "my-dictionary",
-            new string[] { "key1", "key2", "key3", "key4" });
+            fields: batchFieldList);
         var manyStatus = getBatchResponse.Status; // [HIT, HIT, HIT, MISS]
         var values = getBatchResponse.Strings(); // ["value1", "value2", "value3", null]
-        var responses = getBatchResponse.Responses; // individual responses
+
+        Console.WriteLine("\nDisplaying the result of dictionary get batch:");
+        foreach ((var batchField, var response) in batchFieldList.Zip(getBatchResponse.Responses))
+        {
+            Console.WriteLine($"- field={batchField}; status={response.Status}; value={response.String()}");
+        }
 
         // Get the whole dictionary
         var fetchResponse = await client.DictionaryFetchAsync(
@@ -63,7 +64,11 @@ public static class Driver
             dictionaryName: "my-dictionary");
         status = fetchResponse.Status;
         var dictionary = fetchResponse.StringStringDictionary()!;
-        value = dictionary["key1"]; // == "value1"
+        value = dictionary["field1"]; // == "value1"
+
+        Console.WriteLine("\nDisplaying the results of dictionary fetch:");
+        dictionary.ToList().ForEach(kv =>
+            Console.WriteLine($"- field={kv.Key}; value={kv.Value}"));
     }
 }
 ```
