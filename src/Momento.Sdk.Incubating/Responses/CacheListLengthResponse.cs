@@ -1,16 +1,44 @@
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheListLengthResponse
+public abstract class CacheListLengthResponse
 {
-    public int Length { get; private set; } = 0;
-
-    public CacheListLengthResponse(_ListLengthResponse response)
+    public class Success : CacheListLengthResponse
     {
-        if (response.ListCase == _ListLengthResponse.ListOneofCase.Found)
+        public int ListLength { get; private set; }
+        public Success(_ListLengthResponse response)
         {
-            Length = checked((int)response.Found.Length);
+            if (response.ListCase == _ListLengthResponse.ListOneofCase.Found)
+            {
+                Length = checked((int)response.Found.Length);
+            }
         }
     }
+    public class Error : CacheListLengthResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
+    }
+
 }

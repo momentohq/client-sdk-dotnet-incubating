@@ -1,21 +1,56 @@
 ﻿using Google.Protobuf;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheListPopBackResponse : CacheGetResponseBase
+public abstract class CacheListPopBackResponse
 {
-    public CacheListPopBackResponse(CacheGetStatus status, ByteString? value) : base(status, value)
+    public class Hit : CacheListPopBackResponse
     {
+        protected readonly ByteString value;
+
+        public Hit(_ListPopBackResponse response)
+        {
+            this.value = response.Found.Front;
+        }
+
+        public byte[] ByteArray
+        {
+            get => value.ToByteArray();
+        }
+
+        public string String() => value.ToStringUtf8();
     }
 
-    public static CacheListPopBackResponse From_ListPopBackResponse(_ListPopBackResponse response)
+    public class Miss : CacheListPopBackResponse
     {
-        if (response.ListCase == _ListPopBackResponse.ListOneofCase.Missing)
+        public Miss() { }
+    }
+
+    public class Error : CacheListPopBackResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
         {
-            return new CacheListPopBackResponse(CacheGetStatus.MISS, null);
+            _error = error;
         }
-        return new CacheListPopBackResponse(CacheGetStatus.HIT, response.Found.Back);
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
     }
 }
