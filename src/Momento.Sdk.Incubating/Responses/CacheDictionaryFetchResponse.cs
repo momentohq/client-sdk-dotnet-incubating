@@ -87,30 +87,29 @@ public abstract class CacheDictionaryFetchResponse
 
         public Dictionary<string, byte[]>? StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
     }
-}
 
-public class Error : CacheDictionaryFetchResponse
-{
-    private readonly SdkException _error;
-    public Error(SdkException error)
+    public class Error : CacheDictionaryFetchResponse
     {
-        _error = error;
-    }
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
 
-    public SdkException Exception
-    {
-        get => _error;
-    }
+        public SdkException Exception
+        {
+            get => _error;
+        }
 
-    public MomentoErrorCode ErrorCode
-    {
-        get => _error.ErrorCode;
-    }
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
 
-    public string Message
-    {
-        get => $"{_error.MessageWrapper}: {_error.Message}";
-    }
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
 
-}
+    }
 }
