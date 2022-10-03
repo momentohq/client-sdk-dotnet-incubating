@@ -101,28 +101,79 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttlSeconds);
     }
 
-    /// <inheritdoc />
-    public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<byte[]> keys)
+    /// <summary>
+    /// Gets multiple values from the cache.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
+    /// <param name="keys">The keys to get.</param>
+    /// <returns>Task object representing the statuses of the get operation and the associated values.</returns>
+    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys)
     {
-        return await this.dataClient.GetBatchAsync(simpleCacheClient, cacheName, keys);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(keys, nameof(keys));
+            Utils.ElementsNotNull(keys, nameof(keys));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.GetBatchAsync(this, cacheName, keys);
     }
 
-    /// <inheritdoc />
-    public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
+    /// <inheritdoc cref="GetBatchAsync(string, IEnumerable{byte[]})"/>
+    public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys)
     {
-        return await this.dataClient.GetBatchAsync(simpleCacheClient, cacheName, keys);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(keys, nameof(keys));
+            Utils.ElementsNotNull(keys, nameof(keys));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.GetBatchAsync(this, cacheName, keys);
     }
 
-    /// <inheritdoc />
-    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    /// <summary>
+    /// Sets multiple items in the cache. Overwrites existing items.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the items in.</param>
+    /// <param name="items">The items to set.</param>
+    /// <param name="ttlSeconds">TTL for the item in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <returns>Task object representing the result of the set operation.</returns>
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
     {
-        return await this.dataClient.SetBatchAsync(simpleCacheClient, cacheName, items, ttlSeconds);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
     }
 
-    /// <inheritdoc />
-    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
+    /// <inheritdoc cref="SetBatchAsync(string, IEnumerable{KeyValuePair{byte[], byte[]}}, uint?)"/>
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
     {
-        return await this.dataClient.SetBatchAsync(simpleCacheClient, cacheName, items, ttlSeconds);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
     }
 
     /// <summary>
