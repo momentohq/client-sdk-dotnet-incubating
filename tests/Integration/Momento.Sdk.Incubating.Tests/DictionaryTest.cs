@@ -1,6 +1,8 @@
 using Momento.Sdk.Internal.ExtensionMethods;
 using Momento.Sdk.Responses;
 using Momento.Sdk.Incubating.Responses;
+using Google.Protobuf.WellKnownTypes;
+using System.Collections.Generic;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -17,7 +19,8 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", null)]
     public async Task DictionaryGetAsync_NullChecksFieldIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetAsync(cacheName, dictionaryName, field));
+        CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetResponse.Error)response).ErrorCode);
     }
 
     [Theory]
@@ -27,7 +30,8 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", new byte[] { 0x00 }, null)]
     public async Task DictionarySetAsync_NullChecksFieldIsByteArrayValueIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field, byte[] value)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false));
+        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -121,14 +125,17 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var fieldName = Utils.NewGuidString();
 
-        var incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, 1);
-        Assert.Equal(1, incrementResponse.Value);
+        CacheDictionaryIncrementResponse incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, 1);
+        var successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(1, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, 41);
-        Assert.Equal(42, incrementResponse.Value);
+        successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(42, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, -1042);
-        Assert.Equal(-1000, incrementResponse.Value);
+        successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(-1000, successResponse.Value);
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, fieldName);
         var hitResponse = (CacheDictionaryGetResponse.Hit)getResponse;
@@ -176,16 +183,19 @@ public class DictionaryTest : TestBase
 
         // Set field
         await client.DictionarySetAsync(cacheName, dictionaryName, field, "10", false);
-        var incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 0, refreshTtl: false);
-        Assert.Equal(10, incrementResponse.Value);
+        CacheDictionaryIncrementResponse incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 0, refreshTtl: false);
+        var successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(10, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 90, refreshTtl: false);
-        Assert.Equal(100, incrementResponse.Value);
+        successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(100, successResponse.Value);
 
         // Reset field
         await client.DictionarySetAsync(cacheName, dictionaryName, field, "0", false);
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 0, refreshTtl: false);
-        Assert.Equal(0, incrementResponse.Value);
+        successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
+        Assert.Equal(0, successResponse.Value);
     }
 
     [Fact]
@@ -194,8 +204,8 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var fieldName = Utils.NewGuidString();
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
-        await Assert.ThrowsAsync<FailedPreconditionException>(async () => await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, amount: 1, refreshTtl: true));
+        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
     [Theory]
@@ -204,7 +214,8 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", null)]
     public async Task DictionaryGetAsync_NullChecksFieldIsString_ThrowsException(string cacheName, string dictionaryName, string field)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetAsync(cacheName, dictionaryName, field));
+        CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetResponse.Error)response).ErrorCode);
     }
 
     [Theory]
@@ -214,7 +225,8 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", "my-field", null)]
     public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsString_ThrowsException(string cacheName, string dictionaryName, string field, string value)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false));
+        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -299,7 +311,8 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", "my-field", null)]
     public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsByteArray_ThrowsException(string cacheName, string dictionaryName, string field, byte[] value)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false));
+        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -356,12 +369,16 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<byte[], byte[]>();
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<byte[], byte[]>>)null!, false));
+        CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<byte[], byte[]>>)null!, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidByteArray()] = null!;
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false));
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -430,12 +447,16 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, string>>)null!, false));
+        CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, string>>)null!, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidString()] = null!;
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false));
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -504,12 +525,16 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, byte[]>>)null!, false));
+        CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, byte[]>>)null!, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidString()] = null!;
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false));
+        response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -579,16 +604,24 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
 
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (byte[][])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]));
+        CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (byte[][])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<byte[]>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<byte[]>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<byte[]>(testData[1])));
+        response = await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<byte[]>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<byte[]>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -633,16 +666,24 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (string[])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]));
+        CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (string[])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<string>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<string>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<string>(testData[1])));
+        response = await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<string>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
+        response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<string>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -774,7 +815,8 @@ public class DictionaryTest : TestBase
     [InlineData("my-cache", null)]
     public async Task DictionaryDeleteAsync_NullChecks_ThrowsException(string cacheName, string dictionaryName)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryDeleteAsync(cacheName, dictionaryName));
+        CacheDictionaryDeleteResponse response = await client.DictionaryDeleteAsync(cacheName, dictionaryName);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryDeleteResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -805,7 +847,8 @@ public class DictionaryTest : TestBase
     [InlineData("my-cache", "my-dictionary", null)]
     public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field));
+        CacheDictionaryRemoveFieldResponse response = await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldResponse.Error)response).ErrorCode);
     }
 
     [Theory]
@@ -814,7 +857,8 @@ public class DictionaryTest : TestBase
     [InlineData("my-cache", "my-dictionary", null)]
     public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsString_ThrowsException(string cacheName, string dictionaryName, string field)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field));
+        CacheDictionaryRemoveFieldResponse response = await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -867,16 +911,24 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
 
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (byte[][])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]));
+        CacheDictionaryRemoveFieldsResponse response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (byte[][])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<byte[]>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<byte[]>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<byte[]>(testData[1])));
+        response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<byte[]>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<byte[]>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -903,16 +955,24 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (string[])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]));
+        CacheDictionaryRemoveFieldsResponse response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (string[])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<string>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<string>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<string>(testData[1])));
+        response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<string>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
+        response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<string>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
     }
 
     [Fact]
