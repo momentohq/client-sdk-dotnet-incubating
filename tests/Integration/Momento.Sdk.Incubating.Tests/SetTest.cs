@@ -325,7 +325,7 @@ public class SetTest : TestBase
         // Remove element that is not there -- no-op
         await client.SetRemoveElementAsync(cacheName, setName, Utils.NewGuidString());
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse
+        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
         var set = hitResponse.StringSet();
         Assert.Single(set);
         Assert.Contains(element, set);
