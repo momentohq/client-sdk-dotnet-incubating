@@ -1,5 +1,6 @@
 using Momento.Sdk.Internal.ExtensionMethods;
 using Momento.Sdk.Responses;
+using Momento.Sdk.Incubating.Responses;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -25,23 +26,26 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value1 = Utils.NewGuidByteArray();
 
-        var pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
-        Assert.Equal(1, pushResponse.ListLength);
+        CacheListPushFrontResponse pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
+        var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        Assert.Equal(1, successResponse.ListLength);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        var list = fetchResponse.ByteArrayList;
+        var list = hitResponse.ByteArrayList;
         Assert.Single(list);
         Assert.Contains(value1, list);
 
         // Test push semantics
         var value2 = Utils.NewGuidByteArray();
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        Assert.Equal(2, pushResponse.ListLength);
+        successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        list = fetchResponse.ByteArrayList!;
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ByteArrayList!;
         Assert.Equal(value2, list[0]);
         Assert.Equal(value1, list[1]);
     }
@@ -58,8 +62,8 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 10);
         await Task.Delay(4900);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True((CacheListFetchResponse.Miss)response is CacheListFetchResponse.Miss);
     }
 
     [Fact]
@@ -72,9 +76,9 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value, true, ttlSeconds: 10);
         await Task.Delay(2000);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(2, response.ByteArrayList!.Count);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ByteArrayList!.Count);
     }
 
     [Fact]
@@ -98,23 +102,26 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value1 = Utils.NewGuidString();
 
-        var pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
-        Assert.Equal(1, pushResponse.ListLength);
+        CacheListPushFrontResponse pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
+        var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        Assert.Equal(1, successResponse.ListLength);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        var list = fetchResponse.StringList();
+        var list = hitResponse.StringList();
         Assert.Single(list);
         Assert.Contains(value1, list);
 
         // Test push semantics
         var value2 = Utils.NewGuidString();
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        Assert.Equal(2, pushResponse.ListLength);
+        successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        list = fetchResponse.StringList()!;
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.StringList()!;
         Assert.Equal(value2, list[0]);
         Assert.Equal(value1, list[1]);
     }
@@ -131,8 +138,8 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 10);
         await Task.Delay(4900);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True((CacheListFetchResponse.Miss)response is CacheListFetchResponse.Miss);
     }
 
     [Fact]
@@ -145,9 +152,9 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value, true, ttlSeconds: 10);
         await Task.Delay(2000);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(2, response.StringList()!.Count);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.StringList()!.Count);
     }
 
     [Fact]
@@ -171,23 +178,26 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value1 = Utils.NewGuidByteArray();
 
-        var pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
-        Assert.Equal(1, pushResponse.ListLength);
+        CacheListPushBackResponse pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
+        var successResponse = (CacheListPushBackResponse.Success)pushResponse;
+        Assert.Equal(1, successResponse.ListLength);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        var list = fetchResponse.ByteArrayList;
+        var list = hitResponse.ByteArrayList;
         Assert.Single(list);
         Assert.Contains(value1, list);
 
         // Test push semantics
         var value2 = Utils.NewGuidByteArray();
         pushResponse = await client.ListPushBackAsync(cacheName, listName, value2, false);
-        Assert.Equal(2, pushResponse.ListLength);
+        successResponse = (CacheListPushBackResponse.Success)pushResponse;
+        Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        list = fetchResponse.ByteArrayList!;
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ByteArrayList!;
         Assert.Equal(value1, list[0]);
         Assert.Equal(value2, list[1]);
     }
@@ -204,8 +214,8 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 10);
         await Task.Delay(4900);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True((CacheListFetchResponse.Miss)response is CacheListFetchResponse.Miss);
     }
 
     [Fact]
@@ -218,9 +228,9 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 10);
         await Task.Delay(2000);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(2, response.ByteArrayList!.Count);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ByteArrayList!.Count);
     }
 
     [Fact]
@@ -248,10 +258,11 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         await client.ListPushBackAsync(cacheName, listName, value3, false, null, 2);
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(2, response.StringList()!.Count);
-        Assert.Equal(value2, response.StringList()![0]);
-        Assert.Equal(value3, response.StringList()![1]);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.StringList()!.Count);
+        Assert.Equal(value2, hitResponse.StringList()![0]);
+        Assert.Equal(value3, hitResponse.StringList()![1]);
     }
 
     [Fact]
@@ -264,10 +275,11 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         await client.ListPushBackAsync(cacheName, listName, value3, false, null, 2);
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(2, response.ByteArrayList!.Count);
-        Assert.Equal(value2, response.ByteArrayList![0]);
-        Assert.Equal(value3, response.ByteArrayList![1]);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ByteArrayList!.Count);
+        Assert.Equal(value2, hitResponse.ByteArrayList![0]);
+        Assert.Equal(value3, hitResponse.ByteArrayList![1]);
     }
 
     [Fact]
@@ -280,10 +292,11 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         await client.ListPushFrontAsync(cacheName, listName, value3, false, null, 2);
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(2, response.StringList()!.Count);
-        Assert.Equal(value2, response.StringList()![1]);
-        Assert.Equal(value3, response.StringList()![0]);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.StringList()!.Count);
+        Assert.Equal(value2, hitResponse.StringList()![1]);
+        Assert.Equal(value3, hitResponse.StringList()![0]);
     }
 
     [Fact]
@@ -296,10 +309,11 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         await client.ListPushFrontAsync(cacheName, listName, value3, false, null, 2);
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(2, response.ByteArrayList!.Count);
-        Assert.Equal(value2, response.ByteArrayList![1]);
-        Assert.Equal(value3, response.ByteArrayList![0]);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ByteArrayList!.Count);
+        Assert.Equal(value2, hitResponse.ByteArrayList![1]);
+        Assert.Equal(value3, hitResponse.ByteArrayList![0]);
     }
 
     [Fact]
@@ -308,23 +322,26 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value1 = Utils.NewGuidString();
 
-        var pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
-        Assert.Equal(1, pushResponse.ListLength);
+        CacheListPushBackResponse pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
+        var successResponse = (CacheListPushBackResponse.Success)pushResponse;
+        Assert.Equal(1, successResponse.ListLength);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        var list = fetchResponse.StringList();
+        var list = hitResponse.StringList();
         Assert.Single(list);
         Assert.Contains(value1, list);
 
         // Test push semantics
         var value2 = Utils.NewGuidString();
         pushResponse = await client.ListPushBackAsync(cacheName, listName, value2, false);
-        Assert.Equal(2, pushResponse.ListLength);
+        successResponse = (CacheListPushBackResponse.Success)pushResponse;
+        Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        list = fetchResponse.StringList()!;
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.StringList()!;
         Assert.Equal(value1, list[0]);
         Assert.Equal(value2, list[1]);
     }
@@ -341,8 +358,8 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 10);
         await Task.Delay(4900);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True((CacheListFetchResponse.Miss)response is CacheListFetchResponse.Miss);
     }
 
     [Fact]
@@ -355,9 +372,9 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 10);
         await Task.Delay(2000);
 
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(2, response.StringList()!.Count);
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.StringList()!.Count);
     }
 
     [Fact]
@@ -378,10 +395,10 @@ public class ListTest : TestBase
     public async Task ListPopFrontAsync_ListIsMissing_HappyPath()
     {
         var listName = Utils.NewGuidString();
-        var response = await client.ListPopFrontAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
-        Assert.Null(response.ByteArray);
-        Assert.Null(response.String());
+        CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
+        var missResponse = (CacheListPopFrontResponse.Miss)response;
+        Assert.Null(missResponse.ByteArray);
+        Assert.Null(missResponse.String());
     }
 
     [Fact]
@@ -393,10 +410,10 @@ public class ListTest : TestBase
 
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        var response = await client.ListPopFrontAsync(cacheName, listName);
+        CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
+        var hitResponse = (CacheListPopFrontResponse.Hit)response;
 
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(value2, response.ByteArray);
+        Assert.Equal(value2, hitResponse.ByteArray);
     }
 
     [Fact]
@@ -408,10 +425,10 @@ public class ListTest : TestBase
 
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        var response = await client.ListPopFrontAsync(cacheName, listName);
+        CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
+        var hitResponse = (CacheListPopFrontResponse.Hit)response;
 
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(value2, response.String());
+        Assert.Equal(value2, hitResponse.String());
     }
 
     [Theory]
@@ -426,10 +443,10 @@ public class ListTest : TestBase
     public async Task ListPopBackAsync_ListIsMissing_HappyPath()
     {
         var listName = Utils.NewGuidString();
-        var response = await client.ListPopBackAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
-        Assert.Null(response.ByteArray);
-        Assert.Null(response.String());
+        CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
+        var missResponse = (CacheListPopBackResponse.Miss)response;
+        Assert.Null(missResponse.ByteArray);
+        Assert.Null(missResponse.String());
     }
 
     [Fact]
@@ -441,10 +458,10 @@ public class ListTest : TestBase
 
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
-        var response = await client.ListPopBackAsync(cacheName, listName);
+        CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
+        var hitResponse = (CacheListPopBackResponse.Hit)response;
 
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(value2, response.ByteArray);
+        Assert.Equal(value2, hitResponse.ByteArray);
     }
 
     [Fact]
@@ -456,10 +473,10 @@ public class ListTest : TestBase
 
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
-        var response = await client.ListPopBackAsync(cacheName, listName);
+        CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
+        var hitResponse = (CacheListPopBackResponse.Hit)response;
 
-        Assert.Equal(CacheGetStatus.HIT, response.Status);
-        Assert.Equal(value2, response.String());
+        Assert.Equal(value2, hitResponse.String());
     }
 
     [Theory]
@@ -474,10 +491,10 @@ public class ListTest : TestBase
     public async Task ListFetchAsync_Missing_HappyPath()
     {
         var listName = Utils.NewGuidString();
-        var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.Equal(CacheGetStatus.MISS, response.Status);
-        Assert.Null(response.ByteArrayList);
-        Assert.Null(response.StringList());
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        var missResponse = (CacheListFetchResponse.Miss)response;
+        Assert.Null(missResponse.ByteArrayList);
+        Assert.Null(missResponse.StringList());
     }
 
     [Fact]
@@ -491,10 +508,10 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, field2, true, ttlSeconds: 10);
         await client.ListPushFrontAsync(cacheName, listName, field1, true, ttlSeconds: 10);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
-        Assert.Equal(fetchResponse.StringList(), contentList);
+        Assert.Equal(hitResponse.StringList(), contentList);
     }
 
     [Fact]
@@ -508,13 +525,12 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, field2, true, ttlSeconds: 10);
         await client.ListPushFrontAsync(cacheName, listName, field1, true, ttlSeconds: 10);
 
-        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
-        Assert.Equal(CacheGetStatus.HIT, fetchResponse.Status);
-
-        Assert.Contains(field1, fetchResponse.ByteArrayList!);
-        Assert.Contains(field2, fetchResponse.ByteArrayList!);
-        Assert.Equal(2, fetchResponse.ByteArrayList!.Count);
+        Assert.Contains(field1, hitResponse.ByteArrayList!);
+        Assert.Contains(field2, hitResponse.ByteArrayList!);
+        Assert.Equal(2, hitResponse.ByteArrayList!.Count);
     }
 
     [Theory]
@@ -546,7 +562,7 @@ public class ListTest : TestBase
         await client.ListRemoveValueAsync(cacheName, listName, valueOfInterest);
 
         // Test not there
-        var cachedList = (await client.ListFetchAsync(cacheName, listName)).ByteArrayList!;
+        var cachedList = ((CacheListFetchResponse.Hit)await client.ListFetchAsync(cacheName, listName)).ByteArrayList!;
         Assert.True(list.ListEquals(cachedList));
     }
 
@@ -563,7 +579,7 @@ public class ListTest : TestBase
 
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidByteArray());
 
-        var cachedList = (await client.ListFetchAsync(cacheName, listName)).ByteArrayList!;
+        var cachedList = ((CacheListFetchResponse.Hit)await client.ListFetchAsync(cacheName, listName)).ByteArrayList!;
         Assert.True(list.ListEquals(cachedList));
     }
 
@@ -571,9 +587,9 @@ public class ListTest : TestBase
     public async Task ListRemoveValueAsync_ValueIsByteArray_ListNotThereNoop()
     {
         var listName = Utils.NewGuidString();
-        Assert.Equal(CacheGetStatus.MISS, (await client.ListFetchAsync(cacheName, listName)).Status);
+        Assert.True((CacheListFetchResponse.Miss)(await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidByteArray());
-        Assert.Equal(CacheGetStatus.MISS, (await client.ListFetchAsync(cacheName, listName)).Status);
+        Assert.True((CacheListFetchResponse.Miss)(await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
     }
 
     [Theory]
@@ -605,7 +621,7 @@ public class ListTest : TestBase
         await client.ListRemoveValueAsync(cacheName, listName, valueOfInterest);
 
         // Test not there
-        var cachedList = (await client.ListFetchAsync(cacheName, listName)).StringList()!;
+        var cachedList = ((CacheListFetchResponse.Hit)await client.ListFetchAsync(cacheName, listName)).StringList()!;
         Assert.True(list.SequenceEqual(cachedList));
     }
 
@@ -622,7 +638,7 @@ public class ListTest : TestBase
 
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidString());
 
-        var cachedList = (await client.ListFetchAsync(cacheName, listName)).StringList()!;
+        var cachedList = ((CacheListFetchResponse.Hit)await client.ListFetchAsync(cacheName, listName)).StringList()!;
         Assert.True(list.SequenceEqual(cachedList));
     }
 
@@ -630,9 +646,9 @@ public class ListTest : TestBase
     public async Task ListRemoveValueAsync_ValueIsString_ListNotThereNoop()
     {
         var listName = Utils.NewGuidString();
-        Assert.Equal(CacheGetStatus.MISS, (await client.ListFetchAsync(cacheName, listName)).Status);
+        Assert.True((CacheListFetchResponse.Miss)(await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidString());
-        Assert.Equal(CacheGetStatus.MISS, (await client.ListFetchAsync(cacheName, listName)).Status);
+        Assert.True((CacheListFetchResponse.Miss)(await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
     }
 
     [Theory]
@@ -646,8 +662,9 @@ public class ListTest : TestBase
     [Fact]
     public async Task ListLengthAsync_ListIsMissing_HappyPath()
     {
-        var lengthResponse = await client.ListLengthAsync(cacheName, Utils.NewGuidString());
-        Assert.Equal(0, lengthResponse.Length);
+        CacheListLengthResponse lengthResponse = await client.ListLengthAsync(cacheName, Utils.NewGuidString());
+        var successResponse = (CacheListLengthResponse.Success)lengthResponse;
+        Assert.Equal(0, successResponse.Length);
     }
 
     [Fact]
@@ -659,7 +676,8 @@ public class ListTest : TestBase
             await client.ListPushBackAsync(cacheName, listName, Utils.NewGuidByteArray(), false);
         }
 
-        var lengthResponse = await client.ListLengthAsync(cacheName, listName);
-        Assert.Equal(10, lengthResponse.Length);
+        CacheListLengthResponse lengthResponse = await client.ListLengthAsync(cacheName, listName);
+        var successResponse = (CacheListLengthResponse.Success)lengthResponse;
+        Assert.Equal(10, successResponse.Length);
     }
 }

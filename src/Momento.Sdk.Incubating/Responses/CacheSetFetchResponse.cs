@@ -48,7 +48,23 @@ public abstract class CacheSetFetchResponse
 
     public class Miss : CacheSetFetchResponse
     {
-        public Miss() { }
+        protected readonly Lazy<HashSet<byte[]>?> _byteArraySet;
+        protected readonly Lazy<HashSet<string>?> _stringSet;
+        public Miss()
+        {
+            _byteArraySet = new(() =>
+            {
+                return null;
+            });
+
+            _stringSet = new(() =>
+            {
+                return null;
+            });
+        }
+        public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
+
+        public HashSet<string>? StringSet() => _stringSet.Value;
     }
 
     public class Error : CacheSetFetchResponse

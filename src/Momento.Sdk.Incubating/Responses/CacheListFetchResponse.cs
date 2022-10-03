@@ -22,20 +22,11 @@ public abstract class CacheListFetchResponse
             values = response.Found.Values;
             _byteArrayList = new(() =>
             {
-                if (values == null)
-                {
-                    return null;
-                }
-
                 return new List<byte[]>(values.Select(v => v.ToByteArray()));
             });
 
             _stringList = new(() =>
             {
-                if (values == null)
-                {
-                    return null;
-                }
                 return new List<string>(values.Select(v => v.ToStringUtf8()));
             });
         }
@@ -47,7 +38,23 @@ public abstract class CacheListFetchResponse
 
     public class Miss : CacheListFetchResponse
     {
-        public Miss() { }
+        protected readonly Lazy<List<byte[]>?> _byteArrayList;
+        protected readonly Lazy<List<string>?> _stringList;
+        public Miss()
+        {
+            _byteArrayList = new(() =>
+            {
+                return null;
+            });
+
+            _stringList = new(() =>
+            {
+                return null;
+            });
+        }
+        public List<byte[]>? ByteArrayList { get => _byteArrayList.Value; }
+
+        public List<string>? StringList() => _stringList.Value;
     }
 
     public class Error : CacheListFetchResponse

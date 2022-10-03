@@ -61,31 +61,56 @@ public abstract class CacheDictionaryFetchResponse
 
     public class Miss : CacheDictionaryFetchResponse
     {
-        public Miss() { }
-    }
+        protected readonly Lazy<Dictionary<byte[], byte[]>?> _byteArrayByteArrayDictionary;
+        protected readonly Lazy<Dictionary<string, string>?> _stringStringDictionary;
+        protected readonly Lazy<Dictionary<string, byte[]>?> _stringByteArrayDictionary;
+        public Miss()
+        {
+            _byteArrayByteArrayDictionary = new(() =>
+            {
+                return null;
+            });
 
-    public class Error : CacheDictionaryFetchResponse
+            _stringStringDictionary = new(() =>
+            {
+                return null;
+            });
+            _stringByteArrayDictionary = new(() =>
+            {
+                return null;
+            });
+        }
+
+        public Dictionary<byte[], byte[]>? ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
+
+        public Dictionary<string, string>? StringStringDictionary() => _stringStringDictionary.Value;
+
+        public Dictionary<string, byte[]>? StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
+    }
+}
+
+public class Error : CacheDictionaryFetchResponse
+{
+    private readonly SdkException _error;
+    public Error(SdkException error)
     {
-        private readonly SdkException _error;
-        public Error(SdkException error)
-        {
-            _error = error;
-        }
-
-        public SdkException Exception
-        {
-            get => _error;
-        }
-
-        public MomentoErrorCode ErrorCode
-        {
-            get => _error.ErrorCode;
-        }
-
-        public string Message
-        {
-            get => $"{_error.MessageWrapper}: {_error.Message}";
-        }
-
+        _error = error;
     }
+
+    public SdkException Exception
+    {
+        get => _error;
+    }
+
+    public MomentoErrorCode ErrorCode
+    {
+        get => _error.ErrorCode;
+    }
+
+    public string Message
+    {
+        get => $"{_error.MessageWrapper}: {_error.Message}";
+    }
+
+}
 }

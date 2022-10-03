@@ -8,6 +8,7 @@ public abstract class CacheListLengthResponse
     public class Success : CacheListLengthResponse
     {
         public int ListLength { get; private set; }
+        public int Length { get; private set; } = 0;
         public Success(_ListLengthResponse response)
         {
             if (response.ListCase == _ListLengthResponse.ListOneofCase.Found)

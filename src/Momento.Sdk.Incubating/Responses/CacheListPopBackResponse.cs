@@ -13,7 +13,7 @@ public abstract class CacheListPopBackResponse
 
         public Hit(_ListPopBackResponse response)
         {
-            this.value = response.Found.Front;
+            this.value = response.Found.Back;
         }
 
         public byte[] ByteArray
@@ -27,6 +27,15 @@ public abstract class CacheListPopBackResponse
     public class Miss : CacheListPopBackResponse
     {
         public Miss() { }
+        public byte[]? ByteArray
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string? String() => null;
     }
 
     public class Error : CacheListPopBackResponse
