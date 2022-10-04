@@ -1,5 +1,6 @@
 using Momento.Sdk.Responses;
 using Momento.Sdk.Incubating.Responses;
+using System.Xml.Linq;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -29,9 +30,9 @@ public class SetTest : TestBase
         await client.SetAddAsync(cacheName, setName, element, false);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -48,7 +49,7 @@ public class SetTest : TestBase
         await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 10);
         await Task.Delay(4900);
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -62,8 +63,8 @@ public class SetTest : TestBase
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        Assert.Single(hitResponse.ByteArraySet);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
+        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet);
     }
 
     [Theory]
@@ -72,7 +73,8 @@ public class SetTest : TestBase
     [InlineData("cache", "my-set", null)]
     public async Task SetAddAsync_NullChecksString_ThrowsException(string cacheName, string setName, string element)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddAsync(cacheName, setName, element, false));
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -84,9 +86,9 @@ public class SetTest : TestBase
         await client.SetAddAsync(cacheName, setName, element, false);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -104,7 +106,7 @@ public class SetTest : TestBase
         await Task.Delay(4900);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -118,8 +120,8 @@ public class SetTest : TestBase
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        Assert.Single(hitResponse.StringSet());
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
+        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).StringSet());
     }
 
     [Fact]
@@ -127,12 +129,16 @@ public class SetTest : TestBase
     {
         var setName = Utils.NewGuidString();
         var set = new HashSet<byte[]>();
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(null!, setName, set, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, null!, set, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, setName, (IEnumerable<byte[]>)null!, false));
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(null!, setName, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
+        response = await client.SetAddBatchAsync(cacheName, null!, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
+        response = await client.SetAddBatchAsync(cacheName, setName, (IEnumerable<byte[]>)null!, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
 
         set.Add(null!);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, setName, set, false));
+        response = await client.SetAddBatchAsync(cacheName, setName, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -146,9 +152,9 @@ public class SetTest : TestBase
         await client.SetAddBatchAsync(cacheName, setName, content, false, 10);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
         Assert.Equal(2, set!.Count);
         Assert.Contains(element1, set);
         Assert.Contains(element2, set);
@@ -168,7 +174,7 @@ public class SetTest : TestBase
         await Task.Delay(4900);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -183,9 +189,9 @@ public class SetTest : TestBase
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -195,12 +201,16 @@ public class SetTest : TestBase
     {
         var setName = Utils.NewGuidString();
         var set = new HashSet<string>();
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(null!, setName, set, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, null!, set, false));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, setName, (IEnumerable<string>)null!, false));
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(null!, setName, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
+        response = await client.SetAddBatchAsync(cacheName, null!, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
+        response = await client.SetAddBatchAsync(cacheName, setName, (IEnumerable<string>)null!, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
 
         set.Add(null!);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddBatchAsync(cacheName, setName, set, false));
+        response = await client.SetAddBatchAsync(cacheName, setName, set, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddBatchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -214,9 +224,9 @@ public class SetTest : TestBase
         await client.SetAddBatchAsync(cacheName, setName, content, false, 10);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
         Assert.Equal(2, set!.Count);
         Assert.Contains(element1, set);
         Assert.Contains(element2, set);
@@ -236,7 +246,7 @@ public class SetTest : TestBase
         await Task.Delay(4900);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -251,9 +261,9 @@ public class SetTest : TestBase
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
 
-        var set = hitResponse.StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -264,7 +274,8 @@ public class SetTest : TestBase
     [InlineData("cache", "my-set", null)]
     public async Task SetRemoveElementAsync_NullChecksByteArray_ThrowsException(string cacheName, string setName, byte[] element)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementAsync(cacheName, setName, element));
+        CacheSetRemoveElementResponse response = await client.SetRemoveElementAsync(cacheName, setName, element);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -279,15 +290,15 @@ public class SetTest : TestBase
         await client.SetRemoveElementAsync(cacheName, setName, Utils.NewGuidByteArray());
         // Fetch the whole set and make sure response has element we expect 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        var set = hitResponse.ByteArraySet;
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
 
         // Remove element
         await client.SetRemoveElementAsync(cacheName, setName, element);
         fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -297,13 +308,13 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
 
         // Pre-condition: set is missing
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
 
         // Remove element that is not there -- no-op
         await client.SetRemoveElementAsync(cacheName, setName, Utils.NewGuidByteArray());
 
         // Post-condition: set is still missing
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 
     [Theory]
@@ -312,7 +323,8 @@ public class SetTest : TestBase
     [InlineData("cache", "my-set", null)]
     public async Task SetRemoveElementAsync_NullChecksString_ThrowsException(string cacheName, string setName, string element)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementAsync(cacheName, setName, element));
+        CacheSetRemoveElementResponse response = await client.SetRemoveElementAsync(cacheName, setName, element);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -326,15 +338,15 @@ public class SetTest : TestBase
         // Remove element that is not there -- no-op
         await client.SetRemoveElementAsync(cacheName, setName, Utils.NewGuidString());
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        var set = hitResponse.StringSet();
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
         Assert.Single(set);
         Assert.Contains(element, set);
 
         // Remove element
         await client.SetRemoveElementAsync(cacheName, setName, element);
         fetchResponse = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)fetchResponse is CacheSetFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -344,13 +356,13 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
 
         // Pre-condition: set is missing
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
 
         // Remove element that is not there -- no-op
         await client.SetRemoveElementAsync(cacheName, setName, Utils.NewGuidString());
 
         // Post-condition: set is still missing
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -359,16 +371,24 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
 
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(null!, setName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, (byte[][])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, testData[1]));
+        CacheSetRemoveElementsResponse response = await client.SetRemoveElementsAsync(null!, setName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, (byte[][])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<byte[]>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(null!, setName, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, null!, fieldsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, (List<byte[]>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, new List<byte[]>(testData[1])));
+        response = await client.SetRemoveElementsAsync(null!, setName, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, null!, fieldsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, (List<byte[]>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, new List<byte[]>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -386,6 +406,7 @@ public class SetTest : TestBase
         var elementsList = new List<byte[]>(elements);
         await client.SetRemoveElementsAsync(cacheName, setName, elementsList);
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
         var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
         Assert.Single(hitResponse.ByteArraySet!);
         Assert.Contains(otherElement, hitResponse.ByteArraySet!);
@@ -397,16 +418,24 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
 
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(null!, setName, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, null!, testData[0]));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, (byte[][])null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, testData[1]));
+        CacheSetRemoveElementsResponse response = await client.SetRemoveElementsAsync(null!, setName, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, null!, testData[0]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, (byte[][])null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, testData[1]);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
 
         var elementsList = new List<string>(testData[0]);
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(null!, setName, elementsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, null!, elementsList));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, (List<string>)null!));
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetRemoveElementsAsync(cacheName, setName, new List<string>(testData[1])));
+        response = await client.SetRemoveElementsAsync(null!, setName, elementsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, null!, elementsList);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, (List<string>)null!);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
+        response = await client.SetRemoveElementsAsync(cacheName, setName, new List<string>(testData[1]));
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetRemoveElementsResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -424,6 +453,7 @@ public class SetTest : TestBase
         var elementsList = new List<string>(elements);
         await client.SetRemoveElementsAsync(cacheName, setName, elementsList);
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit);
         var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
         Assert.Single(hitResponse.ByteArraySet!);
         Assert.Contains(otherElement, hitResponse.ByteArraySet!);
@@ -434,7 +464,8 @@ public class SetTest : TestBase
     [InlineData("cache", null)]
     public async Task SetFetchAsync_NullChecks_ThrowsException(string cacheName, string setName)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetFetchAsync(cacheName, setName));
+        CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetFetchResponse.Error)response).ErrorCode);
     }
 
     [Fact]
@@ -442,10 +473,10 @@ public class SetTest : TestBase
     {
         var setName = Utils.NewGuidString();
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)response is CacheSetFetchResponse.Miss);
-        var misResponse = (CacheSetFetchResponse.Miss)response;
-        Assert.Null(misResponse.ByteArraySet);
-        Assert.Null(misResponse.StringSet());
+        Assert.True(response is CacheSetFetchResponse.Miss);
+        var missResponse = (CacheSetFetchResponse.Miss)response;
+        Assert.Null(missResponse.ByteArraySet);
+        Assert.Null(missResponse.StringSet());
     }
 
     [Fact]
@@ -454,6 +485,7 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         await client.SetAddBatchAsync(cacheName, setName, new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, false);
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
+        Assert.True(response is CacheSetFetchResponse.Hit);
         var hitResponse = (CacheSetFetchResponse.Hit)response;
         var set1 = hitResponse.ByteArraySet;
         var set2 = hitResponse.ByteArraySet;
@@ -466,6 +498,7 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         await client.SetAddBatchAsync(cacheName, setName, new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, false);
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
+        Assert.True(response is CacheSetFetchResponse.Hit);
         var hitResponse = (CacheSetFetchResponse.Hit)response;
         var set1 = hitResponse.StringSet();
         var set2 = hitResponse.StringSet();
@@ -477,16 +510,17 @@ public class SetTest : TestBase
     [InlineData("my-cache", null)]
     public async Task SetDeleteAsync_NullChecks_ThrowsException(string cacheName, string setName)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetDeleteAsync(cacheName, setName));
+        CacheSetDeleteResponse response = await client.SetDeleteAsync(cacheName, setName);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetDeleteResponse.Error)response).ErrorCode);
     }
 
     [Fact]
     public async Task SetDeleteAsync_SetDoesNotExist_Noop()
     {
         var setName = Utils.NewGuidString();
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
         await client.SetDeleteAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 
     [Fact]
@@ -497,8 +531,8 @@ public class SetTest : TestBase
         await client.SetAddAsync(cacheName, setName, Utils.NewGuidString(), false);
         await client.SetAddAsync(cacheName, setName, Utils.NewGuidString(), false);
 
-        Assert.True((CacheSetFetchResponse.Hit)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Hit);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Hit);
         await client.SetDeleteAsync(cacheName, setName);
-        Assert.True((CacheSetFetchResponse.Miss)(await client.SetFetchAsync(cacheName, setName)) is CacheSetFetchResponse.Miss);
+        Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 }
