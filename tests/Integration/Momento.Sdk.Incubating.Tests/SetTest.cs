@@ -16,7 +16,8 @@ public class SetTest : TestBase
     [InlineData("cache", "my-set", null)]
     public async Task SetAddAsync_NullChecksByteArray_ThrowsException(string cacheName, string setName, byte[] element)
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.SetAddAsync(cacheName, setName, element, false));
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetAddResponse.Error)response).ErrorCode);
     }
 
     [Fact]

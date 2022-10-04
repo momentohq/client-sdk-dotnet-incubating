@@ -20,12 +20,10 @@ public abstract class CacheSetFetchResponse
 
         public Hit(_SetFetchResponse response)
         {
+            elements = response.Found.Elements;
             _byteArraySet = new(() =>
             {
-                if (elements == null)
-                {
-                    return null;
-                }
+
                 return new HashSet<byte[]>(
                     elements.Select(element => element.ToByteArray()),
                     Utils.ByteArrayComparer);
@@ -33,10 +31,7 @@ public abstract class CacheSetFetchResponse
 
             _stringSet = new(() =>
             {
-                if (elements == null)
-                {
-                    return null;
-                }
+
                 return new HashSet<string>(elements.Select(element => element.ToStringUtf8()));
             });
         }

@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
@@ -32,6 +33,15 @@ public abstract class CacheDictionaryGetResponse
     public class Miss : CacheDictionaryGetResponse
     {
         public Miss() { }
+        public byte[]? ByteArray
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string? String() => null;
     }
 
     public class Error : CacheDictionaryGetResponse

@@ -268,6 +268,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
             var exc = CacheExceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"));
             return new CacheDictionaryGetResponse.Error(exc);
         }
+
+        if (response.Found.Items[0].Result == ECacheResult.Miss)
+        {
+            return new CacheDictionaryGetResponse.Miss();
+        }
+
         return new CacheDictionaryGetResponse.Hit(response);
     }
 
@@ -385,9 +391,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Found)
         {
-            return new CacheDictionaryGetBatchResponse.Success(response.Found.Items.Select(item => new CacheDictionaryGetResponse.Hit(item.CacheBody)));
+            return new CacheDictionaryGetBatchResponse.Success(response);
         }
-        return new CacheDictionaryGetBatchResponse.Success(Enumerable.Range(1, fields.Count()).Select(_ => new CacheDictionaryGetResponse.Miss()));
+        return new CacheDictionaryGetBatchResponse.Miss(fields.Count());
     }
 
     public async Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName)

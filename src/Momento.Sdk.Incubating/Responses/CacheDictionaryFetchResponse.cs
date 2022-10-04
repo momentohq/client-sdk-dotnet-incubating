@@ -23,10 +23,6 @@ public abstract class CacheDictionaryFetchResponse
             items = response.Found.Items;
             _byteArrayByteArrayDictionary = new(() =>
             {
-                if (items == null)
-                {
-                    return null;
-                }
                 return new Dictionary<byte[], byte[]>(
                     items.Select(kv => new KeyValuePair<byte[], byte[]>(kv.Field.ToByteArray(), kv.Value.ToByteArray())),
                     Utils.ByteArrayComparer);
@@ -34,19 +30,11 @@ public abstract class CacheDictionaryFetchResponse
 
             _stringStringDictionary = new(() =>
             {
-                if (items == null)
-                {
-                    return null;
-                }
                 return new Dictionary<string, string>(
                     items.Select(kv => new KeyValuePair<string, string>(kv.Field.ToStringUtf8(), kv.Value.ToStringUtf8())));
             });
             _stringByteArrayDictionary = new(() =>
             {
-                if (items == null)
-                {
-                    return null;
-                }
                 return new Dictionary<string, byte[]>(
                     items.Select(kv => new KeyValuePair<string, byte[]>(kv.Field.ToStringUtf8(), kv.Value.ToByteArray())));
             });

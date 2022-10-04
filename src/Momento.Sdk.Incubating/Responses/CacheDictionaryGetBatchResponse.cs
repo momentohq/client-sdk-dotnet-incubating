@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
-
+using static Momento.Protos.CacheClient._DictionaryGetResponse.Types;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -11,11 +12,23 @@ public abstract class CacheDictionaryGetBatchResponse
 {
     public class Success : CacheDictionaryGetBatchResponse
     {
-        public List<CacheDictionaryGetResponse> Responses { get; }
+        public List<CacheDictionaryGetResponse> Responses { get; private set; }
 
-        public Success(IEnumerable<CacheDictionaryGetResponse> responses)
+        public Success(_DictionaryGetResponse responses)
         {
-            this.Responses = new(responses);
+            var responsesList = new List<CacheDictionaryGetResponse>();
+            foreach (_DictionaryGetResponsePart response in responses.Found.Items)
+            {
+                if (response.Result == ECacheResult.Hit)
+                {
+                    responsesList.Add(new CacheDictionaryGetResponse.Hit(response.CacheBody));
+                }
+                if (response.Result == ECacheResult.Miss)
+                {
+                    responsesList.Add(new CacheDictionaryGetResponse.Miss());
+                }
+            }
+            this.Responses = responsesList;
         }
 
         public IEnumerable<string?> Strings()
@@ -53,6 +66,14 @@ public abstract class CacheDictionaryGetBatchResponse
                 }
                 return ret.ToArray();
             }
+        }
+    }
+    public class Miss : CacheDictionaryGetBatchResponse
+    {
+        public List<CacheDictionaryGetResponse> Responses { get; private set; }
+        public Miss(int numRequested)
+        {
+            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
         }
     }
 
