@@ -33,6 +33,15 @@ public abstract class CacheDictionaryGetResponse
     public class Miss : CacheDictionaryGetResponse
     {
         public Miss() { }
+        public byte[]? ByteArray
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string? String() => null;
     }
 
     public class Error : CacheDictionaryGetResponse

@@ -237,7 +237,7 @@ public class DictionaryTest : TestBase
     [InlineData("cache", "my-dictionary", "my-field", null)]
     public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsString_ThrowsException(string cacheName, string dictionaryName, string field, string value)
     {
-        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);\
+        CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
         Assert.True(response is CacheDictionarySetResponse.Error);
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
