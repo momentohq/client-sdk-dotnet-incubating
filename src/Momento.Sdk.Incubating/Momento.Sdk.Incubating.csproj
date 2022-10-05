@@ -11,7 +11,10 @@
 		<!-- TODO: Address public-facing documentation -->
 		<!-- Include source and debug symbols-->
 		<IncludeSource>true</IncludeSource>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<IncludeSymbols>true</IncludeSymbols>
+		<!-- Publish the repository URL in the built .nupkg -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<!-- TODO: Address public-facing documentation -->
 		<NoWarn>1591</NoWarn>
 		<!-- Package metadata -->
@@ -27,10 +30,14 @@
 		<PackageTags>caching, cache, serverless, key value, simple caching service, distributedcache</PackageTags>
 		<Copyright>Copyright (c) Momento Inc 2022</Copyright>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/momentohq/client-sdk-dotnet</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/momentohq/client-sdk-dotnet</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/momentohq/client-sdk-dotnet-incubating</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/momentohq/client-sdk-dotnet-incubating</RepositoryUrl>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Momento.Sdk" Version="0.32.2" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 </Project>
