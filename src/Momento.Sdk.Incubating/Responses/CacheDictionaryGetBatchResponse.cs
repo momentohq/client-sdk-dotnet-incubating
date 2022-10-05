@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
@@ -26,6 +27,10 @@ public abstract class CacheDictionaryGetBatchResponse
                 if (response.Result == ECacheResult.Miss)
                 {
                     responsesList.Add(new CacheDictionaryGetResponse.Miss());
+                }
+                else
+                {
+                    responsesList.Add(new CacheDictionaryGetResponse.Error(new UnknownException(response.Result.ToString())));
                 }
             }
             this.Responses = responsesList;
