@@ -25,63 +25,20 @@ internal sealed class ScsDataClient : ScsDataClientBase
 
     public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
     {
-        return await SendGetBatchAsync(simpleCacheClient, cacheName, keys.Select(key => key));
+        // Gather the tasks
+        var tasks = keys.Select(key => simpleCacheClient.GetAsync(cacheName, key));
+        return await SendGetBatchAsync(tasks);
     }
 
     public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<byte[]> keys)
     {
-        return await SendGetBatchAsync(simpleCacheClient, cacheName, keys.Select(key => key));
-    }
-
-    public async Task<CacheGetBatchResponse> SendGetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
-    {
         // Gather the tasks
         var tasks = keys.Select(key => simpleCacheClient.GetAsync(cacheName, key));
-
-        // Run the tasks
-        var continuation = Task.WhenAll(tasks);
-        try
-        {
-            await continuation;
-        }
-        catch (Exception e)
-        {
-            return new CacheGetBatchResponse.Error(CacheExceptionMapper.Convert(e));
-        }
-
-        // Handle failures
-        if (continuation.Status == TaskStatus.Faulted)
-        {
-            return new CacheGetBatchResponse.Error(
-                CacheExceptionMapper.Convert(continuation.Exception)
-            );
-        }
-        else if (continuation.Status != TaskStatus.RanToCompletion)
-        {
-            return new CacheGetBatchResponse.Error(
-                CacheExceptionMapper.Convert(
-                    new Exception(String.Format("Failure issuing multi-get: {0}", continuation.Status))
-                )
-            );
-        }
-
-        // preserve old behavior of failing on first error
-        foreach (CacheGetResponse response in continuation.Result)
-        {
-            if (response is CacheGetResponse.Error errorResponse)
-            {
-                return new CacheGetBatchResponse.Error(errorResponse.Exception);
-            }
-        }
-
-        // Package results
-        return new CacheGetBatchResponse.Success(continuation.Result);
+        return await SendGetBatchAsync(tasks);
     }
 
-    public async Task<CacheGetBatchResponse> SendGetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<byte[]> keys)
+    public async Task<CacheGetBatchResponse> SendGetBatchAsync(IEnumerable<Task<CacheGetResponse>> tasks)
     {
-        // Gather the tasks
-        var tasks = keys.Select(key => simpleCacheClient.GetAsync(cacheName, key));
 
         // Run the tasks
         var continuation = Task.WhenAll(tasks);
@@ -125,59 +82,20 @@ internal sealed class ScsDataClient : ScsDataClientBase
 
     public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
     {
-        return await SendSetBatchAsync(simpleCacheClient, cacheName: cacheName,
-            items: items.Select(item => new KeyValuePair<string, string>(item.Key, item.Value)),
-            ttlSeconds: ttlSeconds);
+        // Gather the tasks
+        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttlSeconds));
+        return await SendSetBatchAsync(tasks);
     }
 
     public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
     {
-        return await SendSetBatchAsync(simpleCacheClient, cacheName: cacheName,
-            items: items.Select(item => new KeyValuePair<byte[], byte[]>(item.Key, item.Value)),
-            ttlSeconds: ttlSeconds);
-    }
-
-    public async Task<CacheSetBatchResponse> SendSetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
-    {
         // Gather the tasks
         var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttlSeconds));
-
-        // Run the tasks
-        var continuation = Task.WhenAll(tasks);
-        try
-        {
-            await continuation;
-        }
-        catch (Exception e)
-        {
-            return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(e)
-            );
-        }
-
-        // Handle failures
-        if (continuation.Status == TaskStatus.Faulted)
-        {
-            return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(continuation.Exception)
-            );
-        }
-        else if (continuation.Status != TaskStatus.RanToCompletion)
-        {
-            return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(
-                    new Exception(String.Format("Failure issuing multi-set: {0}", continuation.Status))
-                )
-            );
-        }
-        return new CacheSetBatchResponse.Success();
+        return await SendSetBatchAsync(tasks);
     }
 
-    public async Task<CacheSetBatchResponse> SendSetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SendSetBatchAsync(IEnumerable<Task<CacheSetResponse>> tasks)
     {
-        // Gather the tasks
-        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttlSeconds));
-
         // Run the tasks
         var continuation = Task.WhenAll(tasks);
         try
