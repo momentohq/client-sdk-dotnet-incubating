@@ -31,6 +31,11 @@ public abstract class CacheDictionaryGetBatchResponse
             this.Responses = responsesList;
         }
 
+        public Success(int numRequested)
+        {
+            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
+        }
+
         public IEnumerable<string?> Strings()
         {
             var ret = new List<string?>();
@@ -66,14 +71,6 @@ public abstract class CacheDictionaryGetBatchResponse
                 }
                 return ret.ToArray();
             }
-        }
-    }
-    public class Miss : CacheDictionaryGetBatchResponse
-    {
-        public List<CacheDictionaryGetResponse> Responses { get; private set; }
-        public Miss(int numRequested)
-        {
-            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
         }
     }
 

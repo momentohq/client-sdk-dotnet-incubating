@@ -393,7 +393,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         {
             return new CacheDictionaryGetBatchResponse.Success(response);
         }
-        return new CacheDictionaryGetBatchResponse.Miss(fields.Count());
+        return new CacheDictionaryGetBatchResponse.Success(fields.Count());
     }
 
     public async Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName)
