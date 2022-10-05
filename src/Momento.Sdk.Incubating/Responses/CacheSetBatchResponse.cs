@@ -1,13 +1,13 @@
-using Momento.Sdk.Exceptions;
-
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheSetRemoveElementsResponse
+using Momento.Sdk.Exceptions;
+
+public abstract class CacheSetBatchResponse
 {
-    public class Success : CacheSetRemoveElementsResponse
-    {
-    }
-    public class Error : CacheSetRemoveElementsResponse
+
+    public class Success : CacheSetBatchResponse { }
+
+    public class Error : CacheSetBatchResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)

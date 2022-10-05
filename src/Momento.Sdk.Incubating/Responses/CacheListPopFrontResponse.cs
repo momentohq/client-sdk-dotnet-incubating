@@ -1,21 +1,66 @@
 ﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheListPopFrontResponse : CacheGetResponseBase
+public abstract class CacheListPopFrontResponse
 {
-    public CacheListPopFrontResponse(CacheGetStatus status, ByteString? value) : base(status, value)
+    public class Hit : CacheListPopFrontResponse
     {
+        protected readonly ByteString value;
+
+        public Hit(_ListPopFrontResponse response)
+        {
+            this.value = response.Found.Front;
+        }
+
+        public byte[] ByteArray
+        {
+            get => value.ToByteArray();
+        }
+
+        public string String() => value.ToStringUtf8();
     }
 
-    public static CacheListPopFrontResponse From(_ListPopFrontResponse response)
+    public class Miss : CacheListPopFrontResponse
     {
-        if (response.ListCase == _ListPopFrontResponse.ListOneofCase.Missing)
+        public Miss() { }
+        public byte[]? ByteArray
         {
-            return new CacheListPopFrontResponse(CacheGetStatus.MISS, null);
+            get
+            {
+                return null;
+            }
         }
-        return new CacheListPopFrontResponse(CacheGetStatus.HIT, response.Found.Front);
+
+        public string? String() => null;
+    }
+
+    public class Error : CacheListPopFrontResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
     }
 }
