@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
 using Momento.Sdk.Incubating.Responses;
+using Momento.Sdk.Internal;
 using Momento.Sdk.Responses;
 using Utils = Momento.Sdk.Internal.Utils;
 
@@ -25,33 +30,35 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// Enables preview features.
     /// </summary>
     /// <param name="simpleCacheClient">Instance of release cache client to delegate operations to.</param>
+    /// <param name="config">Configuration to use for the transport, retries, middlewares. See <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs"/> for out-of-the-box configuration choices, eg <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs#L22"/></param>
     /// <param name="authToken">Momento JWT.</param>
     /// <param name="defaultTtlSeconds">Default time to live for the item in cache.</param>
-    /// <param name="dataClientOperationTimeoutMilliseconds">Deadline (timeout) for communicating to the server. Defaults to 5 seconds.</param>
-    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, string authToken, uint defaultTtlSeconds, uint? dataClientOperationTimeoutMilliseconds = null)
+    /// <param name="loggerFactory">Logger factory to create loggers for contained instances.</param>
+    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, IConfiguration config, string authToken, uint defaultTtlSeconds, ILoggerFactory? loggerFactory = null)
     {
         this.simpleCacheClient = simpleCacheClient;
 
+        var _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         var claims = Momento.Sdk.Internal.JwtUtils.DecodeJwt(authToken);
-        this.dataClient = new(authToken, claims.CacheEndpoint, defaultTtlSeconds, dataClientOperationTimeoutMilliseconds);
+        this.dataClient = new(config, authToken, claims.CacheEndpoint, defaultTtlSeconds, _loggerFactory);
     }
 
     /// <inheritdoc />
-    public CreateCacheResponse CreateCache(string cacheName)
+    public async Task<CreateCacheResponse> CreateCacheAsync(string cacheName)
     {
-        return this.simpleCacheClient.CreateCache(cacheName);
+        return await this.simpleCacheClient.CreateCacheAsync(cacheName);
     }
 
     /// <inheritdoc />
-    public DeleteCacheResponse DeleteCache(string cacheName)
+    public async Task<DeleteCacheResponse> DeleteCacheAsync(string cacheName)
     {
-        return this.simpleCacheClient.DeleteCache(cacheName);
+        return await this.simpleCacheClient.DeleteCacheAsync(cacheName);
     }
 
     /// <inheritdoc />
-    public ListCachesResponse ListCaches(string? nextPageToken = null)
+    public async Task<ListCachesResponse> ListCachesAsync(string? nextPageToken = null)
     {
-        return this.simpleCacheClient.ListCaches(nextPageToken);
+        return await this.simpleCacheClient.ListCachesAsync(nextPageToken);
     }
 
     /// <inheritdoc />
@@ -96,28 +103,79 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttlSeconds);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets multiple values from the cache.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
+    /// <param name="keys">The keys to get.</param>
+    /// <returns>Task object representing the statuses of the get operation and the associated values.</returns>
     public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys)
     {
-        return await this.simpleCacheClient.GetBatchAsync(cacheName, keys);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(keys, nameof(keys));
+            Utils.ElementsNotNull(keys, nameof(keys));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.GetBatchAsync(this, cacheName, keys);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="GetBatchAsync(string, IEnumerable{byte[]})"/>
     public async Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys)
     {
-        return await this.simpleCacheClient.GetBatchAsync(cacheName, keys);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(keys, nameof(keys));
+            Utils.ElementsNotNull(keys, nameof(keys));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.GetBatchAsync(this, cacheName, keys);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Sets multiple items in the cache. Overwrites existing items.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the items in.</param>
+    /// <param name="items">The items to set.</param>
+    /// <param name="ttlSeconds">TTL for the item in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <returns>Task object representing the result of the set operation.</returns>
     public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
     {
-        return await this.simpleCacheClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="SetBatchAsync(string, IEnumerable{KeyValuePair{byte[], byte[]}}, uint?)"/>
     public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
     {
-        return await this.simpleCacheClient.SetBatchAsync(cacheName, items, ttlSeconds);
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
     }
 
     /// <summary>
@@ -135,13 +193,19 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
     /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="field"/>, <paramref name="value"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
-        Utils.ArgumentNotNull(value, nameof(value));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+            Utils.ArgumentNotNull(value, nameof(value));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
     }
@@ -149,10 +213,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)"/>
     public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
-        Utils.ArgumentNotNull(value, nameof(value));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+            Utils.ArgumentNotNull(value, nameof(value));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
     }
@@ -160,10 +231,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)"/>
     public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
-        Utils.ArgumentNotNull(value, nameof(value));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+            Utils.ArgumentNotNull(value, nameof(value));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
     }
@@ -175,12 +253,18 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">The dictionary to lookup.</param>
     /// <param name="field">The field in the dictionary to lookup.</param>
     /// <returns>Task representing the status of the get operation and the associated value.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="field"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, byte[] field)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryGetResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryGetAsync(cacheName, dictionaryName, field);
     }
@@ -188,9 +272,16 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="DictionaryGetAsync(string, string, byte[])"/>
     public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, string field)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryGetResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryGetAsync(cacheName, dictionaryName, field);
     }
@@ -205,13 +296,19 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
     /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="items"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(items, nameof(items));
-        Utils.KeysAndValuesNotNull(items, nameof(items));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
     }
@@ -219,10 +316,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, uint?)"/>
     public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(items, nameof(items));
-        Utils.KeysAndValuesNotNull(items, nameof(items));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
     }
@@ -230,10 +334,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, uint?)"/>
     public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(items, nameof(items));
-        Utils.KeysAndValuesNotNull(items, nameof(items));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(items, nameof(items));
+            Utils.KeysAndValuesNotNull(items, nameof(items));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
     }
@@ -253,9 +364,6 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="amount">The quantity to add to the value. May be positive, negative, or zero. Defaults to 1.</param>
     /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="NotImplementedException">This method is a stub. Do not invoke.</exception>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="field"/> is <see langword="null"/>.</exception>
-    /// <exception cref="FailedPreconditionException">The command is invoked on a field that wasn't set using <c>DictionaryIncrementAsync</c> or is not the string representation of an integer.</exception>
     /// <example>
     /// The following illustrates a typical workflow:
     /// <code>
@@ -276,9 +384,16 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// </example>
     public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryIncrementResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl, amount, ttlSeconds);
     }
@@ -290,24 +405,36 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">The dictionary to lookup.</param>
     /// <param name="fields">The fields in the dictionary to lookup.</param>
     /// <returns>Task representing the status and associated value for each field.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="fields"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryGetBatchResponse> DictionaryGetBatchAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(fields, nameof(fields));
-        Utils.ElementsNotNull(fields, nameof(fields));
-
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(fields, nameof(fields));
+            Utils.ElementsNotNull(fields, nameof(fields));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.DictionaryGetBatchAsync(cacheName, dictionaryName, fields);
     }
 
     /// <inheritdoc cref="DictionaryGetBatchAsync(string, string, IEnumerable{byte[]})"/>
     public async Task<CacheDictionaryGetBatchResponse> DictionaryGetBatchAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(fields, nameof(fields));
-        Utils.ElementsNotNull(fields, nameof(fields));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(fields, nameof(fields));
+            Utils.ElementsNotNull(fields, nameof(fields));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryGetBatchAsync(cacheName, dictionaryName, fields);
     }
@@ -318,11 +445,18 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
     /// <param name="dictionaryName">The dictionary to fetch.</param>
     /// <returns>Task representing with the status of the fetch operation and the associated dictionary.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryFetchResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
 
         return await this.dataClient.DictionaryFetchAsync(cacheName, dictionaryName);
     }
@@ -335,11 +469,18 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to delete the dictionary from.</param>
     /// <param name="dictionaryName">Name of the dictionary to delete.</param>
     /// <returns>Task representing the result of the delete operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="dictionaryName"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryDeleteResponse> DictionaryDeleteAsync(string cacheName, string dictionaryName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryDeleteResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
 
         return await this.dataClient.DictionaryDeleteAsync(cacheName, dictionaryName);
     }
@@ -353,22 +494,36 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">Name of the dictionary to remove the field from.</param>
     /// <param name="field">Name of the field to remove from the dictionary.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="field"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryRemoveFieldResponse> DictionaryRemoveFieldAsync(string cacheName, string dictionaryName, byte[] field)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryRemoveFieldResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
     }
 
     /// <inheritdoc cref="DictionaryRemoveFieldAsync(string, string, byte[])"/>
     public async Task<CacheDictionaryRemoveFieldResponse> DictionaryRemoveFieldAsync(string cacheName, string dictionaryName, string field)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(field, nameof(field));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(field, nameof(field));
+        }
+
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryRemoveFieldResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
     }
@@ -382,24 +537,38 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">Name of the dictionary to remove the field from.</param>
     /// <param name="fields">Name of the fields to remove from the dictionary.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="dictionaryName"/>, <paramref name="fields"/> is <see langword="null"/>.</exception>
     public async Task<CacheDictionaryRemoveFieldsResponse> DictionaryRemoveFieldsAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(fields, nameof(fields));
-        Utils.ElementsNotNull(fields, nameof(fields));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(fields, nameof(fields));
+            Utils.ElementsNotNull(fields, nameof(fields));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryRemoveFieldsResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, fields);
     }
 
     /// <inheritdoc cref="DictionaryRemoveFieldsAsync(string, string, IEnumerable{byte[]})"/>
     public async Task<CacheDictionaryRemoveFieldsResponse> DictionaryRemoveFieldsAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        Utils.ArgumentNotNull(fields, nameof(fields));
-        Utils.ElementsNotNull(fields, nameof(fields));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
+            Utils.ArgumentNotNull(fields, nameof(fields));
+            Utils.ElementsNotNull(fields, nameof(fields));
+        }
+
+        catch (ArgumentNullException e)
+        {
+            return new CacheDictionaryRemoveFieldsResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, fields);
     }
@@ -417,22 +586,35 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="refreshTtl">Update <paramref name="setName"/>'s TTL if it already exists.</param>
     /// <param name="ttlSeconds">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="setName"/>, <paramref name="element"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(element, nameof(element));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(element, nameof(element));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttlSeconds);
     }
 
     /// <inheritdoc cref="SetAddAsync(string, string, byte[], bool, uint?)"/>
     public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(element, nameof(element));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(element, nameof(element));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttlSeconds);
     }
@@ -450,24 +632,38 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="refreshTtl">Update <paramref name="setName"/>'s TTL if it already exists.</param>
     /// <param name="ttlSeconds">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="setName"/>, <paramref name="elements"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(elements, nameof(elements));
-        Utils.ElementsNotNull(elements, nameof(elements));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(elements, nameof(elements));
+            Utils.ElementsNotNull(elements, nameof(elements));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttlSeconds);
     }
 
     /// <inheritdoc cref="SetAddBatchAsync(string, string, IEnumerable{byte[]}, bool, uint?)"/>
     public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, uint? ttlSeconds = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(elements, nameof(elements));
-        Utils.ElementsNotNull(elements, nameof(elements));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(elements, nameof(elements));
+            Utils.ElementsNotNull(elements, nameof(elements));
+        }
+
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttlSeconds);
     }
@@ -481,22 +677,36 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="setName">The set to remove the element from.</param>
     /// <param name="element">The data to remove from the set.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="setName"/>, <paramref name="element"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetRemoveElementResponse> SetRemoveElementAsync(string cacheName, string setName, byte[] element)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(element, nameof(element));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(element, nameof(element));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetRemoveElementResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.SetRemoveElementAsync(cacheName, setName, element);
     }
 
     /// <inheritdoc cref="SetRemoveElementAsync(string, string, byte[])"/>
     public async Task<CacheSetRemoveElementResponse> SetRemoveElementAsync(string cacheName, string setName, string element)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(element, nameof(element));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(element, nameof(element));
+        }
+
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetRemoveElementResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetRemoveElementAsync(cacheName, setName, element);
     }
@@ -510,13 +720,19 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="setName">The set to remove the elements from.</param>
     /// <param name="elements">The data to remove from the set.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="setName"/>, <paramref name="elements"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetRemoveElementsResponse> SetRemoveElementsAsync(string cacheName, string setName, IEnumerable<byte[]> elements)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(elements, nameof(elements));
-        Utils.ElementsNotNull(elements, nameof(elements));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(elements, nameof(elements));
+            Utils.ElementsNotNull(elements, nameof(elements));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetRemoveElementsResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetRemoveElementsAsync(cacheName, setName, elements);
     }
@@ -524,10 +740,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="SetRemoveElementsAsync(string, string, IEnumerable{byte[]})"/>
     public async Task<CacheSetRemoveElementsResponse> SetRemoveElementsAsync(string cacheName, string setName, IEnumerable<string> elements)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
-        Utils.ArgumentNotNull(elements, nameof(elements));
-        Utils.ElementsNotNull(elements, nameof(elements));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+            Utils.ArgumentNotNull(elements, nameof(elements));
+            Utils.ElementsNotNull(elements, nameof(elements));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetRemoveElementsResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetRemoveElementsAsync(cacheName, setName, elements);
     }
@@ -538,11 +761,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
     /// <param name="setName">The set to fetch.</param>
     /// <returns>Task representing with the status of the fetch operation and the associated set.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="setName"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetFetchResponse> SetFetchAsync(string cacheName, string setName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetFetchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetFetchAsync(cacheName, setName);
     }
@@ -555,11 +784,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to delete the set from.</param>
     /// <param name="setName">Name of the set to delete.</param>
     /// <returns>Task representing the result of the delete operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="setName"/> is <see langword="null"/>.</exception>
     public async Task<CacheSetDeleteResponse> SetDeleteAsync(string cacheName, string setName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(setName, nameof(setName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(setName, nameof(setName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheSetDeleteResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.SetDeleteAsync(cacheName, setName);
     }
@@ -575,14 +810,19 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="ttlSeconds">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateBackToSize">Ensure the list does not exceed this length. Remove excess from the end of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> or <paramref name="value"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="truncateBackToSize"/> is zero.</exception>
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateBackToSize = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
-        Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttlSeconds);
     }
@@ -590,10 +830,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="ListPushFrontAsync(string, string, byte[], bool, uint?, uint?)"/>
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateBackToSize = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
-        Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttlSeconds);
     }
@@ -609,25 +856,36 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="ttlSeconds">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateFrontToSize">Ensure the list does not exceed this length. Remove excess from the beginning of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> or <paramref name="value"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="truncateFrontToSize"/> is zero.</exception>
     public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateFrontToSize = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
-        Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
-
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttlSeconds);
     }
 
     /// <inheritdoc cref="ListPushBackAsync(string, string, byte[], bool, uint?, uint?)"/>
     public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateFrontToSize = null)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
-        Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttlSeconds);
     }
@@ -638,11 +896,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to read the list from.</param>
     /// <param name="listName">The list to pop from.</param>
     /// <returns>Task representing the status and associated value for the pop operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> is <see langword="null"/>.</exception>
     public async Task<CacheListPopFrontResponse> ListPopFrontAsync(string cacheName, string listName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPopFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPopFrontAsync(cacheName, listName);
     }
@@ -653,11 +917,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to read the list from.</param>
     /// <param name="listName">The list to pop from.</param>
     /// <returns>Task representing the status and associated value for the pop operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> is <see langword="null"/>.</exception>
     public async Task<CacheListPopBackResponse> ListPopBackAsync(string cacheName, string listName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListPopBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPopBackAsync(cacheName, listName);
     }
@@ -668,11 +938,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
     /// <param name="listName">The list to fetch.</param>
     /// <returns>Task representing with the status of the fetch operation and the associated list.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> is <see langword="null"/>.</exception>
     public async Task<CacheListFetchResponse> ListFetchAsync(string cacheName, string listName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListFetchResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListFetchAsync(cacheName, listName);
     }
@@ -684,12 +960,19 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="listName">The list to remove elements from.</param>
     /// <param name="value">The value to completely remove from the list.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/>, <paramref name="listName"/>, or <paramref name="value"/> is <see langword="null"/>.</exception>
     public async Task<CacheListRemoveValueResponse> ListRemoveValueAsync(string cacheName, string listName, byte[] value)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListRemoveValueResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
 
         return await this.dataClient.ListRemoveValueAsync(cacheName, listName, value);
     }
@@ -697,9 +980,17 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <inheritdoc cref="ListRemoveValueAsync(string, string, byte[])"/>
     public async Task<CacheListRemoveValueResponse> ListRemoveValueAsync(string cacheName, string listName, string value)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
-        Utils.ArgumentNotNull(value, nameof(value));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(value, nameof(value));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListRemoveValueResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
 
         return await this.dataClient.ListRemoveValueAsync(cacheName, listName, value);
     }
@@ -712,12 +1003,18 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
     /// <param name="listName">The list to calculate length.</param>
     /// <returns>Task representing the length of the list.</returns>
-    /// <exception cref="ArgumentNullException">Any of <paramref name="cacheName"/> or <paramref name="listName"/> is <see langword="null"/>.</exception>
     public async Task<CacheListLengthResponse> ListLengthAsync(string cacheName, string listName)
     {
-        Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-        Utils.ArgumentNotNull(listName, nameof(listName));
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+        }
 
+        catch (ArgumentNullException e)
+        {
+            return new CacheListLengthResponse.Error(new InvalidArgumentException(e.Message));
+        }
         return await this.dataClient.ListLengthAsync(cacheName, listName);
     }
 

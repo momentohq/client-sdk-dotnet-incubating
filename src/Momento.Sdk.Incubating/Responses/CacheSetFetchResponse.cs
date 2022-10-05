@@ -4,45 +4,86 @@ using System.Linq;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheSetFetchResponse
+public abstract class CacheSetFetchResponse
 {
-    public CacheGetStatus Status { get; private set; }
-    private readonly RepeatedField<ByteString>? elements;
-    private readonly Lazy<HashSet<byte[]>?> _byteArraySet;
-    private readonly Lazy<HashSet<string>?> _stringSet;
-
-    public CacheSetFetchResponse(_SetFetchResponse response)
+    public class Hit : CacheSetFetchResponse
     {
-        Status = (response.SetCase == _SetFetchResponse.SetOneofCase.Found) ? CacheGetStatus.HIT : CacheGetStatus.MISS;
-        elements = (Status == CacheGetStatus.HIT) ? response.Found.Elements : null;
+        protected readonly RepeatedField<ByteString>? elements;
+        protected readonly Lazy<HashSet<byte[]>?> _byteArraySet;
+        protected readonly Lazy<HashSet<string>?> _stringSet;
 
-        _byteArraySet = new(() =>
+        public Hit(_SetFetchResponse response)
         {
-            if (elements == null)
+            elements = response.Found.Elements;
+            _byteArraySet = new(() =>
             {
-                return null;
-            }
-            return new HashSet<byte[]>(
-                elements.Select(element => element.ToByteArray()),
-                Utils.ByteArrayComparer);
-        });
 
-        _stringSet = new(() =>
-        {
-            if (elements == null)
+                return new HashSet<byte[]>(
+                    elements.Select(element => element.ToByteArray()),
+                    Utils.ByteArrayComparer);
+            });
+
+            _stringSet = new(() =>
             {
-                return null;
-            }
-            return new HashSet<string>(elements.Select(element => element.ToStringUtf8()));
-        });
+
+                return new HashSet<string>(elements.Select(element => element.ToStringUtf8()));
+            });
+        }
+
+        public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
+
+        public HashSet<string>? StringSet() => _stringSet.Value;
     }
 
-    public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
+    public class Miss : CacheSetFetchResponse
+    {
+        protected readonly Lazy<HashSet<byte[]>?> _byteArraySet;
+        protected readonly Lazy<HashSet<string>?> _stringSet;
+        public Miss()
+        {
+            _byteArraySet = new(() =>
+            {
+                return null;
+            });
 
-    public HashSet<string>? StringSet() => _stringSet.Value;
+            _stringSet = new(() =>
+            {
+                return null;
+            });
+        }
+        public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
+
+        public HashSet<string>? StringSet() => _stringSet.Value;
+    }
+
+    public class Error : CacheSetFetchResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
+    }
 }

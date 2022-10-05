@@ -1,3 +1,5 @@
+using Momento.Sdk.Config;
+
 namespace Momento.Sdk.Incubating.Tests;
 
 /// <summary>
@@ -20,12 +22,12 @@ public class SimpleCacheClientFixture : IDisposable
         CacheName = Environment.GetEnvironmentVariable("TEST_CACHE_NAME") ??
             throw new NullReferenceException("TEST_CACHE_NAME environment variable must be set.");
         CacheName += "-incubating";
-        Client = SimpleCacheClientFactory.CreateClient(AuthToken, defaultTtlSeconds: DefaultTtlSeconds);
+        Client = SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest, AuthToken, defaultTtlSeconds: DefaultTtlSeconds);
 
 
         try
         {
-            Client.CreateCache(CacheName);
+            var result = Client.CreateCacheAsync(CacheName).Result;
         }
         catch (AlreadyExistsException)
         {
@@ -34,7 +36,7 @@ public class SimpleCacheClientFixture : IDisposable
 
     public void Dispose()
     {
-        Client.DeleteCache(CacheName);
+        var result = Client.DeleteCacheAsync(CacheName).Result;
         Client.Dispose();
     }
 }

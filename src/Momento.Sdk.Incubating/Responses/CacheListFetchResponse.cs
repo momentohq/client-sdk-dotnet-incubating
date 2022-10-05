@@ -4,43 +4,81 @@ using System.Linq;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheListFetchResponse
+public abstract class CacheListFetchResponse
 {
-    public CacheGetStatus Status { get; private set; }
-    private readonly RepeatedField<ByteString>? values;
-    private readonly Lazy<List<byte[]>?> _byteArrayList;
-    private readonly Lazy<List<string>?> _stringList;
-
-    public CacheListFetchResponse(_ListFetchResponse response)
+    public class Hit : CacheListFetchResponse
     {
-        Status = (response.ListCase == _ListFetchResponse.ListOneofCase.Found) ? CacheGetStatus.HIT : CacheGetStatus.MISS;
-        values = (Status == CacheGetStatus.HIT) ? response.Found.Values : null;
+        protected readonly RepeatedField<ByteString>? values;
+        protected readonly Lazy<List<byte[]>?> _byteArrayList;
+        protected readonly Lazy<List<string>?> _stringList;
 
-        _byteArrayList = new(() =>
+        public Hit(_ListFetchResponse response)
         {
-            if (values == null)
+            values = response.Found.Values;
+            _byteArrayList = new(() =>
             {
-                return null;
-            }
+                return new List<byte[]>(values.Select(v => v.ToByteArray()));
+            });
 
-            return new List<byte[]>(values.Select(v => v.ToByteArray()));
-        });
-
-        _stringList = new(() =>
-        {
-            if (values == null)
+            _stringList = new(() =>
             {
-                return null;
-            }
-            return new List<string>(values.Select(v => v.ToStringUtf8()));
-        });
+                return new List<string>(values.Select(v => v.ToStringUtf8()));
+            });
+        }
+
+        public List<byte[]>? ByteArrayList { get => _byteArrayList.Value; }
+
+        public List<string>? StringList() => _stringList.Value;
     }
 
-    public List<byte[]>? ByteArrayList { get => _byteArrayList.Value; }
+    public class Miss : CacheListFetchResponse
+    {
+        protected readonly Lazy<List<byte[]>?> _byteArrayList;
+        protected readonly Lazy<List<string>?> _stringList;
+        public Miss()
+        {
+            _byteArrayList = new(() =>
+            {
+                return null;
+            });
 
-    public List<string>? StringList() => _stringList.Value;
+            _stringList = new(() =>
+            {
+                return null;
+            });
+        }
+        public List<byte[]>? ByteArrayList { get => _byteArrayList.Value; }
+
+        public List<string>? StringList() => _stringList.Value;
+    }
+
+    public class Error : CacheListFetchResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
+    }
 }

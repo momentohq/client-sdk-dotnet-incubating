@@ -1,40 +1,101 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
-
+using static Momento.Protos.CacheClient._DictionaryGetResponse.Types;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheDictionaryGetBatchResponse
+public abstract class CacheDictionaryGetBatchResponse
 {
-    public IEnumerable<CacheDictionaryGetResponse> Responses { get; private set; }
-
-    public CacheDictionaryGetBatchResponse(_DictionaryGetResponse response, int numRequested)
+    public class Success : CacheDictionaryGetBatchResponse
     {
-        if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Found)
+        public List<CacheDictionaryGetResponse> Responses { get; private set; }
+
+        public Success(_DictionaryGetResponse responses)
         {
-            Responses = response.Found.Items.Select(item => new CacheDictionaryGetResponse(item));
+            var responsesList = new List<CacheDictionaryGetResponse>();
+            foreach (_DictionaryGetResponsePart response in responses.Found.Items)
+            {
+                if (response.Result == ECacheResult.Hit)
+                {
+                    responsesList.Add(new CacheDictionaryGetResponse.Hit(response.CacheBody));
+                }
+                if (response.Result == ECacheResult.Miss)
+                {
+                    responsesList.Add(new CacheDictionaryGetResponse.Miss());
+                }
+            }
+            this.Responses = responsesList;
         }
-        else
+
+        public Success(int numRequested)
         {
-            Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse());
+            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
         }
 
+        public IEnumerable<string?> Strings()
+        {
+            var ret = new List<string?>();
+            foreach (CacheDictionaryGetResponse response in Responses)
+            {
+                if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                {
+                    ret.Add(hitResponse.String());
+                }
+                else if (response is CacheDictionaryGetResponse.Miss missResponse)
+                {
+                    ret.Add(null);
+                }
+            }
+            return ret.ToArray();
+        }
+
+        public IEnumerable<byte[]?> ByteArrays
+        {
+            get
+            {
+                var ret = new List<byte[]?>();
+                foreach (CacheDictionaryGetResponse response in Responses)
+                {
+                    if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                    {
+                        ret.Add(hitResponse.ByteArray);
+                    }
+                    else if (response is CacheDictionaryGetResponse.Miss missResponse)
+                    {
+                        ret.Add(null);
+                    }
+                }
+                return ret.ToArray();
+            }
+        }
     }
 
-    public IEnumerable<CacheGetStatus> Status
+    public class Error : CacheDictionaryGetBatchResponse
     {
-        get => Responses.Select(response => response.Status);
-    }
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
 
-    public IEnumerable<string?> Strings()
-    {
-        return Responses.Select(response => response.String());
-    }
+        public SdkException Exception
+        {
+            get => _error;
+        }
 
-    public IEnumerable<byte[]?> ByteArrays
-    {
-        get => Responses.Select(response => response.ByteArray);
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
     }
 }

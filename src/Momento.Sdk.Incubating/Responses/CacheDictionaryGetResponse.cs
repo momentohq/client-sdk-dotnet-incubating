@@ -1,37 +1,71 @@
 ﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public class CacheDictionaryGetResponse : CacheGetResponseBase
+public abstract class CacheDictionaryGetResponse
 {
-    public CacheDictionaryGetResponse() : base(CacheGetStatus.MISS, null)
+    public class Hit : CacheDictionaryGetResponse
     {
-    }
+        protected readonly ByteString value;
 
-    public CacheDictionaryGetResponse(ECacheResult status, ByteString value) : base(status, value)
-    {
-    }
-
-    public CacheDictionaryGetResponse(_DictionaryGetResponse.Types._DictionaryGetResponsePart unaryResponse)
-        : base(unaryResponse.Result, unaryResponse.CacheBody)
-    {
-    }
-
-    public static CacheDictionaryGetResponse From(_DictionaryGetResponse response)
-    {
-        if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Missing)
+        public Hit(_DictionaryGetResponse response)
         {
-            return new CacheDictionaryGetResponse();
+            this.value = response.Found.Items[0].CacheBody;
         }
 
-        if (response.Found.Items.Count == 0)
+        public Hit(ByteString cacheBody)
         {
-            // TODO there are no exception types that cleanly map to this kind of error
-            throw new ClientSdkException("_DictionaryGetResponseResponse contained no data but was found");
+            this.value = cacheBody;
         }
-        return new CacheDictionaryGetResponse(response.Found.Items[0].Result, response.Found.Items[0].CacheBody);
+
+        public byte[] ByteArray
+        {
+            get => value.ToByteArray();
+        }
+
+        public string String() => value.ToStringUtf8();
+    }
+
+    public class Miss : CacheDictionaryGetResponse
+    {
+        public Miss() { }
+        public byte[]? ByteArray
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string? String() => null;
+    }
+
+    public class Error : CacheDictionaryGetResponse
+    {
+        private readonly SdkException _error;
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
+        public SdkException Exception
+        {
+            get => _error;
+        }
+
+        public MomentoErrorCode ErrorCode
+        {
+            get => _error.ErrorCode;
+        }
+
+        public string Message
+        {
+            get => $"{_error.MessageWrapper}: {_error.Message}";
+        }
+
     }
 }
