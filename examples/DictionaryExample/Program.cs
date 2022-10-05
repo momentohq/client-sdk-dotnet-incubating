@@ -1,69 +1,154 @@
-﻿using Momento.Sdk.Exceptions;
+﻿using Microsoft.Extensions.Logging;
+using Momento.Sdk.Config;
 using Momento.Sdk.Incubating;
+using Momento.Sdk.Incubating.Responses;
+using Momento.Sdk.Responses;
 
 public class Driver
 {
     private static readonly string AUTH_TOKEN_ENV_VAR = "TEST_AUTH_TOKEN";
     private static readonly string CACHE_NAME_ENV_VAR = "TEST_CACHE_NAME";
+    private static readonly ILogger _logger;
+    private static readonly ILoggerFactory _loggerFactory;
+
+    static Driver()
+    {
+        _loggerFactory = InitializeLogging();
+        _logger = _loggerFactory.CreateLogger<Driver>();
+    }
 
     public async static Task Main()
     {
         var authToken = ReadAuthToken();
         var cacheName = ReadCacheName();
 
-        using var client = Momento.Sdk.Incubating.SimpleCacheClientFactory.CreateClient(authToken, 60);
-        EnsureCacheExists(client, cacheName);
+        // Set up the client
+        using var client = Momento.Sdk.Incubating.SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest, authToken, 60, _loggerFactory);
+        await EnsureCacheExistsAsync(client, cacheName);
 
         // Set a value
-        await client.DictionarySetAsync(cacheName: cacheName, dictionaryName: "my-dictionary",
+        var dictionaryName = "my-dictionary";
+        var setResponse = await client.DictionarySetAsync(cacheName: cacheName, dictionaryName: dictionaryName,
             field: "my-field", value: "my-value", refreshTtl: false, ttlSeconds: 60);
+        if (setResponse is CacheDictionarySetResponse.Error setError)
+        {
+            _logger.LogInformation($"Error setting a value in a dictionary: {setError.Message}");
+            Environment.Exit(1);
+        }
 
         // Set multiple values
-        await client.DictionarySetBatchAsync(
+        var setBatchResponse = await client.DictionarySetBatchAsync(
             cacheName: cacheName,
-            dictionaryName: "my-dictionary",
+            dictionaryName: dictionaryName,
             new Dictionary<string, string>() {
                 { "field1", "value1" },
                 { "field2", "value2" },
                 { "field3", "value3" }},
             refreshTtl: false);
+        if (setBatchResponse is CacheDictionarySetBatchResponse.Error setBatchError)
+        {
+            _logger.LogInformation($"Error setting a values in a dictionary: {setBatchError.Message}");
+            Environment.Exit(1);
+        }
 
         // Get a value
         var field = "field1";
         var getResponse = await client.DictionaryGetAsync(
             cacheName: cacheName,
-            dictionaryName: "my-dictionary",
+            dictionaryName: dictionaryName,
             field: field);
-        var status = getResponse.Status; // HIT
-        string value = getResponse.String()!; // "value1"
-        Console.WriteLine($"Dictionary get of {field}: status={status}; value={value}");
+
+        var status = "";
+        var value = "";
+
+        if (getResponse is CacheDictionaryGetResponse.Hit unaryHit)
+        {
+            status = "HIT";
+            value = unaryHit.String();
+        }
+        else if (getResponse is CacheDictionaryGetResponse.Miss)
+        {
+            // In this example you can get here if you change the field name, or
+            // if you set a short TTL, then add a Task.Delay so that it expires.
+            status = "MISS";
+            value = "<NONE; operation was a MISS>";
+        }
+        else if (getResponse is CacheDictionaryGetResponse.Error getError)
+        {
+            _logger.LogInformation($"Error getting value from a dictionary: {getError.Message}");
+            Environment.Exit(1);
+        }
+
+        _logger.LogInformation("");
+        _logger.LogInformation($"Dictionary get of {field}: status={status}; value={value}");
 
         // Get multiple values
         var batchFieldList = new string[] { "field1", "field2", "field3", "field4" };
         var getBatchResponse = await client.DictionaryGetBatchAsync(
             cacheName: cacheName,
-            dictionaryName: "my-dictionary",
+            dictionaryName: dictionaryName,
             fields: batchFieldList);
-        var manyStatus = getBatchResponse.Status; // [HIT, HIT, HIT, MISS]
-        var values = getBatchResponse.Strings(); // ["value1", "value2", "value3", null]
-
-        Console.WriteLine("\nDisplaying the result of dictionary get batch:");
-        foreach ((var batchField, var response) in batchFieldList.Zip(getBatchResponse.Responses))
+        if (getBatchResponse is CacheDictionaryGetBatchResponse.Error getBatchError)
         {
-            Console.WriteLine($"- field={batchField}; status={response.Status}; value={response.String()}");
+            _logger.LogInformation($"Error getting value from a dictionary: {getBatchError.Message}");
+            Environment.Exit(1);
+        }
+
+        _logger.LogInformation("");
+        _logger.LogInformation("Displaying the result of dictionary get batch:");
+        var responses = ((CacheDictionaryGetBatchResponse.Success)getBatchResponse).Responses;
+        foreach ((var batchField, var response) in batchFieldList.Zip(responses))
+        {
+            status = "MISS";
+            value = "<NONE; field was a MISS>";
+            if (response is CacheDictionaryGetResponse.Hit hit_)
+            {
+                status = "HIT";
+                value = hit_.String();
+            }
+            _logger.LogInformation($"- field={batchField}; status={status}; value={value}");
         }
 
         // Get the whole dictionary
         var fetchResponse = await client.DictionaryFetchAsync(
             cacheName: cacheName,
-            dictionaryName: "my-dictionary");
-        status = fetchResponse.Status;
-        var dictionary = fetchResponse.StringStringDictionary()!;
-        value = dictionary["field1"]; // == "value1"
+            dictionaryName: dictionaryName);
+        if (fetchResponse is CacheDictionaryFetchResponse.Miss fetchMiss)
+        {
+            // You can reach here by:
+            // - fetching a dictionary that does not exist, eg changing the name above, or
+            // - setting a short TTL and adding a Task.Delay so the dictionary expires
+            _logger.LogInformation($"Expected {dictionaryName} to be a hit; got a miss.");
+            Environment.Exit(1);
+        }
+        else if (fetchResponse is CacheDictionaryFetchResponse.Error fetchError)
+        {
+            _logger.LogInformation($"Error while fetching {dictionaryName}: {fetchError.Message}");
+            Environment.Exit(1);
+        }
 
-        Console.WriteLine("\nDisplaying the results of dictionary fetch:");
+        var dictionary = ((CacheDictionaryFetchResponse.Hit)fetchResponse).StringStringDictionary()!;
+        _logger.LogInformation("");
+        _logger.LogInformation($"Accessing an entry of {dictionaryName} using a native Dictionary: {dictionary["field1"]}");
+
+        _logger.LogInformation("");
+        _logger.LogInformation("Displaying the results of dictionary fetch:");
         dictionary.ToList().ForEach(kv =>
-            Console.WriteLine($"- field={kv.Key}; value={kv.Value}"));
+            _logger.LogInformation($"- field={kv.Key}; value={kv.Value}"));
+    }
+
+    private static ILoggerFactory InitializeLogging()
+    {
+        return LoggerFactory.Create(builder =>
+        {
+            builder.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.SingleLine = true;
+                options.TimestampFormat = "hh:mm:ss ";
+            });
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
     }
 
     private static string ReadAuthToken()
@@ -88,15 +173,22 @@ public class Driver
         return cacheName;
     }
 
-    private static void EnsureCacheExists(SimpleCacheClient client, string cacheName)
+    private static async Task EnsureCacheExistsAsync(SimpleCacheClient client, string cacheName)
     {
-        try
+        _logger.LogInformation($"Creating cache {cacheName} if it doesn't already exist.");
+        var createCacheResponse = await client.CreateCacheAsync(cacheName);
+        if (createCacheResponse is CreateCacheResponse.Success)
         {
-            client.CreateCache(cacheName);
-            Console.WriteLine($"Created cache {cacheName}");
+            _logger.LogInformation($"Created cache {cacheName}.");
         }
-        catch (AlreadyExistsException)
+        else if (createCacheResponse is CreateCacheResponse.CacheAlreadyExists)
         {
+            _logger.LogInformation($"Cache {cacheName} already exists.");
+        }
+        else if (createCacheResponse is CreateCacheResponse.Error error)
+        {
+            _logger.LogInformation($"Error creating cache: {error.Message}");
+            Environment.Exit(1);
         }
     }
 }

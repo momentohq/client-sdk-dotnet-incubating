@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Momento.Sdk.Incubating" Version="0.1.2-alpha" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Momento.Sdk.Incubating" Version="0.2.0-alpha" />
   </ItemGroup>
 
 </Project>
