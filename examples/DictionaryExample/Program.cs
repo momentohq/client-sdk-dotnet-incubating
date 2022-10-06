@@ -88,32 +88,44 @@ public class Driver
             cacheName: cacheName,
             dictionaryName: dictionaryName,
             fields: batchFieldList);
-        if (getBatchResponse is CacheDictionaryGetBatchResponse.Error getBatchError)
+        if (getBatchResponse is CacheDictionaryGetBatchResponse.Success responses)
+        {
+            _logger.LogInformation("");
+            _logger.LogInformation("Displaying the result of dictionary get batch:");
+            foreach ((var batchField, var response) in batchFieldList.Zip(responses.Responses))
+            {
+                status = "MISS";
+                value = "<NONE; field was a MISS>";
+                if (response is CacheDictionaryGetResponse.Hit hit_)
+                {
+                    status = "HIT";
+                    value = hit_.String();
+                }
+                _logger.LogInformation($"- field={batchField}; status={status}; value={value}");
+            }
+        }
+        else if (getBatchResponse is CacheDictionaryGetBatchResponse.Error getBatchError)
         {
             _logger.LogInformation($"Error getting value from a dictionary: {getBatchError.Message}");
             Environment.Exit(1);
-        }
-
-        _logger.LogInformation("");
-        _logger.LogInformation("Displaying the result of dictionary get batch:");
-        var responses = ((CacheDictionaryGetBatchResponse.Success)getBatchResponse).Responses;
-        foreach ((var batchField, var response) in batchFieldList.Zip(responses))
-        {
-            status = "MISS";
-            value = "<NONE; field was a MISS>";
-            if (response is CacheDictionaryGetResponse.Hit hit_)
-            {
-                status = "HIT";
-                value = hit_.String();
-            }
-            _logger.LogInformation($"- field={batchField}; status={status}; value={value}");
         }
 
         // Get the whole dictionary
         var fetchResponse = await client.DictionaryFetchAsync(
             cacheName: cacheName,
             dictionaryName: dictionaryName);
-        if (fetchResponse is CacheDictionaryFetchResponse.Miss fetchMiss)
+        if (fetchResponse is CacheDictionaryFetchResponse.Hit fetchHit)
+        {
+            var dictionary = fetchHit.StringStringDictionary()!;
+            _logger.LogInformation("");
+            _logger.LogInformation($"Accessing an entry of {dictionaryName} using a native Dictionary: {dictionary["field1"]}");
+
+            _logger.LogInformation("");
+            _logger.LogInformation("Displaying the results of dictionary fetch:");
+            dictionary.ToList().ForEach(kv =>
+                _logger.LogInformation($"- field={kv.Key}; value={kv.Value}"));
+        }
+        else if (fetchResponse is CacheDictionaryFetchResponse.Miss fetchMiss)
         {
             // You can reach here by:
             // - fetching a dictionary that does not exist, eg changing the name above, or
@@ -126,15 +138,6 @@ public class Driver
             _logger.LogInformation($"Error while fetching {dictionaryName}: {fetchError.Message}");
             Environment.Exit(1);
         }
-
-        var dictionary = ((CacheDictionaryFetchResponse.Hit)fetchResponse).StringStringDictionary()!;
-        _logger.LogInformation("");
-        _logger.LogInformation($"Accessing an entry of {dictionaryName} using a native Dictionary: {dictionary["field1"]}");
-
-        _logger.LogInformation("");
-        _logger.LogInformation("Displaying the results of dictionary fetch:");
-        dictionary.ToList().ForEach(kv =>
-            _logger.LogInformation($"- field={kv.Key}; value={kv.Value}"));
     }
 
     private static ILoggerFactory InitializeLogging()
