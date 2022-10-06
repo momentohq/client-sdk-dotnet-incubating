@@ -116,7 +116,7 @@ public class Driver
             dictionaryName: dictionaryName);
         if (fetchResponse is CacheDictionaryFetchResponse.Hit fetchHit)
         {
-            var dictionary = fetchHit.StringStringDictionary()!;
+            var dictionary = fetchHit.StringStringDictionary();
             _logger.LogInformation("");
             _logger.LogInformation($"Accessing an entry of {dictionaryName} using a native Dictionary: {dictionary["field1"]}");
 
