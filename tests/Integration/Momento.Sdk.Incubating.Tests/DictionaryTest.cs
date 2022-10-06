@@ -1,8 +1,6 @@
+using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal.ExtensionMethods;
 using Momento.Sdk.Responses;
-using Momento.Sdk.Incubating.Responses;
-using Google.Protobuf.WellKnownTypes;
-using System.Collections.Generic;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -730,9 +728,6 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         CacheDictionaryFetchResponse response = await client.DictionaryFetchAsync(cacheName, dictionaryName);
         Assert.True(response is CacheDictionaryFetchResponse.Miss);
-        var nullResponse = (CacheDictionaryFetchResponse.Miss)response;
-        Assert.Null(nullResponse.ByteArrayByteArrayDictionary);
-        Assert.Null(nullResponse.StringStringDictionary());
     }
 
     [Fact]

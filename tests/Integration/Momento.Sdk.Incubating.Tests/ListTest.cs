@@ -1,9 +1,5 @@
-using Momento.Sdk.Internal.ExtensionMethods;
-using Momento.Sdk.Responses;
 using Momento.Sdk.Incubating.Responses;
-using System.Xml.Linq;
-using Google.Protobuf.WellKnownTypes;
-using Newtonsoft.Json.Linq;
+using Momento.Sdk.Internal.ExtensionMethods;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -428,9 +424,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
         Assert.True(response is CacheListPopFrontResponse.Miss);
-        var missResponse = (CacheListPopFrontResponse.Miss)response;
-        Assert.Null(missResponse.ByteArray);
-        Assert.Null(missResponse.String());
     }
 
     [Fact]
@@ -480,9 +473,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
         Assert.True(response is CacheListPopBackResponse.Miss);
-        var missResponse = (CacheListPopBackResponse.Miss)response;
-        Assert.Null(missResponse.ByteArray);
-        Assert.Null(missResponse.String());
     }
 
     [Fact]
@@ -532,9 +522,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
         Assert.True(response is CacheListFetchResponse.Miss);
-        var missResponse = (CacheListFetchResponse.Miss)response;
-        Assert.Null(missResponse.ByteArrayList);
-        Assert.Null(missResponse.StringList());
     }
 
     [Fact]
