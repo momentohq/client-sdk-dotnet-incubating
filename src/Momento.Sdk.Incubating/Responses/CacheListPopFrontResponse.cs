@@ -27,16 +27,7 @@ public abstract class CacheListPopFrontResponse
 
     public class Miss : CacheListPopFrontResponse
     {
-        public Miss() { }
-        public byte[]? ByteArray
-        {
-            get
-            {
-                return null;
-            }
-        }
 
-        public string? String() => null;
     }
 
     public class Error : CacheListPopFrontResponse

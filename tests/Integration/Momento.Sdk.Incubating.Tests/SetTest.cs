@@ -1,6 +1,6 @@
-using Momento.Sdk.Responses;
-using Momento.Sdk.Incubating.Responses;
 using System.Xml.Linq;
+using Momento.Sdk.Incubating.Responses;
+using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -474,9 +474,6 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
         Assert.True(response is CacheSetFetchResponse.Miss);
-        var missResponse = (CacheSetFetchResponse.Miss)response;
-        Assert.Null(missResponse.ByteArraySet);
-        Assert.Null(missResponse.StringSet());
     }
 
     [Fact]
