@@ -60,7 +60,6 @@ public class Driver
 
         var status = "";
         var value = "";
-
         if (getResponse is CacheDictionaryGetResponse.Hit unaryHit)
         {
             status = "HIT";
@@ -68,8 +67,9 @@ public class Driver
         }
         else if (getResponse is CacheDictionaryGetResponse.Miss)
         {
-            // In this example you can get here if you change the field name, or
-            // if you set a short TTL, then add a Task.Delay so that it expires.
+            // In this example you can get here if you:
+            // - change the field name to one that does not exist, or if you
+            // - set a short TTL, then add a Task.Delay so that it expires.
             status = "MISS";
             value = "<NONE; operation was a MISS>";
         }
