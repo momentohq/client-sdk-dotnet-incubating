@@ -49,31 +49,7 @@ public abstract class CacheDictionaryFetchResponse
 
     public class Miss : CacheDictionaryFetchResponse
     {
-        protected readonly Lazy<Dictionary<byte[], byte[]>?> _byteArrayByteArrayDictionary;
-        protected readonly Lazy<Dictionary<string, string>?> _stringStringDictionary;
-        protected readonly Lazy<Dictionary<string, byte[]>?> _stringByteArrayDictionary;
-        public Miss()
-        {
-            _byteArrayByteArrayDictionary = new(() =>
-            {
-                return null;
-            });
 
-            _stringStringDictionary = new(() =>
-            {
-                return null;
-            });
-            _stringByteArrayDictionary = new(() =>
-            {
-                return null;
-            });
-        }
-
-        public Dictionary<byte[], byte[]>? ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
-
-        public Dictionary<string, string>? StringStringDictionary() => _stringStringDictionary.Value;
-
-        public Dictionary<string, byte[]>? StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
     }
 
     public class Error : CacheDictionaryFetchResponse
