@@ -381,7 +381,7 @@ public class SetTest : TestBase
 
         // Remove element
         removeResponse = await client.SetRemoveElementAsync(cacheName, setName, element);
-        Assert.True(removeResponse is CacheSetRemoveElementResponse.Error);
+        Assert.True(removeResponse is CacheSetRemoveElementResponse.Success);
         fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Miss);
     }
@@ -600,7 +600,7 @@ public class SetTest : TestBase
 
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Hit);
         CacheSetDeleteResponse deleteResponse = await client.SetDeleteAsync(cacheName, setName);
-        Assert.True(deleteResponse is CacheSetDeleteResponse.Error);
+        Assert.True(deleteResponse is CacheSetDeleteResponse.Success);
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 }
