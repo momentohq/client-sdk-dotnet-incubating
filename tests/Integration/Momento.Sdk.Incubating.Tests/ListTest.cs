@@ -476,9 +476,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
         Assert.True(response is CacheListPopBackResponse.Miss);
-        var missResponse = (CacheListPopBackResponse.Miss)response;
-        Assert.Null(missResponse.ByteArray);
-        Assert.Null(missResponse.String());
     }
 
     [Fact]
