@@ -424,9 +424,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
         Assert.True(response is CacheListPopFrontResponse.Miss);
-        var missResponse = (CacheListPopFrontResponse.Miss)response;
-        Assert.Null(missResponse.ByteArray);
-        Assert.Null(missResponse.String());
     }
 
     [Fact]
