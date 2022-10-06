@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Responses;
-using Momento.Sdk.Exceptions;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -14,9 +14,9 @@ public abstract class CacheDictionaryFetchResponse
     public class Hit : CacheDictionaryFetchResponse
     {
         protected readonly RepeatedField<_DictionaryFieldValuePair>? items;
-        protected readonly Lazy<Dictionary<byte[], byte[]>?> _byteArrayByteArrayDictionary;
-        protected readonly Lazy<Dictionary<string, string>?> _stringStringDictionary;
-        protected readonly Lazy<Dictionary<string, byte[]>?> _stringByteArrayDictionary;
+        protected readonly Lazy<Dictionary<byte[], byte[]>> _byteArrayByteArrayDictionary;
+        protected readonly Lazy<Dictionary<string, string>> _stringStringDictionary;
+        protected readonly Lazy<Dictionary<string, byte[]>> _stringByteArrayDictionary;
 
         public Hit(_DictionaryFetchResponse response)
         {
@@ -40,11 +40,11 @@ public abstract class CacheDictionaryFetchResponse
             });
         }
 
-        public Dictionary<byte[], byte[]>? ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
+        public Dictionary<byte[], byte[]> ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
 
-        public Dictionary<string, string>? StringStringDictionary() => _stringStringDictionary.Value;
+        public Dictionary<string, string> StringStringDictionary() => _stringStringDictionary.Value;
 
-        public Dictionary<string, byte[]>? StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
+        public Dictionary<string, byte[]> StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
     }
 
     public class Miss : CacheDictionaryFetchResponse
