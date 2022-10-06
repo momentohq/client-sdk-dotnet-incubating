@@ -528,9 +528,6 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
         Assert.True(response is CacheListFetchResponse.Miss);
-        var missResponse = (CacheListFetchResponse.Miss)response;
-        Assert.Null(missResponse.ByteArrayList);
-        Assert.Null(missResponse.StringList());
     }
 
     [Fact]

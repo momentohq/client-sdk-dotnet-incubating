@@ -38,23 +38,7 @@ public abstract class CacheListFetchResponse
 
     public class Miss : CacheListFetchResponse
     {
-        protected readonly Lazy<List<byte[]>?> _byteArrayList;
-        protected readonly Lazy<List<string>?> _stringList;
-        public Miss()
-        {
-            _byteArrayList = new(() =>
-            {
-                return null;
-            });
 
-            _stringList = new(() =>
-            {
-                return null;
-            });
-        }
-        public List<byte[]>? ByteArrayList { get => _byteArrayList.Value; }
-
-        public List<string>? StringList() => _stringList.Value;
     }
 
     public class Error : CacheListFetchResponse
