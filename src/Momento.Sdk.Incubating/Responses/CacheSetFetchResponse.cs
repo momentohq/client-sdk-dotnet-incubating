@@ -14,9 +14,9 @@ public abstract class CacheSetFetchResponse
 {
     public class Hit : CacheSetFetchResponse
     {
-        protected readonly RepeatedField<ByteString>? elements;
-        protected readonly Lazy<HashSet<byte[]>?> _byteArraySet;
-        protected readonly Lazy<HashSet<string>?> _stringSet;
+        protected readonly RepeatedField<ByteString> elements;
+        protected readonly Lazy<HashSet<byte[]>> _byteArraySet;
+        protected readonly Lazy<HashSet<string>> _stringSet;
 
         public Hit(_SetFetchResponse response)
         {
@@ -36,30 +36,14 @@ public abstract class CacheSetFetchResponse
             });
         }
 
-        public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
+        public HashSet<byte[]> ByteArraySet { get => _byteArraySet.Value; }
 
-        public HashSet<string>? StringSet() => _stringSet.Value;
+        public HashSet<string> StringSet() => _stringSet.Value;
     }
 
     public class Miss : CacheSetFetchResponse
     {
-        protected readonly Lazy<HashSet<byte[]>?> _byteArraySet;
-        protected readonly Lazy<HashSet<string>?> _stringSet;
-        public Miss()
-        {
-            _byteArraySet = new(() =>
-            {
-                return null;
-            });
 
-            _stringSet = new(() =>
-            {
-                return null;
-            });
-        }
-        public HashSet<byte[]>? ByteArraySet { get => _byteArraySet.Value; }
-
-        public HashSet<string>? StringSet() => _stringSet.Value;
     }
 
     public class Error : CacheSetFetchResponse
