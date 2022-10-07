@@ -7,7 +7,7 @@ public abstract class CacheDictionaryIncrementResponse
 {
     public class Success : CacheDictionaryIncrementResponse
     {
-        public long? Value { get; private set; }
+        public long Value { get; private set; }
         public Success(_DictionaryIncrementResponse response)
         {
             Value = response.Value;
