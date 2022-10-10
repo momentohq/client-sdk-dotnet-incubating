@@ -22,7 +22,7 @@ public abstract class CacheGetBatchResponse
             {
                 if (response is CacheGetResponse.Hit hitResponse)
                 {
-                    ret.Add(hitResponse.String());
+                    ret.Add(hitResponse.ValueString);
                 }
                 else if (response is CacheGetResponse.Miss missResponse)
                 {
@@ -41,7 +41,7 @@ public abstract class CacheGetBatchResponse
                 {
                     if (response is CacheGetResponse.Hit hitResponse)
                     {
-                        ret.Add(hitResponse.ByteArray);
+                        ret.Add(hitResponse.ValueByteArray);
                     }
                     else if (response is CacheGetResponse.Miss missResponse)
                     {

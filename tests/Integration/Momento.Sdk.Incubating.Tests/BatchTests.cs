@@ -1,8 +1,9 @@
 namespace Momento.Sdk.Incubating.Tests;
 
-using Momento.Sdk.Responses;
-using Momento.Sdk.Incubating.Responses;
+using System;
 using Momento.Sdk.Config;
+using Momento.Sdk.Incubating.Responses;
+using Momento.Sdk.Responses;
 
 [Collection("SimpleCacheClient")]
 public class BatchTests : TestBase
@@ -90,13 +91,13 @@ public class BatchTests : TestBase
     [Fact]
     public async Task GetBatchAsync_Failure()
     {
-        // Set very small timeout for dataClientOperationTimeoutMilliseconds
-        IConfiguration config = Configurations.Laptop.Latest;
+        // Set very small timeout for dataClientOperationTimeout
+        IConfiguration config = Configurations.Laptop.Latest();
         config = config.WithTransportStrategy(
             config.TransportStrategy.WithGrpcConfig(
-                config.TransportStrategy.GrpcConfig.WithDeadlineMilliseconds(1)));
+                config.TransportStrategy.GrpcConfig.WithDeadline(TimeSpan.FromMilliseconds(1))));
 
-        using SimpleCacheClient simpleCacheClient = SimpleCacheClientFactory.CreateClient(config, this.authToken, defaultTtlSeconds);
+        using SimpleCacheClient simpleCacheClient = SimpleCacheClientFactory.CreateClient(config, this.authProvider, defaultTtl);
         List<string> keys = new() { Utils.NewGuidString(), Utils.NewGuidString(), Utils.NewGuidString(), Utils.NewGuidString() };
         CacheGetBatchResponse response = await simpleCacheClient.GetBatchAsync(cacheName, keys);
         Assert.True(response is CacheGetBatchResponse.Error);
@@ -137,12 +138,12 @@ public class BatchTests : TestBase
         var getResponse = await client.GetAsync(cacheName, key1);
         Assert.True(getResponse is CacheGetResponse.Hit);
         var goodGetResponse = (CacheGetResponse.Hit)getResponse;
-        Assert.Equal(value1, goodGetResponse.ByteArray);
+        Assert.Equal(value1, goodGetResponse.ValueByteArray);
 
         getResponse = await client.GetAsync(cacheName, key2);
         Assert.True(getResponse is CacheGetResponse.Hit);
         goodGetResponse = (CacheGetResponse.Hit)getResponse;
-        Assert.Equal(value2, goodGetResponse.ByteArray);
+        Assert.Equal(value2, goodGetResponse.ValueByteArray);
     }
 
     [Fact]
@@ -178,11 +179,11 @@ public class BatchTests : TestBase
         var getResponse = await client.GetAsync(cacheName, key1);
         Assert.True(getResponse is CacheGetResponse.Hit);
         var goodGetResponse = (CacheGetResponse.Hit)getResponse;
-        Assert.Equal(value1, goodGetResponse.String());
+        Assert.Equal(value1, goodGetResponse.ValueString);
 
         getResponse = await client.GetAsync(cacheName, key2);
         Assert.True(getResponse is CacheGetResponse.Hit);
         goodGetResponse = (CacheGetResponse.Hit)getResponse;
-        Assert.Equal(value2, goodGetResponse.String());
+        Assert.Equal(value2, goodGetResponse.ValueString);
     }
 }
