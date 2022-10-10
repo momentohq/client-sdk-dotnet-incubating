@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
-using Microsoft.Extensions.Logging;
+using Grpc.Core;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
@@ -11,15 +11,13 @@ using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Internal.ExtensionMethods;
 using Momento.Sdk.Responses;
-using Momento.Sdk.Internal.Middleware;
-using Grpc.Core;
 
 namespace Momento.Sdk.Incubating.Internal;
 
 internal sealed class ScsDataClient : ScsDataClientBase
 {
-    public ScsDataClient(IConfiguration config, string authToken, string endpoint, uint defaultTtlSeconds, ILoggerFactory loggerFactory)
-        : base(config, authToken, endpoint, defaultTtlSeconds, loggerFactory)
+    public ScsDataClient(IConfiguration config, string authToken, string endpoint, TimeSpan defaultTtl)
+        : base(config, authToken, endpoint, defaultTtl)
     {
     }
 
@@ -48,20 +46,20 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return new CacheGetBatchResponse.Error(CacheExceptionMapper.Convert(e));
+            return new CacheGetBatchResponse.Error(_exceptionMapper.Convert(e));
         }
 
         // Handle failures
         if (continuation.Status == TaskStatus.Faulted)
         {
             return new CacheGetBatchResponse.Error(
-                CacheExceptionMapper.Convert(continuation.Exception)
+                _exceptionMapper.Convert(continuation.Exception)
             );
         }
         else if (continuation.Status != TaskStatus.RanToCompletion)
         {
             return new CacheGetBatchResponse.Error(
-                CacheExceptionMapper.Convert(
+                _exceptionMapper.Convert(
                     new Exception(String.Format("Failure issuing multi-get: {0}", continuation.Status))
                 )
             );
@@ -80,17 +78,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheGetBatchResponse.Success(continuation.Result);
     }
 
-    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<string, string>> items, TimeSpan? ttl = null)
     {
         // Gather the tasks
-        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttlSeconds));
+        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttl));
         return await SendSetBatchAsync(tasks);
     }
 
-    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, TimeSpan? ttl = null)
     {
         // Gather the tasks
-        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttlSeconds));
+        var tasks = items.Select(item => simpleCacheClient.SetAsync(cacheName, item.Key, item.Value, ttl));
         return await SendSetBatchAsync(tasks);
     }
 
@@ -105,7 +103,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         catch (Exception e)
         {
             return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(e)
+                _exceptionMapper.Convert(e)
             );
         }
 
@@ -113,13 +111,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
         if (continuation.Status == TaskStatus.Faulted)
         {
             return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(continuation.Exception)
+                _exceptionMapper.Convert(continuation.Exception)
             );
         }
         else if (continuation.Status != TaskStatus.RanToCompletion)
         {
             return new CacheSetBatchResponse.Error(
-                CacheExceptionMapper.Convert(
+                _exceptionMapper.Convert(
                     new Exception(String.Format("Failure issuing multi-set: {0}", continuation.Status))
                 )
             );
@@ -131,19 +129,19 @@ internal sealed class ScsDataClient : ScsDataClientBase
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, string value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttlSeconds);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttlSeconds);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttlSeconds);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
     }
 
     public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, byte[] field)
@@ -168,7 +166,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -183,7 +181,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
 
         if (response.Found.Items.Count == 0)
         {
-            var exc = CacheExceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"));
+            var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"));
             return new CacheDictionaryGetResponse.Error(exc);
         }
 
@@ -195,31 +193,31 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryGetResponse.Hit(response);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttlSeconds);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttlSeconds);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttlSeconds);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> SendDictionarySetAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetResponse> SendDictionarySetAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         _DictionarySetRequest request = new()
         {
             DictionaryName = dictionaryName.ToByteString(),
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         request.Items.Add(items);
 
@@ -229,18 +227,18 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetResponse.Error(CacheExceptionMapper.Convert(e));
+            return new CacheDictionarySetResponse.Error(_exceptionMapper.Convert(e));
         }
         return new CacheDictionarySetResponse.Success();
     }
 
-    public async Task<CacheDictionarySetBatchResponse> SendDictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetBatchResponse> SendDictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         _DictionarySetRequest request = new()
         {
             DictionaryName = dictionaryName.ToByteString(),
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         request.Items.Add(items);
 
@@ -250,12 +248,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetBatchResponse.Error(CacheExceptionMapper.Convert(e));
+            return new CacheDictionarySetBatchResponse.Error(_exceptionMapper.Convert(e));
         }
         return new CacheDictionarySetBatchResponse.Success();
     }
 
-    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, uint? ttlSeconds = null)
+    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, TimeSpan? ttl = null)
     {
         _DictionaryIncrementRequest request = new()
         {
@@ -263,7 +261,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             Field = field.ToByteString(),
             Amount = amount,
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         _DictionaryIncrementResponse response;
 
@@ -273,7 +271,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            throw CacheExceptionMapper.Convert(e);
+            throw _exceptionMapper.Convert(e);
         }
         return new CacheDictionaryIncrementResponse.Success(response);
     }
@@ -300,7 +298,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -324,7 +322,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -351,7 +349,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -386,7 +384,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -421,7 +419,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -431,33 +429,33 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryRemoveFieldsResponse.Success();
     }
 
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttlSeconds);
+        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttl);
     }
 
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttlSeconds);
+        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttlSeconds);
+        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
-        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttlSeconds);
+        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttl);
     }
 
-    public async Task<CacheSetAddResponse> SendSetAddAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddResponse> SendSetAddAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
         _SetUnionRequest request = new()
         {
             SetName = setName.ToByteString(),
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         request.Elements.Add(elements);
         try
@@ -466,7 +464,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -476,13 +474,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheSetAddResponse.Success();
     }
 
-    public async Task<CacheSetAddBatchResponse> SendSetAddBatchAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddBatchResponse> SendSetAddBatchAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
         _SetUnionRequest request = new()
         {
             SetName = setName.ToByteString(),
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         request.Elements.Add(elements);
         try
@@ -491,7 +489,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -536,7 +534,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -561,7 +559,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -582,7 +580,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -610,7 +608,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -620,25 +618,25 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheSetDeleteResponse.Success();
     }
 
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? truncateBackToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
     {
-        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttlSeconds);
+        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttl);
     }
 
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, uint? truncateBackToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
     {
-        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttlSeconds);
+        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttl);
     }
 
-    public async Task<CacheListPushFrontResponse> SendListPushFrontAsync(string cacheName, string listName, ByteString value, bool refreshTtl, uint? truncateBackToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushFrontResponse> SendListPushFrontAsync(string cacheName, string listName, ByteString value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
     {
         _ListPushFrontRequest request = new()
         {
-            TruncateBackToSize = truncateBackToSize.GetValueOrDefault(),
+            TruncateBackToSize = Convert.ToUInt32(truncateBackToSize.GetValueOrDefault()),
             ListName = listName.ToByteString(),
             Value = value,
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         _ListPushFrontResponse response;
 
@@ -648,7 +646,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -658,25 +656,25 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheListPushFrontResponse.Success(response);
     }
 
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? truncateFrontToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
     {
-        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttlSeconds);
+        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttl);
     }
 
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, uint? truncateFrontToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
     {
-        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttlSeconds);
+        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttl);
     }
 
-    public async Task<CacheListPushBackResponse> SendListPushBackAsync(string cacheName, string listName, ByteString value, bool refreshTtl, uint? truncateFrontToSize = null, uint? ttlSeconds = null)
+    public async Task<CacheListPushBackResponse> SendListPushBackAsync(string cacheName, string listName, ByteString value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
     {
         _ListPushBackRequest request = new()
         {
-            TruncateFrontToSize = truncateFrontToSize.GetValueOrDefault(),
+            TruncateFrontToSize = Convert.ToUInt32(truncateFrontToSize.GetValueOrDefault()),
             ListName = listName.ToByteString(),
             Value = value,
             RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlSecondsToMilliseconds(ttlSeconds)
+            TtlMilliseconds = TtlToMilliseconds(ttl)
         };
         _ListPushBackResponse response;
 
@@ -686,7 +684,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -707,7 +705,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -732,7 +730,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -757,7 +755,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -795,7 +793,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
@@ -819,7 +817,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = CacheExceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
             if (exc.TransportDetails != null)
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);

@@ -1,6 +1,6 @@
+using System;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal.ExtensionMethods;
-using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -78,11 +78,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidByteArray();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 5);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(4900);
 
@@ -97,9 +97,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidByteArray();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 2);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(2000);
 
@@ -152,9 +152,9 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidString();
 
-        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttlSeconds: 2);
+        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success);
-        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: true, ttlSeconds: 10);
+        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success);
         await Task.Delay(2000);
 
@@ -169,11 +169,11 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidString();
 
-        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttlSeconds: 5);
+        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success);
         await Task.Delay(100);
 
-        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttlSeconds: 10);
+        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success);
         await Task.Delay(4900);
 
@@ -285,11 +285,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 5);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(4900);
 
@@ -304,9 +304,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 2);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(2000);
 
@@ -348,11 +348,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 5);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(4900);
 
@@ -367,9 +367,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttlSeconds: 2);
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttlSeconds: 10);
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(setResponse is CacheDictionarySetResponse.Success);
         await Task.Delay(2000);
 
@@ -410,7 +410,7 @@ public class DictionaryTest : TestBase
 
         var items = new Dictionary<byte[], byte[]>() { { field1, value1 }, { field2, value2 } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
@@ -429,10 +429,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<byte[], byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 5);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -447,8 +447,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<byte[], byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 2);
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(2));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -488,7 +488,7 @@ public class DictionaryTest : TestBase
 
         var items = new Dictionary<string, string>() { { field1, value1 }, { field2, value2 } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
@@ -507,10 +507,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
         var content = new Dictionary<string, string>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 5);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -525,8 +525,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
         var content = new Dictionary<string, string>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 2);
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(2));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -566,7 +566,7 @@ public class DictionaryTest : TestBase
 
         var items = new Dictionary<string, byte[]>() { { field1, value1 }, { field2, value2 } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
@@ -585,10 +585,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<string, byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 5);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -603,8 +603,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<string, byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttlSeconds: 2);
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttlSeconds: 10);
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, false, ttl: TimeSpan.FromSeconds(2));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -656,8 +656,8 @@ public class DictionaryTest : TestBase
         var value2 = Utils.NewGuidByteArray();
         var field3 = Utils.NewGuidByteArray();
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, false, 10);
-        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, 10);
+        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, false, TimeSpan.FromSeconds(10));
+        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
         Assert.True(response is CacheDictionaryGetBatchResponse.Success);
@@ -727,8 +727,8 @@ public class DictionaryTest : TestBase
         var value2 = Utils.NewGuidString();
         var field3 = Utils.NewGuidString();
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, false, 10);
-        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, 10);
+        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, false, TimeSpan.FromSeconds(10));
+        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new string[] { field1, field2, field3 });
         Assert.True(response is CacheDictionaryGetBatchResponse.Success);
@@ -767,8 +767,8 @@ public class DictionaryTest : TestBase
             {field2, value2}
         };
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttlSeconds: 10);
-        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttlSeconds: 10);
+        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttl: TimeSpan.FromSeconds(10));
+        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
@@ -793,8 +793,8 @@ public class DictionaryTest : TestBase
             {field2, value2}
         };
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttlSeconds: 10);
-        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttlSeconds: 10);
+        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttl: TimeSpan.FromSeconds(10));
+        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
@@ -819,8 +819,8 @@ public class DictionaryTest : TestBase
             {field2, value2}
         };
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttlSeconds: 10);
-        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttlSeconds: 10);
+        await client.DictionarySetAsync(cacheName, dictionaryName, field1, value1, true, ttl: TimeSpan.FromSeconds(10));
+        await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
