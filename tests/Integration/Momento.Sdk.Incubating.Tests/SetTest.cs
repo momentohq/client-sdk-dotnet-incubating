@@ -45,11 +45,11 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidByteArray();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 5);
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(response is CacheSetAddResponse.Success);
         await Task.Delay(100);
 
-        response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 10);
+        response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddResponse.Success);
         await Task.Delay(4900);
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -62,9 +62,9 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidByteArray();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 2);
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(response is CacheSetAddResponse.Success);
-        await client.SetAddAsync(cacheName, setName, element, true, ttlSeconds: 10);
+        await client.SetAddAsync(cacheName, setName, element, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -106,11 +106,11 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidString();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 5);
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(response is CacheSetAddResponse.Success);
         await Task.Delay(100);
 
-        response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 10);
+        response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddResponse.Success);
         await Task.Delay(4900);
 
@@ -124,9 +124,9 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidString();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttlSeconds: 2);
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(response is CacheSetAddResponse.Success);
-        response = await client.SetAddAsync(cacheName, setName, element, true, ttlSeconds: 10);
+        response = await client.SetAddAsync(cacheName, setName, element, true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddResponse.Success);
         await Task.Delay(2000);
 
@@ -164,7 +164,7 @@ public class SetTest : TestBase
         var element2 = Utils.NewGuidByteArray();
         var content = new List<byte[]>() { element1, element2 };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, 10);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddBatchResponse.Success);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -183,11 +183,11 @@ public class SetTest : TestBase
         var element = Utils.NewGuidByteArray();
         var content = new List<byte[]>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 5);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(response is CacheSetAddBatchResponse.Success);
         await Task.Delay(100);
 
-        response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 10);
+        response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddBatchResponse.Success);
         await Task.Delay(4900);
 
@@ -202,9 +202,9 @@ public class SetTest : TestBase
         var element = Utils.NewGuidByteArray();
         var content = new List<byte[]>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 2);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(response is CacheSetAddBatchResponse.Success);
-        await client.SetAddBatchAsync(cacheName, setName, content, true, ttlSeconds: 10);
+        await client.SetAddBatchAsync(cacheName, setName, content, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -244,7 +244,7 @@ public class SetTest : TestBase
         var element2 = Utils.NewGuidString();
         var content = new List<string>() { element1, element2 };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, 10);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddBatchResponse.Success);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -263,11 +263,11 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
         var content = new List<string>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 5);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(5));
         Assert.True(response is CacheSetAddBatchResponse.Success);
         await Task.Delay(100);
 
-        response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 10);
+        response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddBatchResponse.Success);
         await Task.Delay(4900);
 
@@ -282,9 +282,9 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
         var content = new List<string>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttlSeconds: 2);
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, false, ttl: TimeSpan.FromSeconds(2));
         Assert.True(response is CacheSetAddBatchResponse.Success);
-        response = await client.SetAddBatchAsync(cacheName, setName, content, true, ttlSeconds: 10);
+        response = await client.SetAddBatchAsync(cacheName, setName, content, true, ttl: TimeSpan.FromSeconds(10));
         Assert.True(response is CacheSetAddBatchResponse.Success);
         await Task.Delay(2000);
 

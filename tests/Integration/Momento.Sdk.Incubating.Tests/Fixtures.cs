@@ -1,3 +1,4 @@
+using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 
 namespace Momento.Sdk.Incubating.Tests;
@@ -10,19 +11,18 @@ namespace Momento.Sdk.Incubating.Tests;
 public class SimpleCacheClientFixture : IDisposable
 {
     public SimpleCacheClient Client { get; private set; }
-    public string AuthToken { get; private set; }
+    public ICredentialProvider AuthProvider { get; private set; }
     public string CacheName { get; private set; }
 
-    public const uint DefaultTtlSeconds = 10;
+    public static TimeSpan DefaultTtl { get; private set; } = TimeSpan.FromSeconds(10);
 
     public SimpleCacheClientFixture()
     {
-        AuthToken = Environment.GetEnvironmentVariable("TEST_AUTH_TOKEN") ??
-            throw new NullReferenceException("TEST_AUTH_TOKEN environment variable must be set.");
+        AuthProvider = new EnvMomentoTokenProvider("TEST_AUTH_TOKEN");
         CacheName = Environment.GetEnvironmentVariable("TEST_CACHE_NAME") ??
             throw new NullReferenceException("TEST_CACHE_NAME environment variable must be set.");
         CacheName += "-incubating";
-        Client = SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest, AuthToken, defaultTtlSeconds: DefaultTtlSeconds);
+        Client = SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest(), AuthProvider, defaultTtl: DefaultTtl);
 
 
         try

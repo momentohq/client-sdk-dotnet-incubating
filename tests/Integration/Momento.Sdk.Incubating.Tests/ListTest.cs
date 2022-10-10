@@ -60,10 +60,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 5);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -76,8 +76,8 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 2);
-        await client.ListPushFrontAsync(cacheName, listName, value, true, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(2));
+        await client.ListPushFrontAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -143,10 +143,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 5);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -159,8 +159,8 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, false, ttlSeconds: 2);
-        await client.ListPushFrontAsync(cacheName, listName, value, true, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(2));
+        await client.ListPushFrontAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -226,10 +226,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 5);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 10);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -242,8 +242,8 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 2);
-        await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 10);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(2));
+        await client.ListPushBackAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -381,10 +381,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 5);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(5));
         await Task.Delay(100);
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 10);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -397,8 +397,8 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushBackAsync(cacheName, listName, value, false, ttlSeconds: 2);
-        await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 10);
+        await client.ListPushBackAsync(cacheName, listName, value, false, ttl: TimeSpan.FromSeconds(2));
+        await client.ListPushBackAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(10));
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -539,8 +539,8 @@ public class ListTest : TestBase
         var field2 = Utils.NewGuidString();
         var contentList = new List<string>() { field1, field2 };
 
-        await client.ListPushFrontAsync(cacheName, listName, field2, true, ttlSeconds: 10);
-        await client.ListPushFrontAsync(cacheName, listName, field1, true, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, field2, true, ttl: TimeSpan.FromSeconds(10));
+        await client.ListPushFrontAsync(cacheName, listName, field1, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit);
@@ -557,8 +557,8 @@ public class ListTest : TestBase
         var field2 = Utils.NewGuidByteArray();
         var contentList = new List<byte[]> { field1, field2 };
 
-        await client.ListPushFrontAsync(cacheName, listName, field2, true, ttlSeconds: 10);
-        await client.ListPushFrontAsync(cacheName, listName, field1, true, ttlSeconds: 10);
+        await client.ListPushFrontAsync(cacheName, listName, field2, true, ttl: TimeSpan.FromSeconds(10));
+        await client.ListPushFrontAsync(cacheName, listName, field1, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit);
@@ -590,7 +590,7 @@ public class ListTest : TestBase
         // Add elements to the list
         foreach (var value in list)
         {
-            await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 60);
+            await client.ListPushBackAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(60));
         }
 
         await client.ListPushBackAsync(cacheName, listName, valueOfInterest, false);
@@ -655,7 +655,7 @@ public class ListTest : TestBase
         // Add elements to the list
         foreach (var value in list)
         {
-            await client.ListPushBackAsync(cacheName, listName, value, true, ttlSeconds: 60);
+            await client.ListPushBackAsync(cacheName, listName, value, true, ttl: TimeSpan.FromSeconds(60));
         }
 
         await client.ListPushBackAsync(cacheName, listName, valueOfInterest, false);

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
@@ -23,6 +23,8 @@ public class SimpleCacheClient : ISimpleCacheClient
 {
     private readonly ISimpleCacheClient simpleCacheClient;
     private readonly ScsDataClient dataClient;
+    protected readonly IConfiguration config;
+    protected readonly ILogger _logger;
 
     /// <summary>
     /// Client to perform operations against the Simple Cache Service.
@@ -31,16 +33,16 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// </summary>
     /// <param name="simpleCacheClient">Instance of release cache client to delegate operations to.</param>
     /// <param name="config">Configuration to use for the transport, retries, middlewares. See <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs"/> for out-of-the-box configuration choices, eg <see href="https://github.com/momentohq/client-sdk-dotnet/blob/main/src/Momento.Sdk/Config/Configurations.cs#L22"/></param>
-    /// <param name="authToken">Momento JWT.</param>
-    /// <param name="defaultTtlSeconds">Default time to live for the item in cache.</param>
-    /// <param name="loggerFactory">Logger factory to create loggers for contained instances.</param>
-    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, IConfiguration config, string authToken, uint defaultTtlSeconds, ILoggerFactory? loggerFactory = null)
+    /// <param name="authProvider">Momento JWT.</param>
+    /// <param name="defaultTtl">Default time to live for the item in cache.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="defaultTtl"/> is zero or negative.</exception>
+    public SimpleCacheClient(ISimpleCacheClient simpleCacheClient, IConfiguration config, ICredentialProvider authProvider, TimeSpan defaultTtl)
     {
         this.simpleCacheClient = simpleCacheClient;
-
-        var _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
-        var claims = Momento.Sdk.Internal.JwtUtils.DecodeJwt(authToken);
-        this.dataClient = new(config, authToken, claims.CacheEndpoint, defaultTtlSeconds, _loggerFactory);
+        this.config = config;
+        this._logger = config.LoggerFactory.CreateLogger<SimpleCacheClient>();
+        Utils.ArgumentStrictlyPositive(defaultTtl, "defaultTtl");
+        this.dataClient = new(config, authProvider.AuthToken, authProvider.CacheEndpoint, defaultTtl);
     }
 
     /// <inheritdoc />
@@ -62,9 +64,9 @@ public class SimpleCacheClient : ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetResponse> SetAsync(string cacheName, byte[] key, byte[] value, uint? ttlSeconds = null)
+    public async Task<CacheSetResponse> SetAsync(string cacheName, byte[] key, byte[] value, TimeSpan? ttl = null)
     {
-        return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttlSeconds);
+        return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttl);
     }
 
     /// <inheritdoc />
@@ -80,9 +82,9 @@ public class SimpleCacheClient : ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetResponse> SetAsync(string cacheName, string key, string value, uint? ttlSeconds = null)
+    public async Task<CacheSetResponse> SetAsync(string cacheName, string key, string value, TimeSpan? ttl = null)
     {
-        return await simpleCacheClient.SetAsync(cacheName, key, value, ttlSeconds);
+        return await simpleCacheClient.SetAsync(cacheName, key, value, ttl);
     }
 
     /// <inheritdoc />
@@ -98,9 +100,9 @@ public class SimpleCacheClient : ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetResponse> SetAsync(string cacheName, string key, byte[] value, uint? ttlSeconds = null)
+    public async Task<CacheSetResponse> SetAsync(string cacheName, string key, byte[] value, TimeSpan? ttl = null)
     {
-        return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttlSeconds);
+        return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttl);
     }
 
     /// <summary>
@@ -145,9 +147,9 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// </summary>
     /// <param name="cacheName">Name of the cache to store the items in.</param>
     /// <param name="items">The items to set.</param>
-    /// <param name="ttlSeconds">TTL for the item in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the item in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task object representing the result of the set operation.</returns>
-    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, uint? ttlSeconds = null)
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, TimeSpan? ttl = null)
     {
         try
         {
@@ -159,11 +161,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttl);
     }
 
-    /// <inheritdoc cref="SetBatchAsync(string, IEnumerable{KeyValuePair{byte[], byte[]}}, uint?)"/>
-    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, uint? ttlSeconds = null)
+    /// <inheritdoc cref="SetBatchAsync(string, IEnumerable{KeyValuePair{byte[], byte[]}}, TimeSpan?)"/>
+    public async Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, TimeSpan? ttl = null)
     {
         try
         {
@@ -175,7 +177,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheSetBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttlSeconds);
+        return await this.dataClient.SetBatchAsync(this, cacheName, items, ttl);
     }
 
     /// <summary>
@@ -184,16 +186,16 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <remark>
     /// Creates the data structure if it does not exist and sets the TTL.
     /// If the data structure already exists and <paramref name="refreshTtl"/> is <see langword="true"/>,
-    /// then update the TTL to <paramref name="ttlSeconds"/>, otherwise leave the TTL unchanged.
+    /// then update the TTL to <paramref name="ttl"/>, otherwise leave the TTL unchanged.
     /// </remark>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="field">The field in the dictionary to set.</param>
     /// <param name="value">The value to be stored.</param>
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
-    /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -207,11 +209,11 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)"/>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)"/>
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -225,11 +227,11 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)"/>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)"/>
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -243,7 +245,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttl);
     }
 
     /// <summary>
@@ -289,14 +291,14 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Set several dictionary field-value pairs in the cache.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="items">The field-value pairs in the dictionary to set.</param>
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
-    /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -310,11 +312,11 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, uint?)"/>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, TimeSpan?)"/>
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -328,11 +330,11 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, uint?)"/>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, bool, TimeSpan?)"/>
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -346,7 +348,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttlSeconds);
+        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, refreshTtl, ttl);
     }
 
     /// <summary>
@@ -356,13 +358,13 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <para>Incrementing a value that was not set using this method or not the string representation of an integer
     /// results in throwing a <see cref="FailedPreconditionException"/>.</para>
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="field"></param>
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
     /// <param name="amount">The quantity to add to the value. May be positive, negative, or zero. Defaults to 1.</param>
-    /// <param name="ttlSeconds">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
     /// <example>
     /// The following illustrates a typical workflow:
@@ -382,7 +384,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// var response = client.DictionaryIncrementAsync("my cache", "my dictionary", "counter", amount: 42, refreshTtl: false);
     /// </code>
     /// </example>
-    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, uint? ttlSeconds = null)
+    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, TimeSpan? ttl = null)
     {
         try
         {
@@ -395,7 +397,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionaryIncrementResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl, amount, ttlSeconds);
+        return await this.dataClient.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl, amount, ttl);
     }
 
     /// <summary>
@@ -579,14 +581,14 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the element passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add the element to.</param>
     /// <param name="element">The data to add to the set.</param>
     /// <param name="refreshTtl">Update <paramref name="setName"/>'s TTL if it already exists.</param>
-    /// <param name="ttlSeconds">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -599,11 +601,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttlSeconds);
+        return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="SetAddAsync(string, string, byte[], bool, uint?)"/>
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="SetAddAsync(string, string, byte[], bool, TimeSpan?)"/>
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -616,7 +618,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttlSeconds);
+        return await this.dataClient.SetAddAsync(cacheName, setName, element, refreshTtl, ttl);
     }
 
     /// <summary>
@@ -625,14 +627,14 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the elements passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add elements to.</param>
     /// <param name="elements">The data to add to the set.</param>
     /// <param name="refreshTtl">Update <paramref name="setName"/>'s TTL if it already exists.</param>
-    /// <param name="ttlSeconds">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, uint? ttlSeconds = null)
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -646,11 +648,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttlSeconds);
+        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttl);
     }
 
-    /// <inheritdoc cref="SetAddBatchAsync(string, string, IEnumerable{byte[]}, bool, uint?)"/>
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, uint? ttlSeconds = null)
+    /// <inheritdoc cref="SetAddBatchAsync(string, string, IEnumerable{byte[]}, bool, TimeSpan?)"/>
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, TimeSpan? ttl = null)
     {
         try
         {
@@ -665,7 +667,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttlSeconds);
+        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, refreshTtl, ttl);
     }
 
     /// <summary>
@@ -802,15 +804,15 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the front of the list.</param>
     /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
-    /// <param name="ttlSeconds">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateBackToSize">Ensure the list does not exceed this length. Remove excess from the end of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateBackToSize = null)
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, TimeSpan? ttl = null, int? truncateBackToSize = null)
     {
         try
         {
@@ -824,11 +826,11 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttlSeconds);
+        return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
     }
 
-    /// <inheritdoc cref="ListPushFrontAsync(string, string, byte[], bool, uint?, uint?)"/>
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateBackToSize = null)
+    /// <inheritdoc cref="ListPushFrontAsync(string, string, byte[], bool, TimeSpan?, int?)"/>
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, TimeSpan? ttl = null, int? truncateBackToSize = null)
     {
         try
         {
@@ -842,21 +844,21 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttlSeconds);
+        return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
     }
 
     /// <summary>
     /// Push a value to the end of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, uint?)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the back of the list.</param>
     /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
-    /// <param name="ttlSeconds">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateFrontToSize">Ensure the list does not exceed this length. Remove excess from the beginning of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateFrontToSize = null)
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, TimeSpan? ttl = null, int? truncateFrontToSize = null)
     {
         try
         {
@@ -869,11 +871,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttlSeconds);
+        return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttl);
     }
 
-    /// <inheritdoc cref="ListPushBackAsync(string, string, byte[], bool, uint?, uint?)"/>
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, uint? ttlSeconds = null, uint? truncateFrontToSize = null)
+    /// <inheritdoc cref="ListPushBackAsync(string, string, byte[], bool, TimeSpan?, int?)"/>
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, TimeSpan? ttl = null, int? truncateFrontToSize = null)
     {
         try
         {
@@ -887,7 +889,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttlSeconds);
+        return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttl);
     }
 
     /// <summary>
