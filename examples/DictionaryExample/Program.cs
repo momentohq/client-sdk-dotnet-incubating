@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
+using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
+using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
@@ -23,13 +26,13 @@ public class Driver
         var cacheName = ReadCacheName();
 
         // Set up the client
-        using var client = Momento.Sdk.Incubating.SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest, authToken, 60, _loggerFactory);
+        using var client = Momento.Sdk.Incubating.SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest(), authToken, TimeSpan.FromSeconds(60));
         await EnsureCacheExistsAsync(client, cacheName);
 
         // Set a value
         var dictionaryName = "my-dictionary";
         var setResponse = await client.DictionarySetAsync(cacheName: cacheName, dictionaryName: dictionaryName,
-            field: "my-field", value: "my-value", refreshTtl: false, ttlSeconds: 60);
+            field: "my-field", value: "my-value", refreshTtl: false, ttl: TimeSpan.FromSeconds(60));
         if (setResponse is CacheDictionarySetResponse.Error setError)
         {
             _logger.LogInformation($"Error setting a value in a dictionary: {setError.Message}");
@@ -154,15 +157,31 @@ public class Driver
         });
     }
 
-    private static string ReadAuthToken()
+    private static ICredentialProvider ReadAuthToken()
     {
-        var authToken = System.Environment.GetEnvironmentVariable(AUTH_TOKEN_ENV_VAR);
-        if (authToken is null)
+        try
         {
-            Console.Write($"Auth token not detected in environment variable {AUTH_TOKEN_ENV_VAR}. Enter auth token here: ");
-            authToken = Console.ReadLine()!.Trim();
+            return new EnvMomentoTokenProvider(AUTH_TOKEN_ENV_VAR);
         }
-        return authToken;
+        catch (InvalidArgumentException)
+        {
+        }
+
+        Console.Write($"Auth token not detected in environment variable {AUTH_TOKEN_ENV_VAR}. Enter auth token here: ");
+        var authToken = Console.ReadLine()!.Trim();
+
+        StringMomentoTokenProvider? authProvider = null;
+        try
+        {
+            authProvider = new StringMomentoTokenProvider(authToken);
+        }
+        catch (InvalidArgumentException e)
+        {
+            _logger.LogInformation("{}", e);
+            _loggerFactory.Dispose();
+            Environment.Exit(1);
+        }
+        return authProvider!;
     }
 
     private static string ReadCacheName()

@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-    <PackageReference Include="Momento.Sdk.Incubating" Version="0.2.1-alpha" />
+    <PackageReference Include="Momento.Sdk.Incubating" Version="0.3.1-alpha" />
   </ItemGroup>
 
 </Project>
