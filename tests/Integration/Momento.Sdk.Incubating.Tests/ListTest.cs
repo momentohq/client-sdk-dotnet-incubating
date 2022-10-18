@@ -732,4 +732,43 @@ public class ListTest : TestBase
         var successResponse = (CacheListLengthResponse.Success)lengthResponse;
         Assert.Equal(10, successResponse.Length);
     }
+
+    [Theory]
+    [InlineData(null, "my-list")]
+    [InlineData("my-cache", null)]
+    public async Task ListDeleteAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    {
+        var response = await client.ListDeleteAsync(cacheName, listName);
+        Assert.True(response is CacheListDeleteResponse.Error);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListDeleteResponse.Error)response).ErrorCode);
+    }
+
+    [Fact]
+    public async Task ListDeleteAsync_ListDoesNotExist_Noop()
+    {
+        var listName = Utils.NewGuidString();
+        Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
+        var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
+        Assert.True(deleteResponse is CacheListDeleteResponse.Success);
+        Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
+    }
+
+    [Fact]
+    public async Task ListDeleteAsync_ListExists_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        var pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+
+        Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Hit);
+        var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
+        Assert.True(deleteResponse is CacheListDeleteResponse.Success);
+
+        var fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Miss);
+    }
 }

@@ -1020,6 +1020,30 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.ListLengthAsync(cacheName, listName);
     }
 
+    /// <summary>
+    /// Remove the list from the cache.
+    ///
+    /// Performs a no-op if <paramref name="listName"/> does not exist.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to delete the list from.</param>
+    /// <param name="listName">Name of the list to delete.</param>
+    /// <returns>Task representing the result of the delete operation.</returns>
+    public async Task<CacheListDeleteResponse> ListDeleteAsync(string cacheName, string listName)
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListDeleteResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+
+        return await this.dataClient.ListDeleteAsync(cacheName, listName);
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
