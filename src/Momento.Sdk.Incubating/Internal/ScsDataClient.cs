@@ -70,7 +70,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         {
             if (response is CacheGetResponse.Error errorResponse)
             {
-                return new CacheGetBatchResponse.Error(errorResponse.Exception);
+                return new CacheGetBatchResponse.Error(errorResponse.InnerException);
             }
         }
 
