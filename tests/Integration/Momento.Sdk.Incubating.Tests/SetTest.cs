@@ -15,7 +15,7 @@ public class SetTest : TestBase
     [InlineData(null, "my-set", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-set", null)]
-    public async Task SetAddAsync_NullChecksByteArray_ThrowsException(string cacheName, string setName, byte[] element)
+    public async Task SetAddAsync_NullChecksByteArray_IsError(string cacheName, string setName, byte[] element)
     {
         CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false);
         Assert.True(response is CacheSetAddResponse.Error);
@@ -76,7 +76,7 @@ public class SetTest : TestBase
     [InlineData(null, "my-set", "my-element")]
     [InlineData("cache", null, "my-element")]
     [InlineData("cache", "my-set", null)]
-    public async Task SetAddAsync_NullChecksString_ThrowsException(string cacheName, string setName, string element)
+    public async Task SetAddAsync_NullChecksString_IsError(string cacheName, string setName, string element)
     {
         CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, false);
         Assert.True(response is CacheSetAddResponse.Error);
@@ -136,7 +136,7 @@ public class SetTest : TestBase
     }
 
     [Fact]
-    public async Task SetAddBatchAsync_NullChecksByteArray_ThrowsException()
+    public async Task SetAddBatchAsync_NullChecksByteArray_IsError()
     {
         var setName = Utils.NewGuidString();
         var set = new HashSet<byte[]>();
@@ -216,7 +216,7 @@ public class SetTest : TestBase
     }
 
     [Fact]
-    public async Task SetAddBatchAsync_NullChecksString_ThrowsException()
+    public async Task SetAddBatchAsync_NullChecksString_IsError()
     {
         var setName = Utils.NewGuidString();
         var set = new HashSet<string>();
@@ -300,7 +300,7 @@ public class SetTest : TestBase
     [InlineData(null, "my-set", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-set", null)]
-    public async Task SetRemoveElementAsync_NullChecksByteArray_ThrowsException(string cacheName, string setName, byte[] element)
+    public async Task SetRemoveElementAsync_NullChecksByteArray_IsError(string cacheName, string setName, byte[] element)
     {
         CacheSetRemoveElementResponse response = await client.SetRemoveElementAsync(cacheName, setName, element);
         Assert.True(response is CacheSetRemoveElementResponse.Error);
@@ -354,7 +354,7 @@ public class SetTest : TestBase
     [InlineData(null, "my-set", "my-element")]
     [InlineData("cache", null, "my-element")]
     [InlineData("cache", "my-set", null)]
-    public async Task SetRemoveElementAsync_NullChecksString_ThrowsException(string cacheName, string setName, string element)
+    public async Task SetRemoveElementAsync_NullChecksString_IsError(string cacheName, string setName, string element)
     {
         CacheSetRemoveElementResponse response = await client.SetRemoveElementAsync(cacheName, setName, element);
         Assert.True(response is CacheSetRemoveElementResponse.Error);
@@ -404,7 +404,7 @@ public class SetTest : TestBase
     }
 
     [Fact]
-    public async Task SetRemoveElementsAsync_NullChecksElementsAreByteArray_ThrowsException()
+    public async Task SetRemoveElementsAsync_NullChecksElementsAreByteArray_IsError()
     {
         var setName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
@@ -463,7 +463,7 @@ public class SetTest : TestBase
     }
 
     [Fact]
-    public async Task SetRemoveElementsAsync_NullChecksElementsAreString_ThrowsException()
+    public async Task SetRemoveElementsAsync_NullChecksElementsAreString_IsError()
     {
         var setName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
@@ -524,7 +524,7 @@ public class SetTest : TestBase
     [Theory]
     [InlineData(null, "my-set")]
     [InlineData("cache", null)]
-    public async Task SetFetchAsync_NullChecks_ThrowsException(string cacheName, string setName)
+    public async Task SetFetchAsync_NullChecks_IsError(string cacheName, string setName)
     {
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
         Assert.True(response is CacheSetFetchResponse.Error);
@@ -570,7 +570,7 @@ public class SetTest : TestBase
     [Theory]
     [InlineData(null, "my-set")]
     [InlineData("my-cache", null)]
-    public async Task SetDeleteAsync_NullChecks_ThrowsException(string cacheName, string setName)
+    public async Task SetDeleteAsync_NullChecks_IsError(string cacheName, string setName)
     {
         CacheSetDeleteResponse response = await client.SetDeleteAsync(cacheName, setName);
         Assert.True(response is CacheSetDeleteResponse.Error);
