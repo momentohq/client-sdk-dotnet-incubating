@@ -70,7 +70,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         {
             if (response is CacheGetResponse.Error errorResponse)
             {
-                return new CacheGetBatchResponse.Error(errorResponse.Exception);
+                return new CacheGetBatchResponse.Error(errorResponse.InnerException);
             }
         }
 
@@ -825,5 +825,30 @@ internal sealed class ScsDataClient : ScsDataClientBase
             return new CacheListLengthResponse.Error(exc);
         }
         return new CacheListLengthResponse.Success(response);
+    }
+
+    public async Task<CacheListDeleteResponse> ListDeleteAsync(string cacheName, string listName)
+    {
+        _ListEraseRequest request = new()
+        {
+            ListName = listName.ToByteString(),
+            All = new()
+        };
+        _ListEraseResponse response;
+
+        try
+        {
+            response = await this.grpcManager.Client.ListEraseAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+        }
+        catch (Exception e)
+        {
+            var exc = _exceptionMapper.Convert(e);
+            if (exc.TransportDetails != null)
+            {
+                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
+            }
+            return new CacheListDeleteResponse.Error(exc);
+        }
+        return new CacheListDeleteResponse.Success();
     }
 }
