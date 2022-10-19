@@ -843,6 +843,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
     }
@@ -858,6 +862,10 @@ public class SimpleCacheClient : ISimpleCacheClient
             Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
         }
         catch (ArgumentNullException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
         {
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
@@ -889,6 +897,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
         return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttl);
     }
 
@@ -903,6 +916,10 @@ public class SimpleCacheClient : ISimpleCacheClient
             Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
         }
         catch (ArgumentNullException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
         {
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }
