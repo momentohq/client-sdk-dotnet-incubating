@@ -8,7 +8,6 @@ using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
 using Momento.Sdk.Incubating.Responses;
-using Momento.Sdk.Internal;
 using Momento.Sdk.Responses;
 using Utils = Momento.Sdk.Internal.Utils;
 

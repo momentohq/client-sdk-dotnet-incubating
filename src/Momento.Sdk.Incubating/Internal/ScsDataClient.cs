@@ -6,7 +6,6 @@ using Google.Protobuf;
 using Grpc.Core;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Config;
-using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Internal.ExtensionMethods;
