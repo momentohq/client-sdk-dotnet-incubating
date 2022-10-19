@@ -13,7 +13,7 @@ public class BatchTests : TestBase
     }
 
     [Fact]
-    public async Task GetBatchAsync_NullCheckByteArray_ThrowsException()
+    public async Task GetBatchAsync_NullCheckByteArray_IsError()
     {
         CacheGetBatchResponse response = await client.GetBatchAsync(null!, new List<byte[]>());
         Assert.True(response is CacheGetBatchResponse.Error);
@@ -51,7 +51,7 @@ public class BatchTests : TestBase
     }
 
     [Fact]
-    public async Task GetBatchAsync_NullCheckString_ThrowsException()
+    public async Task GetBatchAsync_NullCheckString_IsError()
     {
         CacheGetBatchResponse response = await client.GetBatchAsync(null!, new List<string>());
         Assert.True(response is CacheGetBatchResponse.Error);
@@ -106,7 +106,7 @@ public class BatchTests : TestBase
     }
 
     [Fact]
-    public async Task SetBatchAsync_NullCheckByteArray_ThrowsException()
+    public async Task SetBatchAsync_NullCheckByteArray_IsError()
     {
         CacheSetBatchResponse response = await client.SetBatchAsync(null!, new Dictionary<byte[], byte[]>());
         Assert.True(response is CacheSetBatchResponse.Error);
@@ -147,7 +147,7 @@ public class BatchTests : TestBase
     }
 
     [Fact]
-    public async Task SetBatchAsync_NullCheckStrings_ThrowsException()
+    public async Task SetBatchAsync_NullCheckStrings_IsError()
     {
         CacheSetBatchResponse response = await client.SetBatchAsync(null!, new Dictionary<string, string>());
         Assert.True(response is CacheSetBatchResponse.Error);
