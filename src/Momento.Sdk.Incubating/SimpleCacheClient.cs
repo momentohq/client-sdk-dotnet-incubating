@@ -8,7 +8,6 @@ using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
 using Momento.Sdk.Incubating.Responses;
-using Momento.Sdk.Internal;
 using Momento.Sdk.Responses;
 using Utils = Momento.Sdk.Internal.Utils;
 
@@ -356,7 +355,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     ///
     /// <para>Incrementing the value of a missing field sets the value to <paramref name="amount"/>.</para>
     /// <para>Incrementing a value that was not set using this method or not the string representation of an integer
-    /// results in throwing a <see cref="FailedPreconditionException"/>.</para>
+    /// results in an error with <see cref="FailedPreconditionException"/>.</para>
     /// </summary>
     /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
@@ -369,19 +368,37 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <example>
     /// The following illustrates a typical workflow:
     /// <code>
-    /// var response = client.DictionaryIncrementAsync("my cache", "my dictionary", "counter", amount: 42, refreshTtl: false);
-    /// Console.WriteLine($"Current value is {response.Value}");
+    ///     var response = await client.DictionaryIncrementAsync(cacheName, "my dictionary", "counter", amount: 42, refreshTtl: false);
+    ///     if (response is CacheDictionaryIncrementResponse.Success success)
+    ///     {
+    ///         Console.WriteLine($"Current value is {success.Value}");
+    ///     }
+    ///     else if (response is CacheDictionaryIncrementResponse.Error error)
+    ///     {
+    ///         Console.WriteLine($"Got an error: {error.Message}");
+    ///     }
     ///
-    /// // Reset the counter. Note we use the string representation of an integer.
-    /// client.DictionarySetAsync("my cache", "my dictionary", "counter", "0", refreshTtl: false);
+    ///     // Reset the counter. Note we use the string representation of an integer.
+    ///     var setResponse = await client.DictionarySetAsync(cacheName, "my dictionary", "counter", "0", refreshTtl: false);
+    ///     if (setResponse is CacheDictionarySetResponse.Error) { /* handle error */ }
     ///
-    /// // Retrieve the counter. The integer is represented as a string.
-    /// var response = client.DictionaryGetAsync("my cache", "my dictionary", "counter");
-    /// Console.WriteLine(response.String());
+    ///     // Retrieve the counter. The integer is represented as a string.
+    ///     var getResponse = await client.DictionaryGetAsync(cacheName, "my dictionary", "counter");
+    ///     if (getResponse is CacheDictionaryGetResponse.Hit getHit)
+    ///     {
+    ///         Console.WriteLine(getHit.String());
+    ///     }
+    ///     else if (getResponse is CacheDictionaryGetResponse.Error) { /* handle error */ }
     ///
-    /// // Here we try incrementing a value that isn't an integer. This throws a <see cref="FailedPreconditionException"/>
-    /// client.DictionarySetAsync("my cache", "my dictionary", "counter", "0123ABC", refreshTtl: false);
-    /// var response = client.DictionaryIncrementAsync("my cache", "my dictionary", "counter", amount: 42, refreshTtl: false);
+    ///     // Here we try incrementing a value that isn't an integer. This results in an error with <see cref="FailedPreconditionException"/>
+    ///     setResponse = await client.DictionarySetAsync(cacheName, "my dictionary", "counter", "0123ABC", refreshTtl: false);
+    ///     if (setResponse is CacheDictionarySetResponse.Error) { /* handle error */ }
+    ///
+    ///     var incrementResponse = await client.DictionaryIncrementAsync(cacheName, "my dictionary", "counter", amount: 42, refreshTtl: false);
+    ///     if (incrementResponse is CacheDictionaryIncrementResponse.Error badIncrement)
+    ///     {
+    ///         Console.WriteLine($"Could not increment dictionary field: {badIncrement.Message}");
+    ///     }
     /// </code>
     /// </example>
     public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, TimeSpan? ttl = null)
@@ -825,6 +842,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
     }
@@ -840,6 +861,10 @@ public class SimpleCacheClient : ISimpleCacheClient
             Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
         }
         catch (ArgumentNullException e)
+        {
+            return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
         {
             return new CacheListPushFrontResponse.Error(new InvalidArgumentException(e.Message));
         }
@@ -871,6 +896,11 @@ public class SimpleCacheClient : ISimpleCacheClient
         {
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
         return await this.dataClient.ListPushBackAsync(cacheName, listName, value, refreshTtl, truncateFrontToSize, ttl);
     }
 
@@ -885,6 +915,10 @@ public class SimpleCacheClient : ISimpleCacheClient
             Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
         }
         catch (ArgumentNullException e)
+        {
+            return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
         {
             return new CacheListPushBackResponse.Error(new InvalidArgumentException(e.Message));
         }

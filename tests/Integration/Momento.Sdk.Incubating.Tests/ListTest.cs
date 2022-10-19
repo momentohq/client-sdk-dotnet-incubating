@@ -14,7 +14,7 @@ public class ListTest : TestBase
     [InlineData(null, "my-list", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-list", null)]
-    public async Task ListPushFrontAsync_NullChecksByteArray_ThrowsException(string cacheName, string listName, byte[] value)
+    public async Task ListPushFrontAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListPushFrontResponse response = await client.ListPushFrontAsync(cacheName, listName, value, false);
         Assert.True(response is CacheListPushFrontResponse.Error);
@@ -87,16 +87,18 @@ public class ListTest : TestBase
     }
 
     [Fact]
-    public async Task ListPushFrontAsync_ValueIsByteArrayTruncateBackToSizeIsZero_ThrowsException()
+    public async Task ListPushFrontAsync_ValueIsByteArrayTruncateBackToSizeIsZero_IsError()
     {
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await client.ListPushFrontAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateBackToSize: 0));
+        var response = await client.ListPushFrontAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateBackToSize: 0);
+        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
     [Theory]
     [InlineData(null, "my-list", "my-value")]
     [InlineData("cache", null, "my-value")]
     [InlineData("cache", "my-list", null)]
-    public async Task ListPushFrontAsync_NullChecksString_ThrowsException(string cacheName, string listName, string value)
+    public async Task ListPushFrontAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListPushFrontResponse response = await client.ListPushFrontAsync(cacheName, listName, value, false);
         Assert.True(response is CacheListPushFrontResponse.Error);
@@ -170,16 +172,18 @@ public class ListTest : TestBase
     }
 
     [Fact]
-    public async Task ListPushFrontAsync_ValueIsStringTruncateBackToSizeIsZero_ThrowsException()
+    public async Task ListPushFrontAsync_ValueIsStringTruncateBackToSizeIsZero_IsError()
     {
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await client.ListPushFrontAsync("myCache", "listName", "value", false, truncateBackToSize: 0));
+        var response = await client.ListPushFrontAsync("myCache", "listName", "value", false, truncateBackToSize: 0);
+        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
     [Theory]
     [InlineData(null, "my-list", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-list", null)]
-    public async Task ListPushBackAsync_NullChecksByteArray_ThrowsException(string cacheName, string listName, byte[] value)
+    public async Task ListPushBackAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListPushBackResponse response = await client.ListPushBackAsync(cacheName, listName, value, false);
         Assert.True(response is CacheListPushBackResponse.Error);
@@ -253,16 +257,18 @@ public class ListTest : TestBase
     }
 
     [Fact]
-    public async Task ListPushBackAsync_ValueIsByteArrayTruncateFrontToSizeIsZero_ThrowsException()
+    public async Task ListPushBackAsync_ValueIsByteArrayTruncateFrontToSizeIsZero_IsError()
     {
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await client.ListPushBackAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateFrontToSize: 0));
+        var response = await client.ListPushBackAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateFrontToSize: 0);
+        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
     [Theory]
     [InlineData(null, "my-list", "my-value")]
     [InlineData("cache", null, "my-value")]
     [InlineData("cache", "my-list", null)]
-    public async Task ListPushBackAsync_NullChecksString_ThrowsException(string cacheName, string listName, string value)
+    public async Task ListPushBackAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListPushBackResponse response = await client.ListPushBackAsync(cacheName, listName, value, false);
         Assert.True(response is CacheListPushBackResponse.Error);
@@ -408,15 +414,17 @@ public class ListTest : TestBase
     }
 
     [Fact]
-    public async Task ListPushBackAsync_ValueIsStringTruncateFrontToSizeIsZero_ThrowsException()
+    public async Task ListPushBackAsync_ValueIsStringTruncateFrontToSizeIsZero_IsError()
     {
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await client.ListPushBackAsync("myCache", "listName", "value", false, truncateFrontToSize: 0));
+        var response = await client.ListPushBackAsync("myCache", "listName", "value", false, truncateFrontToSize: 0);
+        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("cache", null)]
-    public async Task ListPopFrontAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    public async Task ListPopFrontAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
         Assert.True(response is CacheListPopFrontResponse.Error);
@@ -466,7 +474,7 @@ public class ListTest : TestBase
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("cache", null)]
-    public async Task ListPopBackAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    public async Task ListPopBackAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
         Assert.True(response is CacheListPopBackResponse.Error);
@@ -516,7 +524,7 @@ public class ListTest : TestBase
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("cache", null)]
-    public async Task ListFetchAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    public async Task ListFetchAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
         Assert.True(response is CacheListFetchResponse.Error);
@@ -573,7 +581,7 @@ public class ListTest : TestBase
     [InlineData(null, "my-list", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-list", null)]
-    public async Task ListRemoveValueAsync_NullChecksByteArray_ThrowsException(string cacheName, string listName, byte[] value)
+    public async Task ListRemoveValueAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListRemoveValueResponse response = await client.ListRemoveValueAsync(cacheName, listName, value);
         Assert.True(response is CacheListRemoveValueResponse.Error);
@@ -638,7 +646,7 @@ public class ListTest : TestBase
     [InlineData(null, "my-list", "")]
     [InlineData("cache", null, "")]
     [InlineData("cache", "my-list", null)]
-    public async Task ListRemoveValueAsync_NullChecksString_ThrowsException(string cacheName, string listName, string value)
+    public async Task ListRemoveValueAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListRemoveValueResponse response = await client.ListRemoveValueAsync(cacheName, listName, value);
         Assert.True(response is CacheListRemoveValueResponse.Error);
@@ -702,7 +710,7 @@ public class ListTest : TestBase
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("cache", null)]
-    public async Task ListLengthAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    public async Task ListLengthAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListLengthResponse response = await client.ListLengthAsync(cacheName, listName);
         Assert.True(response is CacheListLengthResponse.Error);
@@ -736,7 +744,7 @@ public class ListTest : TestBase
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("my-cache", null)]
-    public async Task ListDeleteAsync_NullChecks_ThrowsException(string cacheName, string listName)
+    public async Task ListDeleteAsync_NullChecks_IsError(string cacheName, string listName)
     {
         var response = await client.ListDeleteAsync(cacheName, listName);
         Assert.True(response is CacheListDeleteResponse.Error);

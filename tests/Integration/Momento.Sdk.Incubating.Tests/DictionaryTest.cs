@@ -15,7 +15,7 @@ public class DictionaryTest : TestBase
     [InlineData(null, "my-dictionary", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-dictionary", null)]
-    public async Task DictionaryGetAsync_NullChecksFieldIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field)
+    public async Task DictionaryGetAsync_NullChecksFieldIsByteArray_IsError(string cacheName, string dictionaryName, byte[] field)
     {
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Error);
@@ -27,7 +27,7 @@ public class DictionaryTest : TestBase
     [InlineData("cache", null, new byte[] { 0x00 }, new byte[] { 0x00 })]
     [InlineData("cache", "my-dictionary", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-dictionary", new byte[] { 0x00 }, null)]
-    public async Task DictionarySetAsync_NullChecksFieldIsByteArrayValueIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field, byte[] value)
+    public async Task DictionarySetAsync_NullChecksFieldIsByteArrayValueIsByteArray_IsError(string cacheName, string dictionaryName, byte[] field, byte[] value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
         Assert.True(response is CacheDictionarySetResponse.Error);
@@ -112,7 +112,7 @@ public class DictionaryTest : TestBase
     [InlineData(null, "my-dictionary", "field")]
     [InlineData("cache", null, "field")]
     [InlineData("cache", "my-dictionary", null)]
-    public async Task DictionaryIncrementAsync_NullChecksFieldIsString_ThrowsException(string cacheName, string dictionaryName, string field)
+    public async Task DictionaryIncrementAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryIncrementResponse response = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: true);
         Assert.True(response is CacheDictionaryIncrementResponse.Error);
@@ -208,20 +208,24 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryIncrementAsync_FailedPrecondition_ThrowsException()
+    public async Task DictionaryIncrementAsync_FailedPrecondition_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var fieldName = Utils.NewGuidString();
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
-        await Assert.ThrowsAsync<FailedPreconditionException>(async () => await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, amount: 1, refreshTtl: true));
+        var setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+
+        var dictionaryIncrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, refreshTtl: false);
+        Assert.True(dictionaryIncrementResponse is CacheDictionaryIncrementResponse.Error);
+        Assert.Equal(MomentoErrorCode.FAILED_PRECONDITION_ERROR, ((CacheDictionaryIncrementResponse.Error)dictionaryIncrementResponse).ErrorCode);
     }
 
     [Theory]
     [InlineData(null, "my-dictionary", "my-field")]
     [InlineData("cache", null, "my-field")]
     [InlineData("cache", "my-dictionary", null)]
-    public async Task DictionaryGetAsync_NullChecksFieldIsString_ThrowsException(string cacheName, string dictionaryName, string field)
+    public async Task DictionaryGetAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Error);
@@ -233,7 +237,7 @@ public class DictionaryTest : TestBase
     [InlineData("cache", null, "my-field", "my-value")]
     [InlineData("cache", "my-dictionary", null, "my-value")]
     [InlineData("cache", "my-dictionary", "my-field", null)]
-    public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsString_ThrowsException(string cacheName, string dictionaryName, string field, string value)
+    public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsString_IsError(string cacheName, string dictionaryName, string field, string value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
         Assert.True(response is CacheDictionarySetResponse.Error);
@@ -320,7 +324,7 @@ public class DictionaryTest : TestBase
     [InlineData("cache", null, "my-field", new byte[] { 0x00 })]
     [InlineData("cache", "my-dictionary", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-dictionary", "my-field", null)]
-    public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsByteArray_ThrowsException(string cacheName, string dictionaryName, string field, byte[] value)
+    public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsByteArray_IsError(string cacheName, string dictionaryName, string field, byte[] value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
         Assert.True(response is CacheDictionarySetResponse.Error);
@@ -379,7 +383,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionarySetBatchAsync_NullChecksFieldIsByteArrayValueIsByteArray_ThrowsException()
+    public async Task DictionarySetBatchAsync_NullChecksFieldIsByteArrayValueIsByteArray_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<byte[], byte[]>();
@@ -457,7 +461,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionarySetBatchAsync_NullChecksFieldsAreStringValuesAreString_ThrowsException()
+    public async Task DictionarySetBatchAsync_NullChecksFieldsAreStringValuesAreString_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
@@ -535,7 +539,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionarySetBatchAsync_NullChecksFieldsAreStringValuesAreByteArray_ThrowsException()
+    public async Task DictionarySetBatchAsync_NullChecksFieldsAreStringValuesAreByteArray_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
@@ -613,7 +617,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryGetBatchAsync_NullChecksFieldsAreByteArray_ThrowsException()
+    public async Task DictionaryGetBatchAsync_NullChecksFieldsAreByteArray_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
@@ -685,7 +689,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryGetBatchAsync_NullChecksFieldsAreString_ThrowsException()
+    public async Task DictionaryGetBatchAsync_NullChecksFieldsAreString_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
@@ -739,7 +743,7 @@ public class DictionaryTest : TestBase
     [Theory]
     [InlineData(null, "my-dictionary")]
     [InlineData("cache", null)]
-    public async Task DictionaryFetchAsync_NullChecks_ThrowsException(string cacheName, string dictionaryName)
+    public async Task DictionaryFetchAsync_NullChecks_IsError(string cacheName, string dictionaryName)
     {
         CacheDictionaryFetchResponse response = await client.DictionaryFetchAsync(cacheName, dictionaryName);
         Assert.True(response is CacheDictionaryFetchResponse.Error);
@@ -842,7 +846,7 @@ public class DictionaryTest : TestBase
     [Theory]
     [InlineData(null, "my-dictionary")]
     [InlineData("my-cache", null)]
-    public async Task DictionaryDeleteAsync_NullChecks_ThrowsException(string cacheName, string dictionaryName)
+    public async Task DictionaryDeleteAsync_NullChecks_IsError(string cacheName, string dictionaryName)
     {
         CacheDictionaryDeleteResponse response = await client.DictionaryDeleteAsync(cacheName, dictionaryName);
         Assert.True(response is CacheDictionaryDeleteResponse.Error);
@@ -875,7 +879,7 @@ public class DictionaryTest : TestBase
     [InlineData(null, "my-dictionary", new byte[] { 0x00 })]
     [InlineData("my-cache", null, new byte[] { 0x00 })]
     [InlineData("my-cache", "my-dictionary", null)]
-    public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsByteArray_ThrowsException(string cacheName, string dictionaryName, byte[] field)
+    public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsByteArray_IsError(string cacheName, string dictionaryName, byte[] field)
     {
         CacheDictionaryRemoveFieldResponse response = await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldResponse.Error)response).ErrorCode);
@@ -885,7 +889,7 @@ public class DictionaryTest : TestBase
     [InlineData(null, "my-dictionary", "my-field")]
     [InlineData("my-cache", null, "my-field")]
     [InlineData("my-cache", "my-dictionary", null)]
-    public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsString_ThrowsException(string cacheName, string dictionaryName, string field)
+    public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryRemoveFieldResponse response = await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryRemoveFieldResponse.Error);
@@ -937,7 +941,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryRemoveFieldsAsync_NullChecksFieldsAreByteArray_ThrowsException()
+    public async Task DictionaryRemoveFieldsAsync_NullChecksFieldsAreByteArray_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
@@ -990,7 +994,7 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryRemoveFieldsAsync_NullChecksFieldsAreString_ThrowsException()
+    public async Task DictionaryRemoveFieldsAsync_NullChecksFieldsAreString_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };

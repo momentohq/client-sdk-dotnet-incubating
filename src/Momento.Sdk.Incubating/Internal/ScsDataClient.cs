@@ -6,7 +6,6 @@ using Google.Protobuf;
 using Grpc.Core;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Config;
-using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Internal.ExtensionMethods;
@@ -271,7 +270,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            throw _exceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
+            if (exc.TransportDetails != null)
+            {
+                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
+            }
+            return new CacheDictionaryIncrementResponse.Error(exc);
         }
         return new CacheDictionaryIncrementResponse.Success(response);
     }
