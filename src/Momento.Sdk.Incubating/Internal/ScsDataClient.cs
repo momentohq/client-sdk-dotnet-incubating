@@ -271,7 +271,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            throw _exceptionMapper.Convert(e);
+            var exc = _exceptionMapper.Convert(e);
+            if (exc.TransportDetails != null)
+            {
+                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
+            }
+            return new CacheDictionaryIncrementResponse.Error(exc);
         }
         return new CacheDictionaryIncrementResponse.Success(response);
     }

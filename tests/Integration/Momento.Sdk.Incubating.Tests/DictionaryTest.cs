@@ -208,13 +208,17 @@ public class DictionaryTest : TestBase
     }
 
     [Fact]
-    public async Task DictionaryIncrementAsync_FailedPrecondition_ThrowsException()
+    public async Task DictionaryIncrementAsync_FailedPrecondition_IsError()
     {
         var dictionaryName = Utils.NewGuidString();
         var fieldName = Utils.NewGuidString();
 
-        await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
-        await Assert.ThrowsAsync<FailedPreconditionException>(async () => await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, amount: 1, refreshTtl: true));
+        var setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+
+        var dictionaryIncrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, refreshTtl: false);
+        Assert.True(dictionaryIncrementResponse is CacheDictionaryIncrementResponse.Error);
+        Assert.Equal(MomentoErrorCode.FAILED_PRECONDITION_ERROR, ((CacheDictionaryIncrementResponse.Error)dictionaryIncrementResponse).ErrorCode);
     }
 
     [Theory]
