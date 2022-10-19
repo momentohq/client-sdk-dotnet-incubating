@@ -17,7 +17,7 @@ public class ListTest : TestBase
     public async Task ListPushFrontAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListPushFrontResponse response = await client.ListPushFrontAsync(cacheName, listName, value, false);
-        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.True(response is CacheListPushFrontResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
@@ -28,11 +28,11 @@ public class ListTest : TestBase
         var value1 = Utils.NewGuidByteArray();
 
         CacheListPushFrontResponse pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         Assert.Equal(1, ((CacheListPushFrontResponse.Success)pushResponse).ListLength);
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         var list = hitResponse.ByteArrayList;
@@ -42,12 +42,12 @@ public class ListTest : TestBase
         // Test push semantics
         var value2 = Utils.NewGuidByteArray();
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
         Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
         list = hitResponse.ByteArrayList!;
         Assert.Equal(value2, list[0]);
@@ -67,7 +67,7 @@ public class ListTest : TestBase
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Miss);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class ListTest : TestBase
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.ByteArrayList!.Count);
     }
@@ -90,7 +90,7 @@ public class ListTest : TestBase
     public async Task ListPushFrontAsync_ValueIsByteArrayTruncateBackToSizeIsZero_IsError()
     {
         var response = await client.ListPushFrontAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateBackToSize: 0);
-        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.True(response is CacheListPushFrontResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
@@ -101,7 +101,7 @@ public class ListTest : TestBase
     public async Task ListPushFrontAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListPushFrontResponse response = await client.ListPushFrontAsync(cacheName, listName, value, false);
-        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.True(response is CacheListPushFrontResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
@@ -112,12 +112,12 @@ public class ListTest : TestBase
         var value1 = Utils.NewGuidString();
 
         CacheListPushFrontResponse pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1, false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         var list = hitResponse.StringList();
@@ -127,12 +127,12 @@ public class ListTest : TestBase
         // Test push semantics
         var value2 = Utils.NewGuidString();
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, value2, false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         successResponse = (CacheListPushFrontResponse.Success)pushResponse;
         Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
         list = hitResponse.StringList()!;
         Assert.Equal(value2, list[0]);
@@ -152,7 +152,7 @@ public class ListTest : TestBase
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Miss);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public class ListTest : TestBase
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.StringList()!.Count);
     }
@@ -175,7 +175,7 @@ public class ListTest : TestBase
     public async Task ListPushFrontAsync_ValueIsStringTruncateBackToSizeIsZero_IsError()
     {
         var response = await client.ListPushFrontAsync("myCache", "listName", "value", false, truncateBackToSize: 0);
-        Assert.True(response is CacheListPushFrontResponse.Error);
+        Assert.True(response is CacheListPushFrontResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushFrontResponse.Error)response).ErrorCode);
     }
 
@@ -186,7 +186,7 @@ public class ListTest : TestBase
     public async Task ListPushBackAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListPushBackResponse response = await client.ListPushBackAsync(cacheName, listName, value, false);
-        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.True(response is CacheListPushBackResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
@@ -197,12 +197,12 @@ public class ListTest : TestBase
         var value1 = Utils.NewGuidByteArray();
 
         CacheListPushBackResponse pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
-        Assert.True(pushResponse is CacheListPushBackResponse.Success);
+        Assert.True(pushResponse is CacheListPushBackResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushBackResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         var list = hitResponse.ByteArrayList;
@@ -212,12 +212,12 @@ public class ListTest : TestBase
         // Test push semantics
         var value2 = Utils.NewGuidByteArray();
         pushResponse = await client.ListPushBackAsync(cacheName, listName, value2, false);
-        Assert.True(pushResponse is CacheListPushBackResponse.Success);
+        Assert.True(pushResponse is CacheListPushBackResponse.Success, $"Unexpected response: {pushResponse}");
         successResponse = (CacheListPushBackResponse.Success)pushResponse;
         Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
         list = hitResponse.ByteArrayList!;
         Assert.Equal(value1, list[0]);
@@ -237,7 +237,7 @@ public class ListTest : TestBase
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Miss);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -251,7 +251,7 @@ public class ListTest : TestBase
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.ByteArrayList!.Count);
     }
@@ -260,7 +260,7 @@ public class ListTest : TestBase
     public async Task ListPushBackAsync_ValueIsByteArrayTruncateFrontToSizeIsZero_IsError()
     {
         var response = await client.ListPushBackAsync("myCache", "listName", new byte[] { 0x00 }, false, truncateFrontToSize: 0);
-        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.True(response is CacheListPushBackResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
@@ -271,7 +271,7 @@ public class ListTest : TestBase
     public async Task ListPushBackAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListPushBackResponse response = await client.ListPushBackAsync(cacheName, listName, value, false);
-        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.True(response is CacheListPushBackResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
@@ -286,7 +286,7 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         await client.ListPushBackAsync(cacheName, listName, value3, false, null, 2);
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.StringList()!.Count);
         Assert.Equal(value2, hitResponse.StringList()![0]);
@@ -304,7 +304,7 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         await client.ListPushBackAsync(cacheName, listName, value3, false, null, 2);
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.ByteArrayList!.Count);
         Assert.Equal(value2, hitResponse.ByteArrayList![0]);
@@ -322,7 +322,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         await client.ListPushFrontAsync(cacheName, listName, value3, false, null, 2);
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.StringList()!.Count);
         Assert.Equal(value2, hitResponse.StringList()![1]);
@@ -340,7 +340,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         await client.ListPushFrontAsync(cacheName, listName, value3, false, null, 2);
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.ByteArrayList!.Count);
         Assert.Equal(value2, hitResponse.ByteArrayList![1]);
@@ -354,12 +354,12 @@ public class ListTest : TestBase
         var value1 = Utils.NewGuidString();
 
         CacheListPushBackResponse pushResponse = await client.ListPushBackAsync(cacheName, listName, value1, false);
-        Assert.True(pushResponse is CacheListPushBackResponse.Success);
+        Assert.True(pushResponse is CacheListPushBackResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushBackResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         var list = hitResponse.StringList();
@@ -374,7 +374,7 @@ public class ListTest : TestBase
         Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
         list = hitResponse.StringList()!;
         Assert.Equal(value1, list[0]);
@@ -394,7 +394,7 @@ public class ListTest : TestBase
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Miss);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -408,7 +408,7 @@ public class ListTest : TestBase
         await Task.Delay(2000);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListFetchResponse.Hit)response;
         Assert.Equal(2, hitResponse.StringList()!.Count);
     }
@@ -417,7 +417,7 @@ public class ListTest : TestBase
     public async Task ListPushBackAsync_ValueIsStringTruncateFrontToSizeIsZero_IsError()
     {
         var response = await client.ListPushBackAsync("myCache", "listName", "value", false, truncateFrontToSize: 0);
-        Assert.True(response is CacheListPushBackResponse.Error);
+        Assert.True(response is CacheListPushBackResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPushBackResponse.Error)response).ErrorCode);
     }
 
@@ -427,7 +427,7 @@ public class ListTest : TestBase
     public async Task ListPopFrontAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
-        Assert.True(response is CacheListPopFrontResponse.Error);
+        Assert.True(response is CacheListPopFrontResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPopFrontResponse.Error)response).ErrorCode);
     }
 
@@ -436,7 +436,7 @@ public class ListTest : TestBase
     {
         var listName = Utils.NewGuidString();
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
-        Assert.True(response is CacheListPopFrontResponse.Miss);
+        Assert.True(response is CacheListPopFrontResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -449,7 +449,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
-        Assert.True(response is CacheListPopFrontResponse.Hit);
+        Assert.True(response is CacheListPopFrontResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListPopFrontResponse.Hit)response;
 
         Assert.Equal(value2, hitResponse.ByteArray);
@@ -465,7 +465,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, value1, false);
         await client.ListPushFrontAsync(cacheName, listName, value2, false);
         CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
-        Assert.True(response is CacheListPopFrontResponse.Hit);
+        Assert.True(response is CacheListPopFrontResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListPopFrontResponse.Hit)response;
 
         Assert.Equal(value2, hitResponse.String());
@@ -477,7 +477,7 @@ public class ListTest : TestBase
     public async Task ListPopBackAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
-        Assert.True(response is CacheListPopBackResponse.Error);
+        Assert.True(response is CacheListPopBackResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListPopBackResponse.Error)response).ErrorCode);
     }
 
@@ -486,7 +486,7 @@ public class ListTest : TestBase
     {
         var listName = Utils.NewGuidString();
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
-        Assert.True(response is CacheListPopBackResponse.Miss);
+        Assert.True(response is CacheListPopBackResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -499,7 +499,7 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
-        Assert.True(response is CacheListPopBackResponse.Hit);
+        Assert.True(response is CacheListPopBackResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListPopBackResponse.Hit)response;
 
         Assert.Equal(value2, hitResponse.ByteArray);
@@ -515,7 +515,7 @@ public class ListTest : TestBase
         await client.ListPushBackAsync(cacheName, listName, value1, false);
         await client.ListPushBackAsync(cacheName, listName, value2, false);
         CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
-        Assert.True(response is CacheListPopBackResponse.Hit);
+        Assert.True(response is CacheListPopBackResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheListPopBackResponse.Hit)response;
 
         Assert.Equal(value2, hitResponse.String());
@@ -527,7 +527,7 @@ public class ListTest : TestBase
     public async Task ListFetchAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Error);
+        Assert.True(response is CacheListFetchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListFetchResponse.Error)response).ErrorCode);
     }
 
@@ -536,7 +536,7 @@ public class ListTest : TestBase
     {
         var listName = Utils.NewGuidString();
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Miss);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -551,7 +551,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, field1, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         Assert.Equal(hitResponse.StringList(), contentList);
@@ -569,7 +569,7 @@ public class ListTest : TestBase
         await client.ListPushFrontAsync(cacheName, listName, field1, true, ttl: TimeSpan.FromSeconds(10));
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
 
         Assert.Contains(field1, hitResponse.ByteArrayList!);
@@ -584,7 +584,7 @@ public class ListTest : TestBase
     public async Task ListRemoveValueAsync_NullChecksByteArray_IsError(string cacheName, string listName, byte[] value)
     {
         CacheListRemoveValueResponse response = await client.ListRemoveValueAsync(cacheName, listName, value);
-        Assert.True(response is CacheListRemoveValueResponse.Error);
+        Assert.True(response is CacheListRemoveValueResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListRemoveValueResponse.Error)response).ErrorCode);
     }
 
@@ -609,7 +609,7 @@ public class ListTest : TestBase
 
         // Test not there
         var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var cachedList = ((CacheListFetchResponse.Hit)response).ByteArrayList!;
         Assert.True(list.ListEquals(cachedList));
     }
@@ -628,7 +628,7 @@ public class ListTest : TestBase
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidByteArray());
 
         var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var cachedList = ((CacheListFetchResponse.Hit)response).ByteArrayList!;
         Assert.True(list.ListEquals(cachedList));
     }
@@ -649,7 +649,7 @@ public class ListTest : TestBase
     public async Task ListRemoveValueAsync_NullChecksString_IsError(string cacheName, string listName, string value)
     {
         CacheListRemoveValueResponse response = await client.ListRemoveValueAsync(cacheName, listName, value);
-        Assert.True(response is CacheListRemoveValueResponse.Error);
+        Assert.True(response is CacheListRemoveValueResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListRemoveValueResponse.Error)response).ErrorCode);
     }
 
@@ -674,7 +674,7 @@ public class ListTest : TestBase
 
         // Test not there
         var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var cachedList = ((CacheListFetchResponse.Hit)response).StringList()!;
         Assert.True(list.SequenceEqual(cachedList));
     }
@@ -693,7 +693,7 @@ public class ListTest : TestBase
         await client.ListRemoveValueAsync(cacheName, listName, Utils.NewGuidString());
 
         var response = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(response is CacheListFetchResponse.Hit);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
         var cachedList = ((CacheListFetchResponse.Hit)response).StringList()!;
         Assert.True(list.SequenceEqual(cachedList));
     }
@@ -713,7 +713,7 @@ public class ListTest : TestBase
     public async Task ListLengthAsync_NullChecks_IsError(string cacheName, string listName)
     {
         CacheListLengthResponse response = await client.ListLengthAsync(cacheName, listName);
-        Assert.True(response is CacheListLengthResponse.Error);
+        Assert.True(response is CacheListLengthResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListLengthResponse.Error)response).ErrorCode);
     }
 
@@ -721,7 +721,7 @@ public class ListTest : TestBase
     public async Task ListLengthAsync_ListIsMissing_HappyPath()
     {
         CacheListLengthResponse lengthResponse = await client.ListLengthAsync(cacheName, Utils.NewGuidString());
-        Assert.True(lengthResponse is CacheListLengthResponse.Success);
+        Assert.True(lengthResponse is CacheListLengthResponse.Success, $"Unexpected response: {lengthResponse}");
         var successResponse = (CacheListLengthResponse.Success)lengthResponse;
         Assert.Equal(0, successResponse.Length);
     }
@@ -736,7 +736,7 @@ public class ListTest : TestBase
         }
 
         CacheListLengthResponse lengthResponse = await client.ListLengthAsync(cacheName, listName);
-        Assert.True(lengthResponse is CacheListLengthResponse.Success);
+        Assert.True(lengthResponse is CacheListLengthResponse.Success, $"Unexpected response: {lengthResponse}");
         var successResponse = (CacheListLengthResponse.Success)lengthResponse;
         Assert.Equal(10, successResponse.Length);
     }
@@ -747,7 +747,7 @@ public class ListTest : TestBase
     public async Task ListDeleteAsync_NullChecks_IsError(string cacheName, string listName)
     {
         var response = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(response is CacheListDeleteResponse.Error);
+        Assert.True(response is CacheListDeleteResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListDeleteResponse.Error)response).ErrorCode);
     }
 
@@ -757,7 +757,7 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
         var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(deleteResponse is CacheListDeleteResponse.Success);
+        Assert.True(deleteResponse is CacheListDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
     }
 
@@ -766,17 +766,17 @@ public class ListTest : TestBase
     {
         var listName = Utils.NewGuidString();
         var pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, Utils.NewGuidString(), false);
-        Assert.True(pushResponse is CacheListPushFrontResponse.Success);
+        Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
 
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Hit);
         var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(deleteResponse is CacheListDeleteResponse.Success);
+        Assert.True(deleteResponse is CacheListDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
 
         var fetchResponse = await client.ListFetchAsync(cacheName, listName);
-        Assert.True(fetchResponse is CacheListFetchResponse.Miss);
+        Assert.True(fetchResponse is CacheListFetchResponse.Miss, $"Unexpected response: {fetchResponse}");
     }
 }
