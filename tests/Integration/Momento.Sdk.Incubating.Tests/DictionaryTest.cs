@@ -18,7 +18,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryGetAsync_NullChecksFieldIsByteArray_IsError(string cacheName, string dictionaryName, byte[] field)
     {
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Error);
+        Assert.True(response is CacheDictionaryGetResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetResponse.Error)response).ErrorCode);
     }
 
@@ -30,7 +30,7 @@ public class DictionaryTest : TestBase
     public async Task DictionarySetAsync_NullChecksFieldIsByteArrayValueIsByteArray_IsError(string cacheName, string dictionaryName, byte[] field, byte[] value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(response is CacheDictionarySetResponse.Error);
+        Assert.True(response is CacheDictionarySetResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
@@ -40,7 +40,7 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidByteArray();
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class DictionaryTest : TestBase
         await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
     }
 
     [Fact]
@@ -64,11 +64,11 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
 
         var otherField = Utils.NewGuidByteArray();
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, otherField);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -79,15 +79,15 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -98,13 +98,13 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
     }
 
@@ -115,7 +115,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryIncrementAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryIncrementResponse response = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: true);
-        Assert.True(response is CacheDictionaryIncrementResponse.Error);
+        Assert.True(response is CacheDictionaryIncrementResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryIncrementResponse.Error)response).ErrorCode);
     }
 
@@ -126,22 +126,22 @@ public class DictionaryTest : TestBase
         var fieldName = Utils.NewGuidString();
 
         CacheDictionaryIncrementResponse incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, 1);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         var successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(1, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, 41);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(42, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, false, -1042);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(-1000, successResponse.Value);
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, fieldName);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         var hitResponse = (CacheDictionaryGetResponse.Hit)getResponse;
         Assert.Equal("-1000", hitResponse.String());
     }
@@ -153,13 +153,13 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
 
         CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(2));
-        Assert.True(resp is CacheDictionaryIncrementResponse.Success);
+        Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: true, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(resp is CacheDictionaryIncrementResponse.Success);
+        Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal("2", ((CacheDictionaryGetResponse.Hit)response).String());
     }
 
@@ -170,15 +170,15 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
 
         CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(5));
-        Assert.True(resp is CacheDictionaryIncrementResponse.Success);
+        Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(100);
 
         resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, refreshTtl: false, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(resp is CacheDictionaryIncrementResponse.Success);
+        Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -190,19 +190,19 @@ public class DictionaryTest : TestBase
         // Set field
         await client.DictionarySetAsync(cacheName, dictionaryName, field, "10", false);
         CacheDictionaryIncrementResponse incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 0, refreshTtl: false);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         var successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(10, successResponse.Value);
 
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 90, refreshTtl: false);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(100, successResponse.Value);
 
         // Reset field
         await client.DictionarySetAsync(cacheName, dictionaryName, field, "0", false);
         incrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, amount: 0, refreshTtl: false);
-        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success);
+        Assert.True(incrementResponse is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {incrementResponse}");
         successResponse = (CacheDictionaryIncrementResponse.Success)incrementResponse;
         Assert.Equal(0, successResponse.Value);
     }
@@ -214,10 +214,10 @@ public class DictionaryTest : TestBase
         var fieldName = Utils.NewGuidString();
 
         var setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, fieldName, "abcxyz", false);
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
 
         var dictionaryIncrementResponse = await client.DictionaryIncrementAsync(cacheName, dictionaryName, fieldName, refreshTtl: false);
-        Assert.True(dictionaryIncrementResponse is CacheDictionaryIncrementResponse.Error);
+        Assert.True(dictionaryIncrementResponse is CacheDictionaryIncrementResponse.Error, $"Unexpected response: {dictionaryIncrementResponse}");
         Assert.Equal(MomentoErrorCode.FAILED_PRECONDITION_ERROR, ((CacheDictionaryIncrementResponse.Error)dictionaryIncrementResponse).ErrorCode);
     }
 
@@ -228,7 +228,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryGetAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Error);
+        Assert.True(response is CacheDictionaryGetResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetResponse.Error)response).ErrorCode);
     }
 
@@ -240,7 +240,7 @@ public class DictionaryTest : TestBase
     public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsString_IsError(string cacheName, string dictionaryName, string field, string value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(response is CacheDictionarySetResponse.Error);
+        Assert.True(response is CacheDictionarySetResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
@@ -250,7 +250,7 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidString();
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -261,10 +261,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
 
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(response is CacheDictionarySetResponse.Success);
+        Assert.True(response is CacheDictionarySetResponse.Success, $"Unexpected response: {response}");
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
     }
 
     [Fact]
@@ -275,11 +275,11 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
 
         var otherField = Utils.NewGuidString();
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, otherField);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -290,15 +290,15 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -309,13 +309,13 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).String());
     }
 
@@ -327,7 +327,7 @@ public class DictionaryTest : TestBase
     public async Task DictionarySetAsync_NullChecksFieldIsStringValueIsByteArray_IsError(string cacheName, string dictionaryName, string field, byte[] value)
     {
         CacheDictionarySetResponse response = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(response is CacheDictionarySetResponse.Error);
+        Assert.True(response is CacheDictionarySetResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetResponse.Error)response).ErrorCode);
     }
 
@@ -339,10 +339,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false);
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
     }
 
     [Fact]
@@ -353,15 +353,15 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(5));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -372,13 +372,13 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
 
         CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, false, ttl: TimeSpan.FromSeconds(2));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, true, ttl: TimeSpan.FromSeconds(10));
-        Assert.True(setResponse is CacheDictionarySetResponse.Success);
+        Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
     }
 
@@ -388,18 +388,18 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<byte[], byte[]>();
         CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<byte[], byte[]>>)null!, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidByteArray()] = null!;
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
@@ -417,11 +417,11 @@ public class DictionaryTest : TestBase
         await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
     }
 
@@ -440,7 +440,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -456,7 +456,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
     }
 
@@ -466,18 +466,18 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
         CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, string>>)null!, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidString()] = null!;
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
@@ -495,11 +495,11 @@ public class DictionaryTest : TestBase
         await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).String());
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).String());
     }
 
@@ -518,7 +518,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -534,7 +534,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).String());
     }
 
@@ -544,18 +544,18 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var dictionary = new Dictionary<string, string>();
         CacheDictionarySetBatchResponse response = await client.DictionarySetBatchAsync(null!, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, null!, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, (IEnumerable<KeyValuePair<string, byte[]>>)null!, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
 
         dictionary[Utils.NewGuidString()] = null!;
         response = await client.DictionarySetBatchAsync(cacheName, dictionaryName, dictionary, false);
-        Assert.True(response is CacheDictionarySetBatchResponse.Error);
+        Assert.True(response is CacheDictionarySetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionarySetBatchResponse.Error)response).ErrorCode);
     }
 
@@ -573,11 +573,11 @@ public class DictionaryTest : TestBase
         await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
-        Assert.True(getResponse is CacheDictionaryGetResponse.Hit);
+        Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
     }
 
@@ -596,7 +596,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Miss);
+        Assert.True(response is CacheDictionaryGetResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -612,7 +612,7 @@ public class DictionaryTest : TestBase
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryGetResponse.Hit);
+        Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
         Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
     }
 
@@ -623,30 +623,30 @@ public class DictionaryTest : TestBase
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (byte[][])null!);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<byte[]>(testData[0]);
         response = await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<byte[]>)null!);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<byte[]>(testData[1]));
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
     }
 
@@ -664,7 +664,7 @@ public class DictionaryTest : TestBase
         await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetBatchResponse.Success);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Success, $"Unexpected response: {response}");
 
         var values = new byte[]?[] { value1, value2, null };
         Assert.Equal(values, ((CacheDictionaryGetBatchResponse.Success)response).ByteArrays);
@@ -679,7 +679,7 @@ public class DictionaryTest : TestBase
         var field3 = Utils.NewGuidByteArray();
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetBatchResponse.Success);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Success, $"Unexpected response: {response}");
         var nullResponse = (CacheDictionaryGetBatchResponse.Success)response;
         var byteArrays = new byte[]?[] { null, null, null };
         var strings = new string?[] { null, null, null };
@@ -694,30 +694,30 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(null!, dictionaryName, testData[0]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, null!, testData[0]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (string[])null!);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, testData[1]);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<string>(testData[0]);
         response = await client.DictionaryGetBatchAsync(null!, dictionaryName, fieldsList);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, null!, fieldsList);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, (List<string>)null!);
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
         response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new List<string>(testData[1]));
-        Assert.True(response is CacheDictionaryGetBatchResponse.Error);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryGetBatchResponse.Error)response).ErrorCode);
     }
 
@@ -735,7 +735,7 @@ public class DictionaryTest : TestBase
         await client.DictionarySetAsync(cacheName, dictionaryName, field2, value2, false, TimeSpan.FromSeconds(10));
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new string[] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetBatchResponse.Success);
+        Assert.True(response is CacheDictionaryGetBatchResponse.Success, $"Unexpected response: {response}");
         var values = new string?[] { value1, value2, null };
         Assert.Equal(values, ((CacheDictionaryGetBatchResponse.Success)response).Strings());
     }
@@ -746,7 +746,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryFetchAsync_NullChecks_IsError(string cacheName, string dictionaryName)
     {
         CacheDictionaryFetchResponse response = await client.DictionaryFetchAsync(cacheName, dictionaryName);
-        Assert.True(response is CacheDictionaryFetchResponse.Error);
+        Assert.True(response is CacheDictionaryFetchResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryFetchResponse.Error)response).ErrorCode);
     }
 
@@ -755,7 +755,7 @@ public class DictionaryTest : TestBase
     {
         var dictionaryName = Utils.NewGuidString();
         CacheDictionaryFetchResponse response = await client.DictionaryFetchAsync(cacheName, dictionaryName);
-        Assert.True(response is CacheDictionaryFetchResponse.Miss);
+        Assert.True(response is CacheDictionaryFetchResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -776,7 +776,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
-        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
         Assert.Equal(hitResponse.StringStringDictionary(), contentDictionary);
 
@@ -802,7 +802,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
-        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
         Assert.Equal(hitResponse.StringByteArrayDictionary(), contentDictionary);
 
@@ -828,7 +828,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryFetchResponse fetchResponse = await client.DictionaryFetchAsync(cacheName, dictionaryName);
 
-        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit);
+        Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
         // Exercise byte array dictionary structural equality comparer
@@ -849,7 +849,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryDeleteAsync_NullChecks_IsError(string cacheName, string dictionaryName)
     {
         CacheDictionaryDeleteResponse response = await client.DictionaryDeleteAsync(cacheName, dictionaryName);
-        Assert.True(response is CacheDictionaryDeleteResponse.Error);
+        Assert.True(response is CacheDictionaryDeleteResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryDeleteResponse.Error)response).ErrorCode);
     }
 
@@ -892,7 +892,7 @@ public class DictionaryTest : TestBase
     public async Task DictionaryRemoveFieldAsync_NullChecksFieldIsString_IsError(string cacheName, string dictionaryName, string field)
     {
         CacheDictionaryRemoveFieldResponse response = await client.DictionaryRemoveFieldAsync(cacheName, dictionaryName, field);
-        Assert.True(response is CacheDictionaryRemoveFieldResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldResponse.Error)response).ErrorCode);
     }
 
@@ -947,30 +947,30 @@ public class DictionaryTest : TestBase
         var testData = new byte[][][] { new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() }, new byte[][] { Utils.NewGuidByteArray(), null! } };
 
         CacheDictionaryRemoveFieldsResponse response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (byte[][])null!);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<byte[]>(testData[0]);
         response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<byte[]>)null!);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<byte[]>(testData[1]));
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
     }
 
@@ -999,30 +999,30 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var testData = new string[][] { new string[] { Utils.NewGuidString(), Utils.NewGuidString() }, new string[] { Utils.NewGuidString(), null! } };
         CacheDictionaryRemoveFieldsResponse response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, testData[0]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, testData[0]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (string[])null!);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, testData[1]);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
 
         var fieldsList = new List<string>(testData[0]);
         response = await client.DictionaryRemoveFieldsAsync(null!, dictionaryName, fieldsList);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, null!, fieldsList);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, (List<string>)null!);
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
         response = await client.DictionaryRemoveFieldsAsync(cacheName, dictionaryName, new List<string>(testData[1]));
-        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error);
+        Assert.True(response is CacheDictionaryRemoveFieldsResponse.Error, $"Unexpected response: {response}");
         Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryRemoveFieldsResponse.Error)response).ErrorCode);
     }
 
