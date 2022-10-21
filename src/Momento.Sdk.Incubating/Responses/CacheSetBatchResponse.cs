@@ -30,6 +30,10 @@ public abstract class CacheSetBatchResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        public override string ToString()
+        {
+            return base.ToString() + ": " + Message;
+        }
     }
 
 }
