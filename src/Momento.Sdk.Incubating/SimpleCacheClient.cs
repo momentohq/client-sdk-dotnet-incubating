@@ -819,6 +819,117 @@ public class SimpleCacheClient : ISimpleCacheClient
     }
 
     /// <summary>
+    /// Pushes multiple values to the beginning of a list.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the list in.</param>
+    /// <param name="listName">The list to push the value on.</param>
+    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="truncateBackToSize">Ensure the list does not exceed this length. Remove excess from the end of the list. Must be a positive number.</param>
+    /// <returns>Task representing the result of the push operation.</returns>
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<byte[]> values, bool refreshTtl, TimeSpan? ttl = null, int? truncateBackToSize = null)
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateFrontAsync(cacheName, listName, values, refreshTtl, truncateBackToSize, ttl);
+    }
+
+    /// <inheritdoc cref="ListConcatenateFrontAsync(string, string, IEnumerable{byte[]}, bool, TimeSpan?, int?)"/>
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<string> values, bool refreshTtl, TimeSpan? ttl = null, int? truncateBackToSize = null)
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateFrontAsync(cacheName, listName, values, refreshTtl, truncateBackToSize, ttl);
+    }
+
+    /// <summary>
+    /// Pushes multiple values to the back of a list.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the list in.</param>
+    /// <param name="listName">The list to push the value on.</param>
+    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="truncateFrontToSize">Ensure the list does not exceed this length. Remove excess from the front of the list. Must be a positive number.</param>
+    /// <returns>Task representing the result of the push operation.</returns>
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<byte[]> values, bool refreshTtl, TimeSpan? ttl = null, int? truncateFrontToSize = null)
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateBackAsync(cacheName, listName, values, refreshTtl, truncateFrontToSize, ttl);
+    }
+
+    /// <inheritdoc cref="ListConcatenateBackAsync(string, string, IEnumerable{byte[]}, bool, TimeSpan?, int?)"/>
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<string> values, bool refreshTtl, TimeSpan? ttl = null, int? truncateFrontToSize = null)
+    {
+         try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateBackAsync(cacheName, listName, values, refreshTtl, truncateFrontToSize, ttl);
+    }
+
+
+    /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
     /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)" path="remark"/>
@@ -870,7 +981,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
-    }
+    } 
 
     /// <summary>
     /// Push a value to the end of a list.

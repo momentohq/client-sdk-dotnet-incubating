@@ -622,6 +622,81 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheSetDeleteResponse.Success();
     }
 
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<byte[]> values, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    {
+        return await SendListConcatenateFrontAsync(cacheName, listName, values.Select(value => value.ToByteString()), refreshTtl, truncateBackToSize, ttl);
+    }
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<string> values, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    {
+        return await SendListConcatenateFrontAsync(cacheName, listName, values.Select(value => value.ToByteString()), refreshTtl, truncateBackToSize, ttl);
+    }
+
+    public async Task<CacheListConcatenateFrontResponse> SendListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<ByteString> values, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    {
+        _ListConcatenateFrontRequest request = new()
+        {
+            TruncateBackToSize = Convert.ToUInt32(truncateBackToSize.GetValueOrDefault()),
+            ListName = listName.ToByteString(),
+            RefreshTtl = refreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl)
+        };
+        request.Values.Add(values);
+        _ListConcatenateFrontResponse response;
+
+        try
+        {
+            response = await this.grpcManager.Client.ListConcatenateFrontAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+        }
+        catch (Exception e)
+        {
+            var exc = _exceptionMapper.Convert(e);
+            if (exc.TransportDetails != null)
+            {
+                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
+            }
+            return new CacheListConcatenateFrontResponse.Error(exc);
+        }
+        return new CacheListConcatenateFrontResponse.Success(response);
+    }
+
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<byte[]> values, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    {
+        return await SendListConcatenateBackAsync(cacheName, listName, values.Select(value => value.ToByteString()), refreshTtl, truncateFrontToSize, ttl);
+    }
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<string> values, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    {
+        return await SendListConcatenateBackAsync(cacheName, listName, values.Select(value => value.ToByteString()), refreshTtl, truncateFrontToSize, ttl);
+    }
+
+    public async Task<CacheListConcatenateBackResponse> SendListConcatenateBackAsync(string cacheName, string listName, IEnumerable<ByteString> values, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    {
+        _ListConcatenateBackRequest request = new()
+        {
+            TruncateFrontToSize = Convert.ToUInt32(truncateFrontToSize.GetValueOrDefault()),
+            ListName = listName.ToByteString(),
+            RefreshTtl = refreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl)
+        };
+        request.Values.Add(values);
+        _ListConcatenateBackResponse response;
+
+        try
+        {
+            response = await this.grpcManager.Client.ListConcatenateBackAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+        }
+        catch (Exception e)
+        {
+            var exc = _exceptionMapper.Convert(e);
+            if (exc.TransportDetails != null)
+            {
+                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
+            }
+            return new CacheListConcatenateBackResponse.Error(exc);
+        }
+        return new CacheListConcatenateBackResponse.Success(response);
+    }
+
+
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
     {
         return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttl);
