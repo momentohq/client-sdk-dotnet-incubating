@@ -822,7 +822,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// Adds multiple values to the beginning of a list in the exact order given.
     /// </summary>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
-    /// <param name="listName">The list to add the value on.</param>
+    /// <param name="listName">The list to add the values to.</param>
     /// <param name="values">The values to add to the front of the list.</param>
     /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
     /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
@@ -877,7 +877,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// Adds multiple values to the back of a list in the exact order given.
     /// </summary>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
-    /// <param name="listName">The list to add the value on.</param>
+    /// <param name="listName">The list to add the values to.</param>
     /// <param name="values">The values to add to the back of the list.</param>
     /// <param name="refreshTtl">Update <paramref name="listName"/>'s TTL if it already exists.</param>
     /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
