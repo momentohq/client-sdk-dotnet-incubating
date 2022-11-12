@@ -981,7 +981,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
 
         return await this.dataClient.ListPushFrontAsync(cacheName, listName, value, refreshTtl, truncateBackToSize, ttl);
-    } 
+    }
 
     /// <summary>
     /// Push a value to the end of a list.
