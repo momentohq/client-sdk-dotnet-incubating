@@ -7,6 +7,7 @@ using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating.Internal;
+using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 using Utils = Momento.Sdk.Internal.Utils;
@@ -194,7 +195,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="refreshTtl">Update the dictionary TTL if the dictionary already exists.</param>
     /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionUpdateTtl? ttl = null)
     {
         try
         {
@@ -208,7 +209,7 @@ public class SimpleCacheClient : ISimpleCacheClient
             return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, refreshTtl, ttl);
+        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl?.refreshTtl ?? true, ttl?.ttl);
     }
 
     /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], bool, TimeSpan?)"/>

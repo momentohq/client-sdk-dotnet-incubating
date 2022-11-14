@@ -40,4 +40,10 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Requests\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Requests\" />
+	</ItemGroup>
 </Project>
