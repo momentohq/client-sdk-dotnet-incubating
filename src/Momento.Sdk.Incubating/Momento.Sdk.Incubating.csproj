@@ -34,7 +34,7 @@
 		<RepositoryUrl>https://github.com/momentohq/client-sdk-dotnet-incubating</RepositoryUrl>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Momento.Sdk" Version="0.38.1" />
+		<PackageReference Include="Momento.Sdk" Version="0.38.2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
