@@ -15,6 +15,7 @@ namespace Momento.Sdk.Incubating.Requests
     /// The default behavior is to refresh the TTL (to prolong the life of the
     /// collection) each time it is written.  This behavior can be modified
     /// by calling the <see cref="noRefreshTtlOnUpdates"/>
+    /// </summary>
     /// 
     /// <param name="Ttl">The TimeSpan after which the cached collection
     /// should be expired from the cache.  If <code>null</code>, we use the default
