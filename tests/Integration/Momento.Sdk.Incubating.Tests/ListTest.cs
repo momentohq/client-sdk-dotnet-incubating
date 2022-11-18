@@ -61,10 +61,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
         await Task.Delay(100);
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -77,7 +77,7 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
         await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
@@ -146,10 +146,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
         await Task.Delay(100);
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -162,7 +162,7 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).noRefreshTtlOnUpdates());
+        await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
         await client.ListPushFrontAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
@@ -231,10 +231,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).noRefreshTtlOnUpdates());
+        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
         await Task.Delay(100);
 
-        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).noRefreshTtlOnUpdates());
+        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
@@ -247,7 +247,7 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).noRefreshTtlOnUpdates());
+        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
         await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
@@ -388,10 +388,10 @@ public class ListTest : TestBase
         var listName = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).noRefreshTtlOnUpdates());
+        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
         await Task.Delay(100);
 
-        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).noRefreshTtlOnUpdates());
+        await client.ListPushBackAsync(cacheName, listName, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
