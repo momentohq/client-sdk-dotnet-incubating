@@ -6,6 +6,7 @@ using Google.Protobuf;
 using Grpc.Core;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Config;
+using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Internal.ExtensionMethods;
@@ -128,19 +129,19 @@ internal sealed class ScsDataClient : ScsDataClientBase
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, string value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), refreshTtl, ttl);
+        return await SendDictionarySetAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
     public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, byte[] field)
@@ -192,31 +193,31 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryGetResponse.Hit(response);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
-        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, refreshTtl, ttl);
+        return await SendDictionarySetBatchAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> SendDictionarySetAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetResponse> SendDictionarySetAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
     {
         _DictionarySetRequest request = new()
         {
             DictionaryName = dictionaryName.ToByteString(),
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Items.Add(items);
 
@@ -231,13 +232,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionarySetResponse.Success();
     }
 
-    public async Task<CacheDictionarySetBatchResponse> SendDictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheDictionarySetBatchResponse> SendDictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
     {
         _DictionarySetRequest request = new()
         {
             DictionaryName = dictionaryName.ToByteString(),
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Items.Add(items);
 
@@ -252,15 +253,15 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionarySetBatchResponse.Success();
     }
 
-    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, bool refreshTtl, long amount = 1, TimeSpan? ttl = null)
+    public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, long amount = 1, CollectionTtl ttl = default(CollectionTtl))
     {
         _DictionaryIncrementRequest request = new()
         {
             DictionaryName = dictionaryName.ToByteString(),
             Field = field.ToByteString(),
             Amount = amount,
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _DictionaryIncrementResponse response;
 
@@ -433,33 +434,33 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryRemoveFieldsResponse.Success();
     }
 
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttl);
+        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), ttl);
     }
 
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), refreshTtl, ttl);
+        return await SendSetAddAsync(cacheName, setName, element.ToSingletonByteString(), ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttl);
+        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), refreshTtl, ttl);
+        return await SendSetAddBatchAsync(cacheName, setName, elements.ToEnumerableByteString(), ttl);
     }
 
-    public async Task<CacheSetAddResponse> SendSetAddAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddResponse> SendSetAddAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         _SetUnionRequest request = new()
         {
             SetName = setName.ToByteString(),
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Elements.Add(elements);
         try
@@ -478,13 +479,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheSetAddResponse.Success();
     }
 
-    public async Task<CacheSetAddBatchResponse> SendSetAddBatchAsync(string cacheName, string setName, IEnumerable<ByteString> elements, bool refreshTtl, TimeSpan? ttl = null)
+    public async Task<CacheSetAddBatchResponse> SendSetAddBatchAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         _SetUnionRequest request = new()
         {
             SetName = setName.ToByteString(),
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Elements.Add(elements);
         try
@@ -622,25 +623,25 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheSetDeleteResponse.Success();
     }
 
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttl);
+        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), truncateBackToSize, ttl);
     }
 
-    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, string value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateBackToSize, ttl);
+        return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), truncateBackToSize, ttl);
     }
 
-    public async Task<CacheListPushFrontResponse> SendListPushFrontAsync(string cacheName, string listName, ByteString value, bool refreshTtl, int? truncateBackToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushFrontResponse> SendListPushFrontAsync(string cacheName, string listName, ByteString value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
         _ListPushFrontRequest request = new()
         {
             TruncateBackToSize = Convert.ToUInt32(truncateBackToSize.GetValueOrDefault()),
             ListName = listName.ToByteString(),
             Value = value,
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _ListPushFrontResponse response;
 
@@ -660,25 +661,25 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheListPushFrontResponse.Success(response);
     }
 
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, byte[] value, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttl);
+        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), truncateFrontToSize, ttl);
     }
 
-    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushBackResponse> ListPushBackAsync(string cacheName, string listName, string value, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
-        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), refreshTtl, truncateFrontToSize, ttl);
+        return await SendListPushBackAsync(cacheName, listName, value.ToByteString(), truncateFrontToSize, ttl);
     }
 
-    public async Task<CacheListPushBackResponse> SendListPushBackAsync(string cacheName, string listName, ByteString value, bool refreshTtl, int? truncateFrontToSize = null, TimeSpan? ttl = null)
+    public async Task<CacheListPushBackResponse> SendListPushBackAsync(string cacheName, string listName, ByteString value, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
         _ListPushBackRequest request = new()
         {
             TruncateFrontToSize = Convert.ToUInt32(truncateFrontToSize.GetValueOrDefault()),
             ListName = listName.ToByteString(),
             Value = value,
-            RefreshTtl = refreshTtl,
-            TtlMilliseconds = TtlToMilliseconds(ttl)
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _ListPushBackResponse response;
 
