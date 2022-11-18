@@ -8,8 +8,8 @@ namespace Momento.Sdk.Incubating.Requests
     /// For cache operations that modify a collection, there are a few things
     /// to consider.  The first time the collection is created, we need to
     /// set a TTL on it.  For subsequent operations that modify the collection
-    /// we may choose to update the TTL in order to prolong the life of the
-    /// cached collection object, or we may choose to leave the TTL unmodified
+    /// you may choose to update the TTL in order to prolong the life of the
+    /// cached collection object, or you may choose to leave the TTL unmodified
     /// in order to ensure that the collection expires at the original TTL.
     ///
     /// The default behavior is to refresh the TTL (to prolong the life of the
