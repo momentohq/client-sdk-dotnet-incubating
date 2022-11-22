@@ -24,7 +24,7 @@ public abstract class CacheDictionaryGetBatchResponse
                 {
                     responsesList.Add(new CacheDictionaryGetResponse.Hit(response.CacheBody));
                 }
-                if (response.Result == ECacheResult.Miss)
+                else if (response.Result == ECacheResult.Miss)
                 {
                     responsesList.Add(new CacheDictionaryGetResponse.Miss());
                 }
