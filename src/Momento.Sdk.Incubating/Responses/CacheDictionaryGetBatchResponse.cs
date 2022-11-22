@@ -38,7 +38,7 @@ public abstract class CacheDictionaryGetBatchResponse
 
         public Success(int numRequested)
         {
-            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
+            Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss()).ToList<CacheDictionaryGetResponse>();
         }
 
         public IEnumerable<string?> Strings()
