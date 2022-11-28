@@ -667,8 +667,13 @@ public class DictionaryTest : TestBase
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
         Assert.True(response is CacheDictionaryGetBatchResponse.Success, $"Unexpected response: {response}");
 
+        var success = (CacheDictionaryGetBatchResponse.Success)response;
+        Assert.Equal(3, success.Responses.Count);
+        Assert.True(success.Responses[0] is CacheDictionaryGetResponse.Hit);
+        Assert.True(success.Responses[1] is CacheDictionaryGetResponse.Hit);
+        Assert.True(success.Responses[2] is CacheDictionaryGetResponse.Miss);
         var values = new byte[]?[] { value1, value2, null };
-        Assert.Equal(values, ((CacheDictionaryGetBatchResponse.Success)response).ByteArrays);
+        Assert.Equal(values, success.ByteArrays);
     }
 
     [Fact]
@@ -737,8 +742,14 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetBatchResponse response = await client.DictionaryGetBatchAsync(cacheName, dictionaryName, new string[] { field1, field2, field3 });
         Assert.True(response is CacheDictionaryGetBatchResponse.Success, $"Unexpected response: {response}");
+        var success = (CacheDictionaryGetBatchResponse.Success)response;
+
+        Assert.Equal(3, success.Responses.Count);
+        Assert.True(success.Responses[0] is CacheDictionaryGetResponse.Hit);
+        Assert.True(success.Responses[1] is CacheDictionaryGetResponse.Hit);
+        Assert.True(success.Responses[2] is CacheDictionaryGetResponse.Miss);
         var values = new string?[] { value1, value2, null };
-        Assert.Equal(values, ((CacheDictionaryGetBatchResponse.Success)response).Strings());
+        Assert.Equal(values, success.Strings());
     }
 
     [Theory]
