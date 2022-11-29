@@ -793,10 +793,10 @@ public class DictionaryTest : TestBase
 
         Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
-        Assert.Equal(hitResponse.ValueStringStringDictionary, contentDictionary);
+        Assert.Equal(hitResponse.ValueDictionaryStringString, contentDictionary);
 
         // Test field caching behavior
-        Assert.Same(hitResponse.ValueStringStringDictionary, hitResponse.ValueStringStringDictionary);
+        Assert.Same(hitResponse.ValueDictionaryStringString, hitResponse.ValueDictionaryStringString);
     }
 
     [Fact]
@@ -819,10 +819,10 @@ public class DictionaryTest : TestBase
 
         Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
-        Assert.Equal(hitResponse.ValueStringByteArrayDictionary, contentDictionary);
+        Assert.Equal(hitResponse.ValueDictionaryStringByteArray, contentDictionary);
 
         // Test field caching behavior
-        Assert.Same(hitResponse.ValueStringByteArrayDictionary, hitResponse.ValueStringByteArrayDictionary);
+        Assert.Same(hitResponse.ValueDictionaryStringByteArray, hitResponse.ValueDictionaryStringByteArray);
     }
 
     [Fact]
@@ -847,15 +847,15 @@ public class DictionaryTest : TestBase
 
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
         // Exercise byte array dictionary structural equality comparer
-        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.ContainsKey(field1));
-        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.ContainsKey(field2));
-        Assert.Equal(2, hitResponse.ValueByteArrayByteArrayDictionary!.Count);
+        Assert.True(hitResponse.ValueDictionaryByteArrayByteArray!.ContainsKey(field1));
+        Assert.True(hitResponse.ValueDictionaryByteArrayByteArray!.ContainsKey(field2));
+        Assert.Equal(2, hitResponse.ValueDictionaryByteArrayByteArray!.Count);
 
         // Exercise DictionaryEquals extension
-        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.DictionaryEquals(contentDictionary));
+        Assert.True(hitResponse.ValueDictionaryByteArrayByteArray!.DictionaryEquals(contentDictionary));
 
         // Test field caching behavior
-        Assert.Same(hitResponse.ValueByteArrayByteArrayDictionary, hitResponse.ValueByteArrayByteArrayDictionary);
+        Assert.Same(hitResponse.ValueDictionaryByteArrayByteArray, hitResponse.ValueDictionaryByteArrayByteArray);
     }
 
     [Theory]
