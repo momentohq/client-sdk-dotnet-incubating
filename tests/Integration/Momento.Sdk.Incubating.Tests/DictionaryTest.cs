@@ -79,11 +79,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidByteArray();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
@@ -98,9 +98,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidByteArray();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.of(TimeSpan.FromSeconds(2)));
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.Of(TimeSpan.FromSeconds(2)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
@@ -153,9 +153,9 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidString();
 
-        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
+        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
-        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(2000);
 
@@ -170,11 +170,11 @@ public class DictionaryTest : TestBase
         var dictionaryName = Utils.NewGuidString();
         var field = Utils.NewGuidString();
 
-        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)));
+        CacheDictionaryIncrementResponse resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)));
         Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(101);
 
-        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        resp = await client.DictionaryIncrementAsync(cacheName, dictionaryName, field, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(resp is CacheDictionaryIncrementResponse.Success, $"Unexpected response: {resp}");
         await Task.Delay(4900);
 
@@ -290,11 +290,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)));
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
@@ -309,9 +309,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidString();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
@@ -353,11 +353,11 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)));
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(100);
 
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(4900);
 
@@ -372,9 +372,9 @@ public class DictionaryTest : TestBase
         var field = Utils.NewGuidString();
         var value = Utils.NewGuidByteArray();
 
-        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
+        CacheDictionarySetResponse setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
-        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        setResponse = await client.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(setResponse is CacheDictionarySetResponse.Success, $"Unexpected response: {setResponse}");
         await Task.Delay(2000);
 
@@ -415,7 +415,7 @@ public class DictionaryTest : TestBase
 
         var items = new Dictionary<byte[], byte[]>() { { field1, value1 }, { field2, value2 } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, items, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
@@ -434,10 +434,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<byte[], byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)));
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -452,8 +452,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<byte[], byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -512,10 +512,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
         var content = new Dictionary<string, string>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)));
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -530,8 +530,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidString();
         var content = new Dictionary<string, string>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -590,10 +590,10 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<string, byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         await Task.Delay(100);
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         await Task.Delay(4900);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
@@ -608,8 +608,8 @@ public class DictionaryTest : TestBase
         var value = Utils.NewGuidByteArray();
         var content = new Dictionary<string, byte[]>() { { field, value } };
 
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)));
-        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)));
+        await client.DictionarySetBatchAsync(cacheName, dictionaryName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);

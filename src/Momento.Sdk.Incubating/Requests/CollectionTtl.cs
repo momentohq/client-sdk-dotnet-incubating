@@ -14,7 +14,7 @@ namespace Momento.Sdk.Incubating.Requests
     ///
     /// The default behavior is to refresh the TTL (to prolong the life of the
     /// collection) each time it is written.  This behavior can be modified
-    /// by calling the <see cref="withNoRefreshTtlOnUpdates"/>
+    /// by calling the <see cref="WithNoRefreshTtlOnUpdates"/>
     /// </summary>
     /// 
     /// <param name="Ttl">The TimeSpan after which the cached collection
@@ -32,7 +32,7 @@ namespace Momento.Sdk.Incubating.Requests
         /// time the collection is modified.
         /// </summary>
         /// <returns></returns>
-        public static CollectionTtl fromCacheTtl()
+        public static CollectionTtl FromCacheTtl()
         {
             return new CollectionTtl(Ttl: null, RefreshTtl: true);
         }
@@ -43,7 +43,7 @@ namespace Momento.Sdk.Incubating.Requests
         /// </summary>
         /// <param name="ttl"></param>
         /// <returns></returns>
-        public static CollectionTtl of(TimeSpan ttl)
+        public static CollectionTtl Of(TimeSpan ttl)
         {
             return new CollectionTtl(Ttl: ttl);
         }
@@ -53,7 +53,7 @@ namespace Momento.Sdk.Incubating.Requests
         /// the collection is modified.  (This is the default behavior.)
         /// </summary>
         /// <returns>A copy of this CollectionTtl with the refresh TTL behavior enabled.</returns>
-        public CollectionTtl withRefreshTtlOnUpdates()
+        public CollectionTtl WithRefreshTtlOnUpdates()
         {
             return new CollectionTtl(Ttl: this.Ttl, RefreshTtl: true);
         }
@@ -65,7 +65,7 @@ namespace Momento.Sdk.Incubating.Requests
         /// if you make modifications to the value of the collection.
         /// </summary>
         /// <returns>A copy of this CollectionTtl with the refresh TTL behavior disabled.</returns>
-        public CollectionTtl withNoRefreshTtlOnUpdates()
+        public CollectionTtl WithNoRefreshTtlOnUpdates()
         {
             return new CollectionTtl(Ttl: this.Ttl, RefreshTtl: false);
         }
