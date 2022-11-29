@@ -46,11 +46,11 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidByteArray();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(100);
 
-        response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(4900);
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -63,9 +63,9 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidByteArray();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
-        await client.SetAddAsync(cacheName, setName, element, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.SetAddAsync(cacheName, setName, element, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -107,11 +107,11 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidString();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(100);
 
-        response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(4900);
 
@@ -125,9 +125,9 @@ public class SetTest : TestBase
         var setName = Utils.NewGuidString();
         var element = Utils.NewGuidString();
 
-        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
+        CacheSetAddResponse response = await client.SetAddAsync(cacheName, setName, element, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
-        response = await client.SetAddAsync(cacheName, setName, element, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        response = await client.SetAddAsync(cacheName, setName, element, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(response is CacheSetAddResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(2000);
 
@@ -184,11 +184,11 @@ public class SetTest : TestBase
         var element = Utils.NewGuidByteArray();
         var content = new List<byte[]>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(100);
 
-        response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(4900);
 
@@ -203,9 +203,9 @@ public class SetTest : TestBase
         var element = Utils.NewGuidByteArray();
         var content = new List<byte[]>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
-        await client.SetAddBatchAsync(cacheName, setName, content, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        await client.SetAddBatchAsync(cacheName, setName, content, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         await Task.Delay(2000);
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
@@ -264,11 +264,11 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
         var content = new List<string>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(5)).withNoRefreshTtlOnUpdates());
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(100);
 
-        response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(10)).withNoRefreshTtlOnUpdates());
+        response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(4900);
 
@@ -283,9 +283,9 @@ public class SetTest : TestBase
         var element = Utils.NewGuidString();
         var content = new List<string>() { element };
 
-        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.of(TimeSpan.FromSeconds(2)).withNoRefreshTtlOnUpdates());
+        CacheSetAddBatchResponse response = await client.SetAddBatchAsync(cacheName, setName, content, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
-        response = await client.SetAddBatchAsync(cacheName, setName, content, CollectionTtl.of(TimeSpan.FromSeconds(10)));
+        response = await client.SetAddBatchAsync(cacheName, setName, content, CollectionTtl.Of(TimeSpan.FromSeconds(10)));
         Assert.True(response is CacheSetAddBatchResponse.Success, $"Unexpected response: {response}");
         await Task.Delay(2000);
 
