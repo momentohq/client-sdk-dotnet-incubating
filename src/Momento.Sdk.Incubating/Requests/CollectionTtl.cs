@@ -17,17 +17,17 @@ namespace Momento.Sdk.Incubating.Requests
     /// by calling the <see cref="WithNoRefreshTtlOnUpdates"/>
     /// </summary>
     /// 
-    /// <param name="Ttl">The TimeSpan after which the cached collection
+    /// <param name="Ttl">The <see cref="TimeSpan"/> after which the cached collection
     /// should be expired from the cache.  If <code>null</code>, we use the default
-    /// TTL TimeSpan that was passed to the <see cref="SimpleCacheClient"/>constructor</param>.
-    /// <param name="RefreshTtl">If true, the collection's TTL will be refreshed (to
-    /// prolong the life of the collection) on every update.  If false, the collection's
+    /// TTL <see cref="TimeSpan"/> that was passed to the <see cref="SimpleCacheClient"/>constructor</param>.
+    /// <param name="RefreshTtl">If <see langword="true"/>, the collection's TTL will be refreshed (to
+    /// prolong the life of the collection) on every update.  If <see langword="false"/>, the collection's
     /// TTL will only be set when the collection is initially created.</param>
     public record struct CollectionTtl(TimeSpan? Ttl = null, bool RefreshTtl = true)
     {
         /// <summary>
         /// The default way to handle TTLs for collections.  The default TTL
-        /// TimeSpan that was specified when constructing the <see cref="SimpleCacheClient"/>
+        /// <see cref="TimeSpan"/> that was specified when constructing the <see cref="SimpleCacheClient"/>
         /// will be used, and the TTL for the collection will be refreshed any
         /// time the collection is modified.
         /// </summary>
@@ -36,8 +36,9 @@ namespace Momento.Sdk.Incubating.Requests
         {
             return new CollectionTtl(Ttl: null, RefreshTtl: true);
         }
+
         /// <summary>
-        /// Constructs a CollectionTtl with the specified TimeSpan.  The TTL
+        /// Constructs a CollectionTtl with the specified <see cref="TimeSpan"/>.  The TTL
         /// for the collection will be refreshed any time the collection is
         /// modified.
         /// </summary>
@@ -46,6 +47,17 @@ namespace Momento.Sdk.Incubating.Requests
         public static CollectionTtl Of(TimeSpan ttl)
         {
             return new CollectionTtl(Ttl: ttl);
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="CollectionTtl"/> with the specified <see cref="TimeSpan"/>.
+        /// Will only refresh if the TTL is provided (ie not <see langword="null" />).
+        /// </summary>
+        /// <param name="ttl"></param>
+        /// <returns></returns>
+        public static CollectionTtl RefreshTtlIfProvided(TimeSpan? ttl = null)
+        {
+            return new CollectionTtl(Ttl: ttl, RefreshTtl: ttl.HasValue);
         }
 
         /// <summary>
