@@ -36,6 +36,7 @@ namespace Momento.Sdk.Incubating.Requests
         {
             return new CollectionTtl(Ttl: null, RefreshTtl: true);
         }
+
         /// <summary>
         /// Constructs a CollectionTtl with the specified TimeSpan.  The TTL
         /// for the collection will be refreshed any time the collection is

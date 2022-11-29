@@ -6,9 +6,9 @@ using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 
 [Collection("SimpleCacheClient")]
-public class BatchTests : TestBase
+public class BatchTest : TestBase
 {
-    public BatchTests(SimpleCacheClientFixture fixture) : base(fixture)
+    public BatchTest(SimpleCacheClientFixture fixture) : base(fixture)
     {
     }
 
