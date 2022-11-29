@@ -24,7 +24,7 @@ public abstract class CacheDictionaryGetBatchResponse
                 {
                     responsesList.Add(new CacheDictionaryGetResponse.Hit(response.CacheBody));
                 }
-                if (response.Result == ECacheResult.Miss)
+                else if (response.Result == ECacheResult.Miss)
                 {
                     responsesList.Add(new CacheDictionaryGetResponse.Miss());
                 }
@@ -38,7 +38,7 @@ public abstract class CacheDictionaryGetBatchResponse
 
         public Success(int numRequested)
         {
-            Responses = (List<CacheDictionaryGetResponse>)Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss());
+            Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss()).ToList<CacheDictionaryGetResponse>();
         }
 
         public IEnumerable<string?> Strings()
@@ -102,5 +102,9 @@ public abstract class CacheDictionaryGetBatchResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        public override string ToString()
+        {
+            return base.ToString() + ": " + Message;
+        }
     }
 }
