@@ -50,7 +50,7 @@ public abstract class CacheDictionaryGetBatchResponse
                 {
                     if (response is CacheDictionaryGetResponse.Hit hitResponse)
                     {
-                        ret.Add(hitResponse.String());
+                        ret.Add(hitResponse.ValueString);
                     }
                     else if (response is CacheDictionaryGetResponse.Miss missResponse)
                     {
@@ -70,7 +70,7 @@ public abstract class CacheDictionaryGetBatchResponse
                 {
                     if (response is CacheDictionaryGetResponse.Hit hitResponse)
                     {
-                        ret.Add(hitResponse.ByteArray);
+                        ret.Add(hitResponse.ValueByteArray);
                     }
                     else if (response is CacheDictionaryGetResponse.Miss missResponse)
                     {
