@@ -106,7 +106,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueByteArray);
     }
 
     [Theory]
@@ -144,7 +144,7 @@ public class DictionaryTest : TestBase
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, fieldName);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
         var hitResponse = (CacheDictionaryGetResponse.Hit)getResponse;
-        Assert.Equal("-1000", hitResponse.String());
+        Assert.Equal("-1000", hitResponse.ValueString);
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal("2", ((CacheDictionaryGetResponse.Hit)response).String());
+        Assert.Equal("2", ((CacheDictionaryGetResponse.Hit)response).ValueString);
     }
 
     [Fact]
@@ -317,7 +317,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).String());
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueString);
     }
 
     [Theory]
@@ -380,7 +380,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueByteArray);
     }
 
     [Fact]
@@ -419,11 +419,11 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
+        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ValueByteArray);
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
+        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ValueByteArray);
     }
 
     [Fact]
@@ -458,7 +458,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueByteArray);
     }
 
     [Fact]
@@ -497,11 +497,11 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).String());
+        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ValueString);
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).String());
+        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ValueString);
     }
 
     [Fact]
@@ -536,7 +536,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).String());
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueString);
     }
 
     [Fact]
@@ -575,11 +575,11 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field1);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
+        Assert.Equal(value1, ((CacheDictionaryGetResponse.Hit)getResponse).ValueByteArray);
 
         getResponse = await client.DictionaryGetAsync(cacheName, dictionaryName, field2);
         Assert.True(getResponse is CacheDictionaryGetResponse.Hit, $"Unexpected response: {getResponse}");
-        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ByteArray);
+        Assert.Equal(value2, ((CacheDictionaryGetResponse.Hit)getResponse).ValueByteArray);
     }
 
     [Fact]
@@ -614,7 +614,7 @@ public class DictionaryTest : TestBase
 
         CacheDictionaryGetResponse response = await client.DictionaryGetAsync(cacheName, dictionaryName, field);
         Assert.True(response is CacheDictionaryGetResponse.Hit, $"Unexpected response: {response}");
-        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ByteArray);
+        Assert.Equal(value, ((CacheDictionaryGetResponse.Hit)response).ValueByteArray);
     }
 
     [Fact]
@@ -673,7 +673,7 @@ public class DictionaryTest : TestBase
         Assert.True(success.Responses[1] is CacheDictionaryGetResponse.Hit);
         Assert.True(success.Responses[2] is CacheDictionaryGetResponse.Miss);
         var values = new byte[]?[] { value1, value2, null };
-        Assert.Equal(values, success.ByteArrays);
+        Assert.Equal(values, success.ValueByteArrays);
     }
 
     [Fact]
@@ -693,8 +693,8 @@ public class DictionaryTest : TestBase
         var byteArrays = new byte[]?[] { null, null, null };
         var strings = new string?[] { null, null, null };
 
-        Assert.Equal(byteArrays, nullResponse.ByteArrays);
-        Assert.Equal(strings, nullResponse.Strings()!);
+        Assert.Equal(byteArrays, nullResponse.ValueByteArrays);
+        Assert.Equal(strings, nullResponse.ValueStrings!);
     }
 
     [Fact]
@@ -752,7 +752,7 @@ public class DictionaryTest : TestBase
         Assert.True(success.Responses[1] is CacheDictionaryGetResponse.Hit);
         Assert.True(success.Responses[2] is CacheDictionaryGetResponse.Miss);
         var values = new string?[] { value1, value2, null };
-        Assert.Equal(values, success.Strings());
+        Assert.Equal(values, success.ValueStrings);
     }
 
     [Theory]
@@ -793,10 +793,10 @@ public class DictionaryTest : TestBase
 
         Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
-        Assert.Equal(hitResponse.StringStringDictionary(), contentDictionary);
+        Assert.Equal(hitResponse.ValueStringStringDictionary, contentDictionary);
 
         // Test field caching behavior
-        Assert.Same(hitResponse.StringStringDictionary(), hitResponse.StringStringDictionary());
+        Assert.Same(hitResponse.ValueStringStringDictionary, hitResponse.ValueStringStringDictionary);
     }
 
     [Fact]
@@ -819,10 +819,10 @@ public class DictionaryTest : TestBase
 
         Assert.True(fetchResponse is CacheDictionaryFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
-        Assert.Equal(hitResponse.StringByteArrayDictionary(), contentDictionary);
+        Assert.Equal(hitResponse.ValueStringByteArrayDictionary, contentDictionary);
 
         // Test field caching behavior
-        Assert.Same(hitResponse.StringByteArrayDictionary(), hitResponse.StringByteArrayDictionary());
+        Assert.Same(hitResponse.ValueStringByteArrayDictionary, hitResponse.ValueStringByteArrayDictionary);
     }
 
     [Fact]
@@ -847,15 +847,15 @@ public class DictionaryTest : TestBase
 
         var hitResponse = (CacheDictionaryFetchResponse.Hit)fetchResponse;
         // Exercise byte array dictionary structural equality comparer
-        Assert.True(hitResponse.ByteArrayByteArrayDictionary!.ContainsKey(field1));
-        Assert.True(hitResponse.ByteArrayByteArrayDictionary!.ContainsKey(field2));
-        Assert.Equal(2, hitResponse.ByteArrayByteArrayDictionary!.Count);
+        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.ContainsKey(field1));
+        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.ContainsKey(field2));
+        Assert.Equal(2, hitResponse.ValueByteArrayByteArrayDictionary!.Count);
 
         // Exercise DictionaryEquals extension
-        Assert.True(hitResponse.ByteArrayByteArrayDictionary!.DictionaryEquals(contentDictionary));
+        Assert.True(hitResponse.ValueByteArrayByteArrayDictionary!.DictionaryEquals(contentDictionary));
 
         // Test field caching behavior
-        Assert.Same(hitResponse.ByteArrayByteArrayDictionary, hitResponse.ByteArrayByteArrayDictionary);
+        Assert.Same(hitResponse.ValueByteArrayByteArrayDictionary, hitResponse.ValueByteArrayByteArrayDictionary);
     }
 
     [Theory]

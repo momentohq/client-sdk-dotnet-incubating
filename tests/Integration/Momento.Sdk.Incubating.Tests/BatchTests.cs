@@ -44,8 +44,8 @@ public class BatchTests : TestBase
         CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
         Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
         var goodResult = (CacheGetBatchResponse.Success)result;
-        string? stringResult1 = goodResult.Strings().ToList()[0];
-        string? stringResult2 = goodResult.Strings().ToList()[1];
+        string? stringResult1 = goodResult.ValueStrings.ToList()[0];
+        string? stringResult2 = goodResult.ValueStrings.ToList()[1];
         Assert.Equal(value1, stringResult1);
         Assert.Equal(value2, stringResult2);
     }
@@ -82,7 +82,7 @@ public class BatchTests : TestBase
         CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
         Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
         var goodResult = (CacheGetBatchResponse.Success)result;
-        Assert.Equal(goodResult.Strings(), new string[] { value1, value2, null! });
+        Assert.Equal(goodResult.ValueStrings, new string[] { value1, value2, null! });
         Assert.True(goodResult.Responses[0] is CacheGetResponse.Hit);
         Assert.True(goodResult.Responses[1] is CacheGetResponse.Hit);
         Assert.True(goodResult.Responses[2] is CacheGetResponse.Miss);

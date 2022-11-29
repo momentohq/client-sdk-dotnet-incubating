@@ -35,7 +35,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -70,7 +70,7 @@ public class SetTest : TestBase
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
-        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet);
+        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).ValueByteArraySet);
     }
 
     [Theory]
@@ -96,7 +96,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueStringSet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -133,7 +133,7 @@ public class SetTest : TestBase
 
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
-        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).StringSet());
+        Assert.Single(((CacheSetFetchResponse.Hit)fetchResponse).ValueStringSet);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueByteArraySet;
         Assert.Equal(2, set!.Count);
         Assert.Contains(element1, set);
         Assert.Contains(element2, set);
@@ -211,7 +211,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -251,7 +251,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueStringSet;
         Assert.Equal(2, set!.Count);
         Assert.Contains(element1, set);
         Assert.Contains(element2, set);
@@ -292,7 +292,7 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
 
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueStringSet;
         Assert.Single(set);
         Assert.Contains(element, set);
     }
@@ -323,7 +323,7 @@ public class SetTest : TestBase
         // Fetch the whole set and make sure response has element we expect
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ByteArraySet;
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueByteArraySet;
         Assert.Single(set);
         Assert.Contains(element, set);
 
@@ -376,7 +376,7 @@ public class SetTest : TestBase
         Assert.True(removeResponse is CacheSetRemoveElementResponse.Success, $"Unexpected response: {removeResponse}");
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
-        var set = ((CacheSetFetchResponse.Hit)fetchResponse).StringSet();
+        var set = ((CacheSetFetchResponse.Hit)fetchResponse).ValueStringSet;
         Assert.Single(set);
         Assert.Contains(element, set);
 
@@ -459,8 +459,8 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        Assert.Single(hitResponse.ByteArraySet!);
-        Assert.Contains(otherElement, hitResponse.ByteArraySet!);
+        Assert.Single(hitResponse.ValueByteArraySet!);
+        Assert.Contains(otherElement, hitResponse.ValueByteArraySet!);
     }
 
     [Fact]
@@ -518,8 +518,8 @@ public class SetTest : TestBase
         CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
         Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
         var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
-        Assert.Single(hitResponse.ByteArraySet!);
-        Assert.Contains(otherElement, hitResponse.ByteArraySet!);
+        Assert.Single(hitResponse.ValueByteArraySet!);
+        Assert.Contains(otherElement, hitResponse.ValueByteArraySet!);
     }
 
     [Theory]
@@ -549,8 +549,8 @@ public class SetTest : TestBase
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
         Assert.True(response is CacheSetFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheSetFetchResponse.Hit)response;
-        var set1 = hitResponse.ByteArraySet;
-        var set2 = hitResponse.ByteArraySet;
+        var set1 = hitResponse.ValueByteArraySet;
+        var set2 = hitResponse.ValueByteArraySet;
         Assert.Same(set1, set2);
     }
 
@@ -563,8 +563,8 @@ public class SetTest : TestBase
         CacheSetFetchResponse response = await client.SetFetchAsync(cacheName, setName);
         Assert.True(response is CacheSetFetchResponse.Hit, $"Unexpected response: {response}");
         var hitResponse = (CacheSetFetchResponse.Hit)response;
-        var set1 = hitResponse.StringSet();
-        var set2 = hitResponse.StringSet();
+        var set1 = hitResponse.ValueStringSet;
+        var set2 = hitResponse.ValueStringSet;
         Assert.Same(set1, set2);
     }
 

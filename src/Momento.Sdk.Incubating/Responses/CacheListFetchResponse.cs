@@ -31,9 +31,9 @@ public abstract class CacheListFetchResponse
             });
         }
 
-        public List<byte[]> ByteArrayList { get => _byteArrayList.Value; }
+        public List<byte[]> ValueByteArrayList { get => _byteArrayList.Value; }
 
-        public List<string> StringList() => _stringList.Value;
+        public List<string> ValueStringList { get => _stringList.Value; }
     }
 
     public class Miss : CacheListFetchResponse

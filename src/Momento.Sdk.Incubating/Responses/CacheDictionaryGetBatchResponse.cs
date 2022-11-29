@@ -41,24 +41,27 @@ public abstract class CacheDictionaryGetBatchResponse
             Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss()).ToList<CacheDictionaryGetResponse>();
         }
 
-        public IEnumerable<string?> Strings()
+        public IEnumerable<string?> ValueStrings
         {
-            var ret = new List<string?>();
-            foreach (CacheDictionaryGetResponse response in Responses)
+            get
             {
-                if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                var ret = new List<string?>();
+                foreach (CacheDictionaryGetResponse response in Responses)
                 {
-                    ret.Add(hitResponse.String());
+                    if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                    {
+                        ret.Add(hitResponse.String());
+                    }
+                    else if (response is CacheDictionaryGetResponse.Miss missResponse)
+                    {
+                        ret.Add(null);
+                    }
                 }
-                else if (response is CacheDictionaryGetResponse.Miss missResponse)
-                {
-                    ret.Add(null);
-                }
+                return ret.ToArray();
             }
-            return ret.ToArray();
         }
 
-        public IEnumerable<byte[]?> ByteArrays
+        public IEnumerable<byte[]?> ValueByteArrays
         {
             get
             {

@@ -15,24 +15,27 @@ public abstract class CacheGetBatchResponse
             this.Responses = new(responses);
         }
 
-        public IEnumerable<string?> Strings()
+        public IEnumerable<string?> ValueStrings
         {
-            var ret = new List<string?>();
-            foreach (CacheGetResponse response in Responses)
+            get
             {
-                if (response is CacheGetResponse.Hit hitResponse)
+                var ret = new List<string?>();
+                foreach (CacheGetResponse response in Responses)
                 {
-                    ret.Add(hitResponse.ValueString);
+                    if (response is CacheGetResponse.Hit hitResponse)
+                    {
+                        ret.Add(hitResponse.ValueString);
+                    }
+                    else if (response is CacheGetResponse.Miss missResponse)
+                    {
+                        ret.Add(null);
+                    }
                 }
-                else if (response is CacheGetResponse.Miss missResponse)
-                {
-                    ret.Add(null);
-                }
+                return ret.ToArray();
             }
-            return ret.ToArray();
         }
 
-        public IEnumerable<byte[]?> ByteArrays
+        public IEnumerable<byte[]?> ValueByteArrays
         {
             get
             {
