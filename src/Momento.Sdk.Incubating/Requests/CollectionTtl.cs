@@ -50,6 +50,17 @@ namespace Momento.Sdk.Incubating.Requests
         }
 
         /// <summary>
+        /// Constructs a <see cref="CollectionTtl"/> with the specified <see cref="TimeSpan"/>.
+        /// Will only refresh if the TTL is provided (ie not <see langword="null" />).
+        /// </summary>
+        /// <param name="ttl"></param>
+        /// <returns></returns>
+        public static CollectionTtl RefreshTtlIfProvided(TimeSpan? ttl = null)
+        {
+            return new CollectionTtl(Ttl: ttl, RefreshTtl: ttl.HasValue);
+        }
+
+        /// <summary>
         /// Specifies that the TTL for the collection should be refreshed when
         /// the collection is modified.  (This is the default behavior.)
         /// </summary>

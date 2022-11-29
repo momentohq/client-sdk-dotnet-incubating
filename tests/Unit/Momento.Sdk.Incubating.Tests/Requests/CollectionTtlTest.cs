@@ -80,4 +80,20 @@ public class CollectionTtlTest
         Assert.Null(newCollectionTtl.Ttl);
         Assert.False(newCollectionTtl.RefreshTtl);
     }
+
+    [Fact]
+    public void RefreshTtlIfProvided_NoTtl_DoNotRefresh()
+    {
+        var collectionTtl = CollectionTtl.RefreshTtlIfProvided(null);
+        Assert.False(collectionTtl.RefreshTtl);
+        Assert.Null(collectionTtl.Ttl);
+    }
+
+    [Fact]
+    public void RefreshTtlIfProvided_HasTtl_DoRefresh()
+    {
+        var collectionTtl = CollectionTtl.RefreshTtlIfProvided(TimeSpan.FromDays(1));
+        Assert.True(collectionTtl.RefreshTtl);
+        Assert.Equal(TimeSpan.FromDays(1), collectionTtl.Ttl);
+    }
 }
