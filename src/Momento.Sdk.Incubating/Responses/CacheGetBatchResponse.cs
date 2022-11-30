@@ -4,6 +4,7 @@ using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
+#if USE_UNARY_BATCH
 public abstract class CacheGetBatchResponse
 {
     public class Success : CacheGetBatchResponse
@@ -85,3 +86,4 @@ public abstract class CacheGetBatchResponse
         }
     }
 }
+#endif

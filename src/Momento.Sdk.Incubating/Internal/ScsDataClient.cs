@@ -21,6 +21,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
     }
 
+#if USE_UNARY_BATCH
     public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
     {
         // Gather the tasks
@@ -124,6 +125,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         return new CacheSetBatchResponse.Success();
     }
+#endif
 
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(byte[] field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, string value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };

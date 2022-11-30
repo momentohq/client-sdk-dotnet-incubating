@@ -5,6 +5,7 @@ using Momento.Sdk.Config;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 
+#if USE_UNARY_BATCH
 [Collection("SimpleCacheClient")]
 public class BatchTest : TestBase
 {
@@ -40,12 +41,11 @@ public class BatchTest : TestBase
         Assert.True(setResponse is CacheSetResponse.Success, $"Unexpected response: {setResponse}");
 
         List<byte[]> keys = new() { Utils.Utf8ToByteArray(key1), Utils.Utf8ToByteArray(key2) };
-
         CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
         Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
         var goodResult = (CacheGetBatchResponse.Success)result;
-        string? stringResult1 = goodResult.ValueStrings.ToList()[0];
-        string? stringResult2 = goodResult.ValueStrings.ToList()[1];
+        string? stringResult1 = goodResult.Strings().ToList()[0];
+        string? stringResult2 = goodResult.Strings().ToList()[1];
         Assert.Equal(value1, stringResult1);
         Assert.Equal(value2, stringResult2);
     }
@@ -82,7 +82,7 @@ public class BatchTest : TestBase
         CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
         Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
         var goodResult = (CacheGetBatchResponse.Success)result;
-        Assert.Equal(goodResult.ValueStrings, new string[] { value1, value2, null! });
+        Assert.Equal(goodResult.Strings(), new string[] { value1, value2, null! });
         Assert.True(goodResult.Responses[0] is CacheGetResponse.Hit);
         Assert.True(goodResult.Responses[1] is CacheGetResponse.Hit);
         Assert.True(goodResult.Responses[2] is CacheGetResponse.Miss);
@@ -187,3 +187,4 @@ public class BatchTest : TestBase
         Assert.Equal(value2, goodGetResponse.ValueString);
     }
 }
+#endif

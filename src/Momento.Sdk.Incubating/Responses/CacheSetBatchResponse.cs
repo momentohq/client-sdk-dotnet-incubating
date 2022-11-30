@@ -1,7 +1,8 @@
-namespace Momento.Sdk.Incubating.Responses;
+﻿namespace Momento.Sdk.Incubating.Responses;
 
 using Momento.Sdk.Exceptions;
 
+#if USE_UNARY_BATCH
 public abstract class CacheSetBatchResponse
 {
 
@@ -37,3 +38,4 @@ public abstract class CacheSetBatchResponse
     }
 
 }
+#endif
