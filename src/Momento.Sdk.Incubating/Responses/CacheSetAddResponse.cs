@@ -2,12 +2,12 @@ using Momento.Sdk.Exceptions;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheSetAddElementsResponse
+public abstract class CacheSetAddResponse
 {
-    public class Success : CacheSetAddElementsResponse
+    public class Success : CacheSetAddResponse
     {
     }
-    public class Error : CacheSetAddElementsResponse
+    public class Error : CacheSetAddResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)
