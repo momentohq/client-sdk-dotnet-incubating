@@ -13,24 +13,24 @@ public abstract class CacheDictionaryGetFieldsResponse
 {
     public class Success : CacheDictionaryGetFieldsResponse
     {
-        public List<CacheDictionaryGetResponse> Responses { get; private set; }
+        public List<CacheDictionaryGetFieldResponse> Responses { get; private set; }
 
         public Success(_DictionaryGetResponse responses)
         {
-            var responsesList = new List<CacheDictionaryGetResponse>();
+            var responsesList = new List<CacheDictionaryGetFieldResponse>();
             foreach (_DictionaryGetResponsePart response in responses.Found.Items)
             {
                 if (response.Result == ECacheResult.Hit)
                 {
-                    responsesList.Add(new CacheDictionaryGetResponse.Hit(response.CacheBody));
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Hit(response.CacheBody));
                 }
                 else if (response.Result == ECacheResult.Miss)
                 {
-                    responsesList.Add(new CacheDictionaryGetResponse.Miss());
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Miss());
                 }
                 else
                 {
-                    responsesList.Add(new CacheDictionaryGetResponse.Error(new UnknownException(response.Result.ToString())));
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Error(new UnknownException(response.Result.ToString())));
                 }
             }
             this.Responses = responsesList;
@@ -38,7 +38,7 @@ public abstract class CacheDictionaryGetFieldsResponse
 
         public Success(int numRequested)
         {
-            Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetResponse.Miss()).ToList<CacheDictionaryGetResponse>();
+            Responses = Enumerable.Range(1, numRequested).Select(_ => new CacheDictionaryGetFieldResponse.Miss()).ToList<CacheDictionaryGetFieldResponse>();
         }
 
         public IEnumerable<string?> ValueStrings
@@ -46,13 +46,13 @@ public abstract class CacheDictionaryGetFieldsResponse
             get
             {
                 var ret = new List<string?>();
-                foreach (CacheDictionaryGetResponse response in Responses)
+                foreach (CacheDictionaryGetFieldResponse response in Responses)
                 {
-                    if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                    if (response is CacheDictionaryGetFieldResponse.Hit hitResponse)
                     {
                         ret.Add(hitResponse.ValueString);
                     }
-                    else if (response is CacheDictionaryGetResponse.Miss missResponse)
+                    else if (response is CacheDictionaryGetFieldResponse.Miss missResponse)
                     {
                         ret.Add(null);
                     }
@@ -66,13 +66,13 @@ public abstract class CacheDictionaryGetFieldsResponse
             get
             {
                 var ret = new List<byte[]?>();
-                foreach (CacheDictionaryGetResponse response in Responses)
+                foreach (CacheDictionaryGetFieldResponse response in Responses)
                 {
-                    if (response is CacheDictionaryGetResponse.Hit hitResponse)
+                    if (response is CacheDictionaryGetFieldResponse.Hit hitResponse)
                     {
                         ret.Add(hitResponse.ValueByteArray);
                     }
-                    else if (response is CacheDictionaryGetResponse.Miss missResponse)
+                    else if (response is CacheDictionaryGetFieldResponse.Miss missResponse)
                     {
                         ret.Add(null);
                     }
