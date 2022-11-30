@@ -2,13 +2,13 @@
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheDictionarySetFieldsResponse
+public abstract class CacheDictionarySetFieldResponse
 {
-    public class Success : CacheDictionarySetFieldsResponse
+    public class Success : CacheDictionarySetFieldResponse
     {
 
     }
-    public class Error : CacheDictionarySetFieldsResponse
+    public class Error : CacheDictionarySetFieldResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)
