@@ -40,11 +40,11 @@ public abstract class CacheDictionaryFetchResponse
             });
         }
 
-        public Dictionary<byte[], byte[]> ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
+        public Dictionary<byte[], byte[]> ValueDictionaryByteArrayByteArray { get => _byteArrayByteArrayDictionary.Value; }
 
-        public Dictionary<string, string> StringStringDictionary() => _stringStringDictionary.Value;
+        public Dictionary<string, string> ValueDictionaryStringString { get => _stringStringDictionary.Value; }
 
-        public Dictionary<string, byte[]> StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
+        public Dictionary<string, byte[]> ValueDictionaryStringByteArray { get => _stringByteArrayDictionary.Value; }
     }
 
     public class Miss : CacheDictionaryFetchResponse

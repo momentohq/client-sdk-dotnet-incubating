@@ -17,12 +17,12 @@ public abstract class CacheListPopFrontResponse
             this.value = response.Found.Front;
         }
 
-        public byte[] ByteArray
+        public byte[] ValueByteArray
         {
             get => value.ToByteArray();
         }
 
-        public string String() => value.ToStringUtf8();
+        public string ValueString { get => value.ToStringUtf8(); }
     }
 
     public class Miss : CacheListPopFrontResponse
