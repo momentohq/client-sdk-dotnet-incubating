@@ -105,6 +105,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.simpleCacheClient.SetAsync(cacheName, key, value, ttl);
     }
 
+#if USE_UNARY_BATCH
     /// <summary>
     /// Gets multiple values from the cache.
     /// </summary>
@@ -179,6 +180,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         return await this.dataClient.SetBatchAsync(this, cacheName, items, ttl);
     }
+#endif
 
     /// <summary>
     /// Set the dictionary field to a value with a given time to live (TTL) seconds.
