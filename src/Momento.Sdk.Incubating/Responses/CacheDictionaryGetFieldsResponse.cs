@@ -9,9 +9,9 @@ using static Momento.Protos.CacheClient._DictionaryGetResponse.Types;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheDictionaryGetBatchResponse
+public abstract class CacheDictionaryGetFieldsResponse
 {
-    public class Success : CacheDictionaryGetBatchResponse
+    public class Success : CacheDictionaryGetFieldsResponse
     {
         public List<CacheDictionaryGetResponse> Responses { get; private set; }
 
@@ -82,7 +82,7 @@ public abstract class CacheDictionaryGetBatchResponse
         }
     }
 
-    public class Error : CacheDictionaryGetBatchResponse
+    public class Error : CacheDictionaryGetFieldsResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)

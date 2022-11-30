@@ -6,9 +6,9 @@ using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheDictionaryGetResponse
+public abstract class CacheDictionaryGetFieldResponse
 {
-    public class Hit : CacheDictionaryGetResponse
+    public class Hit : CacheDictionaryGetFieldResponse
     {
         protected readonly ByteString value;
 
@@ -30,12 +30,12 @@ public abstract class CacheDictionaryGetResponse
         public string ValueString { get => value.ToStringUtf8(); }
     }
 
-    public class Miss : CacheDictionaryGetResponse
+    public class Miss : CacheDictionaryGetFieldResponse
     {
 
     }
 
-    public class Error : CacheDictionaryGetResponse
+    public class Error : CacheDictionaryGetFieldResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)

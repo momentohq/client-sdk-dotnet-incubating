@@ -129,32 +129,32 @@ internal sealed class ScsDataClient : ScsDataClientBase
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, string value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
     private _DictionaryFieldValuePair[] ToSingletonFieldValuePair(string field, byte[] value) => new _DictionaryFieldValuePair[] { new _DictionaryFieldValuePair() { Field = field.ToByteString(), Value = value.ToByteString() } };
 
-    public async Task<CacheDictionarySetResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendDictionarySetFieldAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendDictionarySetFieldAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendDictionarySetFieldAsync(cacheName, dictionaryName, ToSingletonFieldValuePair(field, value), ttl);
     }
 
-    public async Task<CacheDictionaryGetResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, byte[] field)
+    public async Task<CacheDictionaryGetFieldResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, byte[] field)
     {
         return await SendDictionaryGetFieldAsync(cacheName, dictionaryName, field.ToSingletonByteString());
     }
 
-    public async Task<CacheDictionaryGetResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, string field)
+    public async Task<CacheDictionaryGetFieldResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, string field)
     {
         return await SendDictionaryGetFieldAsync(cacheName, dictionaryName, field.ToSingletonByteString());
     }
 
-    private async Task<CacheDictionaryGetResponse> SendDictionaryGetFieldAsync(string cacheName, string dictionaryName, IEnumerable<ByteString> fields)
+    private async Task<CacheDictionaryGetFieldResponse> SendDictionaryGetFieldAsync(string cacheName, string dictionaryName, IEnumerable<ByteString> fields)
     {
         _DictionaryGetRequest request = new() { DictionaryName = dictionaryName.ToByteString() };
         request.Fields.Add(fields);
@@ -171,47 +171,47 @@ internal sealed class ScsDataClient : ScsDataClientBase
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
             }
-            return new CacheDictionaryGetResponse.Error(exc);
+            return new CacheDictionaryGetFieldResponse.Error(exc);
         }
 
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Missing)
         {
-            return new CacheDictionaryGetResponse.Miss();
+            return new CacheDictionaryGetFieldResponse.Miss();
         }
 
         if (response.Found.Items.Count == 0)
         {
             var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"));
-            return new CacheDictionaryGetResponse.Error(exc);
+            return new CacheDictionaryGetFieldResponse.Error(exc);
         }
 
         if (response.Found.Items[0].Result == ECacheResult.Miss)
         {
-            return new CacheDictionaryGetResponse.Miss();
+            return new CacheDictionaryGetFieldResponse.Miss();
         }
 
-        return new CacheDictionaryGetResponse.Hit(response);
+        return new CacheDictionaryGetFieldResponse.Hit(response);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
         return await SendDictionarySetFieldsAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
         return await SendDictionarySetFieldsAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         var protoItems = items.Select(kv => new _DictionaryFieldValuePair() { Field = kv.Key.ToByteString(), Value = kv.Value.ToByteString() });
         return await SendDictionarySetFieldsAsync(cacheName, dictionaryName, protoItems, ttl);
     }
 
-    public async Task<CacheDictionarySetResponse> SendDictionarySetFieldAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldResponse> SendDictionarySetFieldAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
     {
         _DictionarySetRequest request = new()
         {
@@ -227,12 +227,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetResponse.Error(_exceptionMapper.Convert(e));
+            return new CacheDictionarySetFieldResponse.Error(_exceptionMapper.Convert(e));
         }
-        return new CacheDictionarySetResponse.Success();
+        return new CacheDictionarySetFieldResponse.Success();
     }
 
-    public async Task<CacheDictionarySetBatchResponse> SendDictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldsResponse> SendDictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<_DictionaryFieldValuePair> items, CollectionTtl ttl = default(CollectionTtl))
     {
         _DictionarySetRequest request = new()
         {
@@ -248,9 +248,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetBatchResponse.Error(_exceptionMapper.Convert(e));
+            return new CacheDictionarySetFieldsResponse.Error(_exceptionMapper.Convert(e));
         }
-        return new CacheDictionarySetBatchResponse.Success();
+        return new CacheDictionarySetFieldsResponse.Success();
     }
 
     public async Task<CacheDictionaryIncrementResponse> DictionaryIncrementAsync(string cacheName, string dictionaryName, string field, long amount = 1, CollectionTtl ttl = default(CollectionTtl))
@@ -281,17 +281,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryIncrementResponse.Success(response);
     }
 
-    public async Task<CacheDictionaryGetBatchResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
+    public async Task<CacheDictionaryGetFieldsResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
     {
         return await SendDictionaryGetFieldsAsync(cacheName, dictionaryName, fields.ToEnumerableByteString());
     }
 
-    public async Task<CacheDictionaryGetBatchResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
+    public async Task<CacheDictionaryGetFieldsResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
     {
         return await SendDictionaryGetFieldsAsync(cacheName, dictionaryName, fields.ToEnumerableByteString());
     }
 
-    private async Task<CacheDictionaryGetBatchResponse> SendDictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<ByteString> fields)
+    private async Task<CacheDictionaryGetFieldsResponse> SendDictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<ByteString> fields)
     {
         _DictionaryGetRequest request = new() { DictionaryName = dictionaryName.ToByteString() };
         request.Fields.Add(fields);
@@ -308,13 +308,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
             }
-            return new CacheDictionaryGetBatchResponse.Error(exc);
+            return new CacheDictionaryGetFieldsResponse.Error(exc);
         }
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Found)
         {
-            return new CacheDictionaryGetBatchResponse.Success(response);
+            return new CacheDictionaryGetFieldsResponse.Success(response);
         }
-        return new CacheDictionaryGetBatchResponse.Success(fields.Count());
+        return new CacheDictionaryGetFieldsResponse.Success(fields.Count());
     }
 
     public async Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName)
@@ -434,27 +434,27 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return new CacheDictionaryRemoveFieldsResponse.Success();
     }
 
-    public async Task<CacheSetAddResponse> SetAddElementAsync(string cacheName, string setName, byte[] element, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementResponse> SetAddElementAsync(string cacheName, string setName, byte[] element, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendSetAddElementAsync(cacheName, setName, element.ToSingletonByteString(), ttl);
     }
 
-    public async Task<CacheSetAddResponse> SetAddElementAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementResponse> SetAddElementAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendSetAddElementAsync(cacheName, setName, element.ToSingletonByteString(), ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<byte[]> elements, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementsResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<byte[]> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendSetAddElementsAsync(cacheName, setName, elements.ToEnumerableByteString(), ttl);
     }
 
-    public async Task<CacheSetAddBatchResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementsResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendSetAddElementsAsync(cacheName, setName, elements.ToEnumerableByteString(), ttl);
     }
 
-    public async Task<CacheSetAddResponse> SendSetAddElementAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementResponse> SendSetAddElementAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         _SetUnionRequest request = new()
         {
@@ -474,12 +474,12 @@ internal sealed class ScsDataClient : ScsDataClientBase
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
             }
-            return new CacheSetAddResponse.Error(exc);
+            return new CacheSetAddElementResponse.Error(exc);
         }
-        return new CacheSetAddResponse.Success();
+        return new CacheSetAddElementResponse.Success();
     }
 
-    public async Task<CacheSetAddBatchResponse> SendSetAddElementsAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementsResponse> SendSetAddElementsAsync(string cacheName, string setName, IEnumerable<ByteString> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         _SetUnionRequest request = new()
         {
@@ -499,9 +499,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
             {
                 exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
             }
-            return new CacheSetAddBatchResponse.Error(exc);
+            return new CacheSetAddElementsResponse.Error(exc);
         }
-        return new CacheSetAddBatchResponse.Success();
+        return new CacheSetAddElementsResponse.Success();
     }
 
     public async Task<CacheSetRemoveElementResponse> SetRemoveElementAsync(string cacheName, string setName, byte[] element)
