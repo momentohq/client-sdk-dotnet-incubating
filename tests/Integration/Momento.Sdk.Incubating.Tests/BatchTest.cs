@@ -41,7 +41,6 @@ using Momento.Sdk.Responses;
 //        Assert.True(setResponse is CacheSetResponse.Success, $"Unexpected response: {setResponse}");
 
 //        List<byte[]> keys = new() { Utils.Utf8ToByteArray(key1), Utils.Utf8ToByteArray(key2) };
-
 //        CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
 //        Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
 //        var goodResult = (CacheGetBatchResponse.Success)result;
