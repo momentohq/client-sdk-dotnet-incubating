@@ -6,6 +6,7 @@ public abstract class CacheDictionarySetFieldsResponse
 {
     public class Success : CacheDictionarySetFieldsResponse
     {
+
     }
     public class Error : CacheDictionarySetFieldsResponse
     {
@@ -35,5 +36,4 @@ public abstract class CacheDictionarySetFieldsResponse
             return base.ToString() + ": " + Message;
         }
     }
-
 }
