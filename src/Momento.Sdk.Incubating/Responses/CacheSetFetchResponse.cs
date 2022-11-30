@@ -36,9 +36,9 @@ public abstract class CacheSetFetchResponse
             });
         }
 
-        public HashSet<byte[]> ByteArraySet { get => _byteArraySet.Value; }
+        public HashSet<byte[]> ValueSetByteArray { get => _byteArraySet.Value; }
 
-        public HashSet<string> StringSet() => _stringSet.Value;
+        public HashSet<string> ValueSetString { get => _stringSet.Value; }
     }
 
     public class Miss : CacheSetFetchResponse
