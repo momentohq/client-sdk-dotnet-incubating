@@ -35,5 +35,4 @@ public abstract class CacheSetAddResponse
             return base.ToString() + ": " + Message;
         }
     }
-
 }
