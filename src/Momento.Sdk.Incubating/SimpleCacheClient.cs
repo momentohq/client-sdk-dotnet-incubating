@@ -209,7 +209,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionarySetFieldAsync(cacheName, dictionaryName, field, value, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)"/>
     public async Task<CacheDictionarySetResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -227,7 +227,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionarySetFieldAsync(cacheName, dictionaryName, field, value, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)"/>
     public async Task<CacheDictionarySetResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -268,7 +268,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionaryGetFieldAsync(cacheName, dictionaryName, field);
     }
 
-    /// <inheritdoc cref="DictionaryGetAsync(string, string, byte[])"/>
+    /// <inheritdoc cref="DictionaryGetFieldAsync(string, string, byte[])"/>
     public async Task<CacheDictionaryGetResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, string field)
     {
         try
@@ -288,7 +288,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Set several dictionary field-value pairs in the cache.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="items">The field-value pairs in the dictionary to set.</param>
@@ -311,7 +311,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionarySetFieldsAsync(cacheName, dictionaryName, items, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
+    /// <inheritdoc cref="DictionarySetFieldsAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
     public async Task<CacheDictionarySetBatchResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -329,7 +329,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionarySetFieldsAsync(cacheName, dictionaryName, items, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
+    /// <inheritdoc cref="DictionarySetFieldsAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
     public async Task<CacheDictionarySetBatchResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -354,7 +354,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <para>Incrementing a value that was not set using this method or not the string representation of an integer
     /// results in an error with <see cref="FailedPreconditionException"/>.</para>
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="field"></param>
@@ -436,7 +436,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.DictionaryGetFieldsAsync(cacheName, dictionaryName, fields);
     }
 
-    /// <inheritdoc cref="DictionaryGetBatchAsync(string, string, IEnumerable{byte[]})"/>
+    /// <inheritdoc cref="DictionaryGetFieldsAsync(string, string, IEnumerable{byte[]})"/>
     public async Task<CacheDictionaryGetBatchResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
     {
         try
@@ -594,7 +594,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the element passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add the element to.</param>
     /// <param name="element">The data to add to the set.</param>
@@ -616,7 +616,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.SetAddElementAsync(cacheName, setName, element, ttl);
     }
 
-    /// <inheritdoc cref="SetAddAsync(string, string, byte[], CollectionTtl)"/>
+    /// <inheritdoc cref="SetAddElementAsync(string, string, byte[], CollectionTtl)"/>
     public async Task<CacheSetAddResponse> SetAddElementAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -639,7 +639,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the elements passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add elements to.</param>
     /// <param name="elements">The data to add to the set.</param>
@@ -662,7 +662,7 @@ public class SimpleCacheClient : ISimpleCacheClient
         return await this.dataClient.SetAddElementsAsync(cacheName, setName, elements, ttl);
     }
 
-    /// <inheritdoc cref="SetAddBatchAsync(string, string, IEnumerable{byte[]}, CollectionTtl)"/>
+    /// <inheritdoc cref="SetAddElementsAsync(string, string, IEnumerable{byte[]}, CollectionTtl)"/>
     public async Task<CacheSetAddBatchResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -815,7 +815,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the front of the list.</param>
@@ -868,7 +868,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Push a value to the end of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the back of the list.</param>
