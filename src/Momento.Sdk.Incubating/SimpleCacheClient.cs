@@ -194,7 +194,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="value">The value to be stored.</param>
     /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, byte[] field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -205,14 +205,14 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl);
+        return await this.dataClient.DictionarySetFieldAsync(cacheName, dictionaryName, field, value, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)"/>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)"/>
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, string value, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -223,14 +223,14 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl);
+        return await this.dataClient.DictionarySetFieldAsync(cacheName, dictionaryName, field, value, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)"/>
-    public async Task<CacheDictionarySetResponse> DictionarySetAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)"/>
+    public async Task<CacheDictionarySetFieldResponse> DictionarySetFieldAsync(string cacheName, string dictionaryName, string field, byte[] value, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -241,10 +241,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetAsync(cacheName, dictionaryName, field, value, ttl);
+        return await this.dataClient.DictionarySetFieldAsync(cacheName, dictionaryName, field, value, ttl);
     }
 
     /// <summary>
@@ -254,7 +254,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">The dictionary to lookup.</param>
     /// <param name="field">The field in the dictionary to lookup.</param>
     /// <returns>Task representing the status of the get operation and the associated value.</returns>
-    public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, byte[] field)
+    public async Task<CacheDictionaryGetFieldResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, byte[] field)
     {
         try
         {
@@ -264,14 +264,14 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionaryGetResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionaryGetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionaryGetAsync(cacheName, dictionaryName, field);
+        return await this.dataClient.DictionaryGetFieldAsync(cacheName, dictionaryName, field);
     }
 
-    /// <inheritdoc cref="DictionaryGetAsync(string, string, byte[])"/>
-    public async Task<CacheDictionaryGetResponse> DictionaryGetAsync(string cacheName, string dictionaryName, string field)
+    /// <inheritdoc cref="DictionaryGetFieldAsync(string, string, byte[])"/>
+    public async Task<CacheDictionaryGetFieldResponse> DictionaryGetFieldAsync(string cacheName, string dictionaryName, string field)
     {
         try
         {
@@ -281,22 +281,22 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionaryGetResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionaryGetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionaryGetAsync(cacheName, dictionaryName, field);
+        return await this.dataClient.DictionaryGetFieldAsync(cacheName, dictionaryName, field);
     }
 
     /// <summary>
     /// Set several dictionary field-value pairs in the cache.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="items">The field-value pairs in the dictionary to set.</param>
     /// <param name="ttl">TTL for the dictionary in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<byte[], byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -307,14 +307,14 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldsResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, ttl);
+        return await this.dataClient.DictionarySetFieldsAsync(cacheName, dictionaryName, items, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="DictionarySetFieldsAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, string>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -325,14 +325,14 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldsResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, ttl);
+        return await this.dataClient.DictionarySetFieldsAsync(cacheName, dictionaryName, items, ttl);
     }
 
-    /// <inheritdoc cref="DictionarySetBatchAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
-    public async Task<CacheDictionarySetBatchResponse> DictionarySetBatchAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="DictionarySetFieldsAsync(string, string, IEnumerable{KeyValuePair{byte[], byte[]}}, CollectionTtl)"/>
+    public async Task<CacheDictionarySetFieldsResponse> DictionarySetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<KeyValuePair<string, byte[]>> items, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -343,10 +343,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionarySetBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionarySetFieldsResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionarySetBatchAsync(cacheName, dictionaryName, items, ttl);
+        return await this.dataClient.DictionarySetFieldsAsync(cacheName, dictionaryName, items, ttl);
     }
 
     /// <summary>
@@ -356,7 +356,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <para>Incrementing a value that was not set using this method or not the string representation of an integer
     /// results in an error with <see cref="FailedPreconditionException"/>.</para>
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the dictionary in.</param>
     /// <param name="dictionaryName">The dictionary to set.</param>
     /// <param name="field"></param>
@@ -377,20 +377,20 @@ public class SimpleCacheClient : ISimpleCacheClient
     ///     }
     ///
     ///     // Reset the counter. Note we use the string representation of an integer.
-    ///     var setResponse = await client.DictionarySetAsync(cacheName, "my dictionary", "counter", "0");
-    ///     if (setResponse is CacheDictionarySetResponse.Error) { /* handle error */ }
+    ///     var setResponse = await client.DictionarySetFieldAsync(cacheName, "my dictionary", "counter", "0");
+    ///     if (setResponse is CacheDictionarySetFieldResponse.Error) { /* handle error */ }
     ///
     ///     // Retrieve the counter. The integer is represented as a string.
-    ///     var getResponse = await client.DictionaryGetAsync(cacheName, "my dictionary", "counter");
-    ///     if (getResponse is CacheDictionaryGetResponse.Hit getHit)
+    ///     var getResponse = await client.DictionaryGetFieldAsync(cacheName, "my dictionary", "counter");
+    ///     if (getResponse is CacheDictionaryGetFieldResponse.Hit getHit)
     ///     {
     ///         Console.WriteLine(getHit.String());
     ///     }
-    ///     else if (getResponse is CacheDictionaryGetResponse.Error) { /* handle error */ }
+    ///     else if (getResponse is CacheDictionaryGetFieldResponse.Error) { /* handle error */ }
     ///
     ///     // Here we try incrementing a value that isn't an integer. This results in an error with <see cref="FailedPreconditionException"/>
-    ///     setResponse = await client.DictionarySetAsync(cacheName, "my dictionary", "counter", "0123ABC");
-    ///     if (setResponse is CacheDictionarySetResponse.Error) { /* handle error */ }
+    ///     setResponse = await client.DictionarySetFieldAsync(cacheName, "my dictionary", "counter", "0123ABC");
+    ///     if (setResponse is CacheDictionarySetFieldResponse.Error) { /* handle error */ }
     ///
     ///     var incrementResponse = await client.DictionaryIncrementAsync(cacheName, "my dictionary", "counter", amount: 42);
     ///     if (incrementResponse is CacheDictionaryIncrementResponse.Error badIncrement)
@@ -422,7 +422,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <param name="dictionaryName">The dictionary to lookup.</param>
     /// <param name="fields">The fields in the dictionary to lookup.</param>
     /// <returns>Task representing the status and associated value for each field.</returns>
-    public async Task<CacheDictionaryGetBatchResponse> DictionaryGetBatchAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
+    public async Task<CacheDictionaryGetFieldsResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<byte[]> fields)
     {
         try
         {
@@ -433,13 +433,13 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionaryGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionaryGetFieldsResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.DictionaryGetBatchAsync(cacheName, dictionaryName, fields);
+        return await this.dataClient.DictionaryGetFieldsAsync(cacheName, dictionaryName, fields);
     }
 
-    /// <inheritdoc cref="DictionaryGetBatchAsync(string, string, IEnumerable{byte[]})"/>
-    public async Task<CacheDictionaryGetBatchResponse> DictionaryGetBatchAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
+    /// <inheritdoc cref="DictionaryGetFieldsAsync(string, string, IEnumerable{byte[]})"/>
+    public async Task<CacheDictionaryGetFieldsResponse> DictionaryGetFieldsAsync(string cacheName, string dictionaryName, IEnumerable<string> fields)
     {
         try
         {
@@ -450,10 +450,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionaryGetBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheDictionaryGetFieldsResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.DictionaryGetBatchAsync(cacheName, dictionaryName, fields);
+        return await this.dataClient.DictionaryGetFieldsAsync(cacheName, dictionaryName, fields);
     }
 
     /// <summary>
@@ -596,13 +596,13 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the element passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add the element to.</param>
     /// <param name="element">The data to add to the set.</param>
     /// <param name="ttl">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, byte[] element, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementResponse> SetAddElementAsync(string cacheName, string setName, byte[] element, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -613,13 +613,13 @@ public class SimpleCacheClient : ISimpleCacheClient
 
         catch (ArgumentNullException e)
         {
-            return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheSetAddElementResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetAddAsync(cacheName, setName, element, ttl);
+        return await this.dataClient.SetAddElementAsync(cacheName, setName, element, ttl);
     }
 
-    /// <inheritdoc cref="SetAddAsync(string, string, byte[], CollectionTtl)"/>
-    public async Task<CacheSetAddResponse> SetAddAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="SetAddElementAsync(string, string, byte[], CollectionTtl)"/>
+    public async Task<CacheSetAddElementResponse> SetAddElementAsync(string cacheName, string setName, string element, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -629,10 +629,10 @@ public class SimpleCacheClient : ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheSetAddResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheSetAddElementResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.SetAddAsync(cacheName, setName, element, ttl);
+        return await this.dataClient.SetAddElementAsync(cacheName, setName, element, ttl);
     }
 
     /// <summary>
@@ -641,13 +641,13 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// After this operation, the set will contain the union
     /// of the elements passed in and the elements of the set.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the set in.</param>
     /// <param name="setName">The set to add elements to.</param>
     /// <param name="elements">The data to add to the set.</param>
     /// <param name="ttl">TTL for the set in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <returns>Task representing the result of the cache operation.</returns>
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<byte[]> elements, CollectionTtl ttl = default(CollectionTtl))
+    public async Task<CacheSetAddElementsResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<byte[]> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -659,13 +659,13 @@ public class SimpleCacheClient : ISimpleCacheClient
 
         catch (ArgumentNullException e)
         {
-            return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheSetAddElementsResponse.Error(new InvalidArgumentException(e.Message));
         }
-        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, ttl);
+        return await this.dataClient.SetAddElementsAsync(cacheName, setName, elements, ttl);
     }
 
-    /// <inheritdoc cref="SetAddBatchAsync(string, string, IEnumerable{byte[]}, CollectionTtl)"/>
-    public async Task<CacheSetAddBatchResponse> SetAddBatchAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
+    /// <inheritdoc cref="SetAddElementsAsync(string, string, IEnumerable{byte[]}, CollectionTtl)"/>
+    public async Task<CacheSetAddElementsResponse> SetAddElementsAsync(string cacheName, string setName, IEnumerable<string> elements, CollectionTtl ttl = default(CollectionTtl))
     {
         try
         {
@@ -677,10 +677,10 @@ public class SimpleCacheClient : ISimpleCacheClient
 
         catch (ArgumentNullException e)
         {
-            return new CacheSetAddBatchResponse.Error(new InvalidArgumentException(e.Message));
+            return new CacheSetAddElementsResponse.Error(new InvalidArgumentException(e.Message));
         }
 
-        return await this.dataClient.SetAddBatchAsync(cacheName, setName, elements, ttl);
+        return await this.dataClient.SetAddElementsAsync(cacheName, setName, elements, ttl);
     }
 
     /// <summary>
@@ -817,7 +817,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the front of the list.</param>
@@ -870,7 +870,7 @@ public class SimpleCacheClient : ISimpleCacheClient
     /// <summary>
     /// Push a value to the end of a list.
     /// </summary>
-    /// <inheritdoc cref="DictionarySetAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
+    /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
     /// <param name="listName">The list to push the value on.</param>
     /// <param name="value">The value to push to the back of the list.</param>
