@@ -4,7 +4,7 @@ namespace Momento.Sdk.Incubating.Tests;
 
 public class TestBase
 {
-    protected readonly SimpleCacheClient client;
+    protected readonly ISimpleCacheClient client;
     protected readonly string cacheName;
     protected readonly ICredentialProvider authProvider;
     protected readonly TimeSpan defaultTtl = SimpleCacheClientFixture.DefaultTtl;

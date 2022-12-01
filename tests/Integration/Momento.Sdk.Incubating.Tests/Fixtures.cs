@@ -10,7 +10,7 @@ namespace Momento.Sdk.Incubating.Tests;
 /// </summary>
 public class SimpleCacheClientFixture : IDisposable
 {
-    public SimpleCacheClient Client { get; private set; }
+    public ISimpleCacheClient Client { get; private set; }
     public ICredentialProvider AuthProvider { get; private set; }
     public string CacheName { get; private set; }
 
