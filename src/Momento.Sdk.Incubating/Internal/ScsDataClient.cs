@@ -314,9 +314,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Found)
         {
-            return new CacheDictionaryGetFieldsResponse.Success(response);
+            return new CacheDictionaryGetFieldsResponse.Hit(response);
         }
-        return new CacheDictionaryGetFieldsResponse.Success(fields.Count());
+        return new CacheDictionaryGetFieldsResponse.Miss();
     }
 
     public async Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName)

@@ -665,15 +665,15 @@ public class DictionaryTest : TestBase
         await client.DictionarySetFieldAsync(cacheName, dictionaryName, field2, value2);
 
         CacheDictionaryGetFieldsResponse response = await client.DictionaryGetFieldsAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetFieldsResponse.Success, $"Unexpected response: {response}");
+        Assert.True(response is CacheDictionaryGetFieldsResponse.Hit, $"Unexpected response: {response}");
 
-        var success = (CacheDictionaryGetFieldsResponse.Success)response;
-        Assert.Equal(3, success.Responses.Count);
-        Assert.True(success.Responses[0] is CacheDictionaryGetFieldResponse.Hit);
-        Assert.True(success.Responses[1] is CacheDictionaryGetFieldResponse.Hit);
-        Assert.True(success.Responses[2] is CacheDictionaryGetFieldResponse.Miss);
-        var values = new byte[]?[] { value1, value2, null };
-        Assert.Equal(values, success.ValueByteArrays);
+        var hit = (CacheDictionaryGetFieldsResponse.Hit)response;
+        Assert.Equal(3, hit.Responses.Count);
+        Assert.True(hit.Responses[0] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[0]}");
+        Assert.Equal(value1, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[0]).ValueByteArray);
+        Assert.True(hit.Responses[1] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[1]}");
+        Assert.Equal(value2, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[1]).ValueByteArray);
+        Assert.True(hit.Responses[2] is CacheDictionaryGetFieldResponse.Miss, $"should be miss but was {hit.Responses[2]}");
     }
 
     [Fact]
@@ -685,16 +685,7 @@ public class DictionaryTest : TestBase
         var field3 = Utils.NewGuidByteArray();
 
         CacheDictionaryGetFieldsResponse response = await client.DictionaryGetFieldsAsync(cacheName, dictionaryName, new byte[][] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetFieldsResponse.Success, $"Unexpected response: {response}");
-        var nullResponse = (CacheDictionaryGetFieldsResponse.Success)response;
-        Assert.True(nullResponse.Responses[0] is CacheDictionaryGetFieldResponse.Miss);
-        Assert.True(nullResponse.Responses[1] is CacheDictionaryGetFieldResponse.Miss);
-        Assert.True(nullResponse.Responses[2] is CacheDictionaryGetFieldResponse.Miss);
-        var byteArrays = new byte[]?[] { null, null, null };
-        var strings = new string?[] { null, null, null };
-
-        Assert.Equal(byteArrays, nullResponse.ValueByteArrays);
-        Assert.Equal(strings, nullResponse.ValueStrings!);
+        Assert.True(response is CacheDictionaryGetFieldsResponse.Miss, $"Unexpected response: {response}");
     }
 
     [Fact]
@@ -744,15 +735,15 @@ public class DictionaryTest : TestBase
         await client.DictionarySetFieldAsync(cacheName, dictionaryName, field2, value2);
 
         CacheDictionaryGetFieldsResponse response = await client.DictionaryGetFieldsAsync(cacheName, dictionaryName, new string[] { field1, field2, field3 });
-        Assert.True(response is CacheDictionaryGetFieldsResponse.Success, $"Unexpected response: {response}");
-        var success = (CacheDictionaryGetFieldsResponse.Success)response;
+        Assert.True(response is CacheDictionaryGetFieldsResponse.Hit, $"Unexpected response: {response}");
 
-        Assert.Equal(3, success.Responses.Count);
-        Assert.True(success.Responses[0] is CacheDictionaryGetFieldResponse.Hit);
-        Assert.True(success.Responses[1] is CacheDictionaryGetFieldResponse.Hit);
-        Assert.True(success.Responses[2] is CacheDictionaryGetFieldResponse.Miss);
-        var values = new string?[] { value1, value2, null };
-        Assert.Equal(values, success.ValueStrings);
+        var hit = (CacheDictionaryGetFieldsResponse.Hit)response;
+        Assert.Equal(3, hit.Responses.Count);
+        Assert.True(hit.Responses[0] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[0]}");
+        Assert.Equal(value1, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[0]).ValueString);
+        Assert.True(hit.Responses[1] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[1]}");
+        Assert.Equal(value2, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[1]).ValueString);
+        Assert.True(hit.Responses[2] is CacheDictionaryGetFieldResponse.Miss, $"should be miss but was {hit.Responses[2]}");
     }
 
     [Theory]
