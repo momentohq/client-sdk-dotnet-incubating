@@ -18,7 +18,7 @@ public class SimpleCacheClientFactory
     /// <param name="authProvider">Momento JWT.</param>
     /// <param name="defaultTtl">Default time to live for the item in cache.</param>
     /// <returns>An instance of the incubating Simple Cache Client.</returns>
-    public static SimpleCacheClient CreateClient(IConfiguration config, ICredentialProvider authProvider, TimeSpan defaultTtl)
+    public static ISimpleCacheClient CreateClient(IConfiguration config, ICredentialProvider authProvider, TimeSpan defaultTtl)
     {
         var simpleCacheClient = new Momento.Sdk.SimpleCacheClient(config, authProvider, defaultTtl);
         return new SimpleCacheClient(simpleCacheClient, config, authProvider, defaultTtl);
