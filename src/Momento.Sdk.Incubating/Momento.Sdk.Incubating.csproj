@@ -34,8 +34,7 @@
 		<RepositoryUrl>https://github.com/momentohq/client-sdk-dotnet-incubating</RepositoryUrl>
 	</PropertyGroup>
 	<ItemGroup>
-	  <!-- TODO: restore and upgrade once we release the prod repo
-		<PackageReference Include="Momento.Sdk" Version="1.0.0" /> -->
+		<PackageReference Include="Momento.Sdk" Version="1.0.1" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
@@ -46,9 +45,5 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Requests\" />
-	</ItemGroup>
-	<!-- TODO remove once we release, upgrade, and pull in the prod repo -->
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\client-sdk-dotnet\src\Momento.Sdk\Momento.Sdk.csproj" />
 	</ItemGroup>
 </Project>
