@@ -10,7 +10,6 @@ using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal;
 using Momento.Sdk.Internal.ExtensionMethods;
-using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Internal;
 
@@ -161,19 +160,15 @@ internal sealed class ScsDataClient : ScsDataClientBase
         _DictionaryGetRequest request = new() { DictionaryName = dictionaryName.ToByteString() };
         request.Fields.Add(fields);
         _DictionaryGetResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            response = await this.grpcManager.Client.DictionaryGetAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            response = await this.grpcManager.Client.DictionaryGetAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryGetFieldResponse.Error(exc);
+            return new CacheDictionaryGetFieldResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
 
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Missing)
@@ -183,7 +178,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
 
         if (response.Found.Items.Count == 0)
         {
-            var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"));
+            var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"), metadata);
             return new CacheDictionaryGetFieldResponse.Error(exc);
         }
 
@@ -222,15 +217,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Items.Add(items);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            await this.grpcManager.Client.DictionarySetAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            await this.grpcManager.Client.DictionarySetAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetFieldResponse.Error(_exceptionMapper.Convert(e));
+            return new CacheDictionarySetFieldResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionarySetFieldResponse.Success();
     }
 
@@ -243,15 +240,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Items.Add(items);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            await this.grpcManager.Client.DictionarySetAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            await this.grpcManager.Client.DictionarySetAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            return new CacheDictionarySetFieldsResponse.Error(_exceptionMapper.Convert(e));
+            return new CacheDictionarySetFieldsResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionarySetFieldsResponse.Success();
     }
 
@@ -266,20 +265,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _DictionaryIncrementResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            response = await this.grpcManager.Client.DictionaryIncrementAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            response = await this.grpcManager.Client.DictionaryIncrementAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryIncrementResponse.Error(exc);
+            return new CacheDictionaryIncrementResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionaryIncrementResponse.Success(response);
     }
 
@@ -298,24 +294,22 @@ internal sealed class ScsDataClient : ScsDataClientBase
         _DictionaryGetRequest request = new() { DictionaryName = dictionaryName.ToByteString() };
         request.Fields.Add(fields);
         _DictionaryGetResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            response = await this.grpcManager.Client.DictionaryGetAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            response = await this.grpcManager.Client.DictionaryGetAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryGetFieldsResponse.Error(exc);
+            return new CacheDictionaryGetFieldsResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Found)
         {
             return new CacheDictionaryGetFieldsResponse.Success(response);
         }
+
         return new CacheDictionaryGetFieldsResponse.Success(fields.Count());
     }
 
@@ -323,23 +317,22 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
         _DictionaryFetchRequest request = new() { DictionaryName = dictionaryName.ToByteString() };
         _DictionaryFetchResponse response;
+        var metadata = MetadataWithCache(cacheName);
+
         try
         {
-            response = await this.grpcManager.Client.DictionaryFetchAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            response = await this.grpcManager.Client.DictionaryFetchAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryFetchResponse.Error(exc);
+            return new CacheDictionaryFetchResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         if (response.DictionaryCase == _DictionaryFetchResponse.DictionaryOneofCase.Found)
         {
             return new CacheDictionaryFetchResponse.Hit(response);
         }
+
         return new CacheDictionaryFetchResponse.Miss();
     }
 
@@ -350,19 +343,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             DictionaryName = dictionaryName.ToByteString(),
             All = new()
         };
+        var metadata = MetadataWithCache(cacheName);
+
         try
         {
-            await this.grpcManager.Client.DictionaryDeleteAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            await this.grpcManager.Client.DictionaryDeleteAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryDeleteResponse.Error(exc);
+            return new CacheDictionaryDeleteResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionaryDeleteResponse.Success();
     }
 
@@ -384,6 +375,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             Some = new()
         };
         request.Some.Fields.Add(field);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -391,13 +383,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryRemoveFieldResponse.Error(exc);
+            return new CacheDictionaryRemoveFieldResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionaryRemoveFieldResponse.Success();
     }
 
@@ -419,6 +407,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             Some = new()
         };
         request.Some.Fields.Add(fields);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -426,13 +415,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheDictionaryRemoveFieldsResponse.Error(exc);
+            return new CacheDictionaryRemoveFieldsResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheDictionaryRemoveFieldsResponse.Success();
     }
 
@@ -465,19 +450,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Elements.Add(elements);
+        var metadata = MetadataWithCache(cacheName);
+
         try
         {
             await this.grpcManager.Client.SetUnionAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetAddElementResponse.Error(exc);
+            return new CacheSetAddElementResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheSetAddElementResponse.Success();
     }
 
@@ -490,19 +473,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         request.Elements.Add(elements);
+        var metadata = MetadataWithCache(cacheName);
+
         try
         {
             await this.grpcManager.Client.SetUnionAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetAddElementsResponse.Error(exc);
+            return new CacheSetAddElementsResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheSetAddElementsResponse.Success();
     }
 
@@ -534,6 +515,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             Subtrahend = new() { Set = new() }
         };
         request.Subtrahend.Set.Elements.Add(elements);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -541,13 +523,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetRemoveElementResponse.Error(exc);
+            return new CacheSetRemoveElementResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheSetRemoveElementResponse.Success();
     }
 
@@ -559,6 +537,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             Subtrahend = new() { Set = new() }
         };
         request.Subtrahend.Set.Elements.Add(elements);
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -566,13 +545,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetRemoveElementsResponse.Error(exc);
+            return new CacheSetRemoveElementsResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheSetRemoveElementsResponse.Success();
     }
 
@@ -580,6 +555,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
         _SetFetchRequest request = new() { SetName = setName.ToByteString() };
         _SetFetchResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -587,17 +563,13 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetFetchResponse.Error(exc);
+            return new CacheSetFetchResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
         if (response.SetCase == _SetFetchResponse.SetOneofCase.Found)
         {
             return new CacheSetFetchResponse.Hit(response);
         }
+
         return new CacheSetFetchResponse.Miss();
     }
 
@@ -608,6 +580,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             SetName = setName.ToByteString(),
             Subtrahend = new() { Identity = new() }
         };
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -615,13 +588,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheSetDeleteResponse.Error(exc);
+            return new CacheSetDeleteResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheSetDeleteResponse.Success();
     }
 
@@ -646,6 +615,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _ListPushFrontResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -653,13 +623,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListPushFrontResponse.Error(exc);
+            return new CacheListPushFrontResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheListPushFrontResponse.Success(response);
     }
 
@@ -684,6 +650,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
         };
         _ListPushBackResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -691,13 +658,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListPushBackResponse.Error(exc);
+            return new CacheListPushBackResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheListPushBackResponse.Success(response);
     }
 
@@ -705,6 +668,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
         _ListPopFrontRequest request = new() { ListName = listName.ToByteString() };
         _ListPopFrontResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -712,17 +676,14 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListPopFrontResponse.Error(exc);
+            return new CacheListPopFrontResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         if (response.ListCase == _ListPopFrontResponse.ListOneofCase.Missing)
         {
             return new CacheListPopFrontResponse.Miss();
         }
+
         return new CacheListPopFrontResponse.Hit(response);
     }
 
@@ -730,6 +691,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
         _ListPopBackRequest request = new() { ListName = listName.ToByteString() };
         _ListPopBackResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -737,17 +699,14 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListPopBackResponse.Error(exc);
+            return new CacheListPopBackResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         if (response.ListCase == _ListPopBackResponse.ListOneofCase.Missing)
         {
             return new CacheListPopBackResponse.Miss();
         }
+
         return new CacheListPopBackResponse.Hit(response);
     }
 
@@ -755,6 +714,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
         _ListFetchRequest request = new() { ListName = listName.ToByteString() };
         _ListFetchResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -762,17 +722,14 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListFetchResponse.Error(exc);
+            return new CacheListFetchResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         if (response.ListCase == _ListFetchResponse.ListOneofCase.Found)
         {
             return new CacheListFetchResponse.Hit(response);
         }
+
         return new CacheListFetchResponse.Miss();
     }
 
@@ -793,6 +750,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             ListName = listName.ToByteString(),
             AllElementsWithValue = value
         };
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -800,13 +758,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListRemoveValueResponse.Error(exc);
+            return new CacheListRemoveValueResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheListRemoveValueResponse.Success();
     }
 
@@ -817,6 +771,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             ListName = listName.ToByteString(),
         };
         _ListLengthResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
@@ -824,13 +779,9 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListLengthResponse.Error(exc);
+            return new CacheListLengthResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheListLengthResponse.Success(response);
     }
 
@@ -842,20 +793,17 @@ internal sealed class ScsDataClient : ScsDataClientBase
             All = new()
         };
         _ListEraseResponse response;
+        var metadata = MetadataWithCache(cacheName);
 
         try
         {
-            response = await this.grpcManager.Client.ListEraseAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+            response = await this.grpcManager.Client.ListEraseAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
         }
         catch (Exception e)
         {
-            var exc = _exceptionMapper.Convert(e);
-            if (exc.TransportDetails != null)
-            {
-                exc.TransportDetails.Grpc.Metadata = MetadataWithCache(cacheName);
-            }
-            return new CacheListDeleteResponse.Error(exc);
+            return new CacheListDeleteResponse.Error(_exceptionMapper.Convert(e, metadata));
         }
+
         return new CacheListDeleteResponse.Success();
     }
 }
