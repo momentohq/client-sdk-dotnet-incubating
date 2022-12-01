@@ -674,6 +674,9 @@ public class DictionaryTest : TestBase
         Assert.True(hit.Responses[1] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[1]}");
         Assert.Equal(value2, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[1]).ValueByteArray);
         Assert.True(hit.Responses[2] is CacheDictionaryGetFieldResponse.Miss, $"should be miss but was {hit.Responses[2]}");
+
+        var expectedDictionary = new Dictionary<byte[], byte[]>() { { field1, value1 }, { field2, value2 } };
+        Assert.True(hit.ValueDictionaryByteArrayByteArray.DictionaryEquals(expectedDictionary), "dictionaries did not match");
     }
 
     [Fact]
@@ -744,6 +747,14 @@ public class DictionaryTest : TestBase
         Assert.True(hit.Responses[1] is CacheDictionaryGetFieldResponse.Hit, $"should be hit but was {hit.Responses[1]}");
         Assert.Equal(value2, ((CacheDictionaryGetFieldResponse.Hit)hit.Responses[1]).ValueString);
         Assert.True(hit.Responses[2] is CacheDictionaryGetFieldResponse.Miss, $"should be miss but was {hit.Responses[2]}");
+
+        var expectedDictionary = new Dictionary<string, string> { { field1, value1 }, { field2, value2 } };
+        Assert.Equal(expectedDictionary, hit.ValueDictionaryStringString);
+
+        var otherDictionary = hit.ValueDictionaryStringByteArray;
+        Assert.Equal(2, otherDictionary.Count);
+        Assert.Equal(otherDictionary[field1], Utils.Utf8ToByteArray(value1));
+        Assert.Equal(otherDictionary[field2], Utils.Utf8ToByteArray(value2));
     }
 
     [Theory]
