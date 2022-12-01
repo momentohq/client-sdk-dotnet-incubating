@@ -4,6 +4,7 @@ using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Responses;
 
+// NB: we exclude this from the build; once we have server-side support we will re-enable and change appropriately
 #if USE_UNARY_BATCH
 public abstract class CacheGetBatchResponse
 {
