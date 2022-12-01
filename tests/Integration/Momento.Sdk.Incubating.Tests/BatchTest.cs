@@ -5,6 +5,7 @@ using Momento.Sdk.Config;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 
+// NB: we exclude this from the build; once we have server-side support we will re-enable and change appropriately
 #if USE_UNARY_BATCH
 [Collection("SimpleCacheClient")]
 public class BatchTest : TestBase

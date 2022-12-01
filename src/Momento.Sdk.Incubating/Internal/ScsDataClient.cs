@@ -20,6 +20,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
     {
     }
 
+    // NB: we exclude this from the build; once we have server-side support we will re-enable and change appropriately
 #if USE_UNARY_BATCH
     public async Task<CacheGetBatchResponse> GetBatchAsync(ISimpleCacheClient simpleCacheClient, string cacheName, IEnumerable<string> keys)
     {
