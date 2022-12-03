@@ -5,6 +5,8 @@ using Momento.Sdk.Config;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 
+// NB: we exclude this from the build; once we have server-side support we will re-enable and change appropriately
+#if USE_UNARY_BATCH
 [Collection("SimpleCacheClient")]
 public class BatchTest : TestBase
 {
@@ -40,7 +42,6 @@ public class BatchTest : TestBase
         Assert.True(setResponse is CacheSetResponse.Success, $"Unexpected response: {setResponse}");
 
         List<byte[]> keys = new() { Utils.Utf8ToByteArray(key1), Utils.Utf8ToByteArray(key2) };
-
         CacheGetBatchResponse result = await client.GetBatchAsync(cacheName, keys);
         Assert.True(result is CacheGetBatchResponse.Success, $"Unexpected response: {result}");
         var goodResult = (CacheGetBatchResponse.Success)result;
@@ -187,3 +188,4 @@ public class BatchTest : TestBase
         Assert.Equal(value2, goodGetResponse.ValueString);
     }
 }
+#endif

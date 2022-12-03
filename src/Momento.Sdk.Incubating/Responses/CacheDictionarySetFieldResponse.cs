@@ -1,13 +1,14 @@
-using Momento.Sdk.Exceptions;
+﻿using Momento.Sdk.Exceptions;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheSetAddBatchResponse
+public abstract class CacheDictionarySetFieldResponse
 {
-    public class Success : CacheSetAddBatchResponse
+    public class Success : CacheDictionarySetFieldResponse
     {
+
     }
-    public class Error : CacheSetAddBatchResponse
+    public class Error : CacheDictionarySetFieldResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)
@@ -35,5 +36,4 @@ public abstract class CacheSetAddBatchResponse
             return base.ToString() + ": " + Message;
         }
     }
-
 }

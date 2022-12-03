@@ -14,37 +14,37 @@ public abstract class CacheDictionaryFetchResponse
     public class Hit : CacheDictionaryFetchResponse
     {
         protected readonly RepeatedField<_DictionaryFieldValuePair>? items;
-        protected readonly Lazy<Dictionary<byte[], byte[]>> _byteArrayByteArrayDictionary;
-        protected readonly Lazy<Dictionary<string, string>> _stringStringDictionary;
-        protected readonly Lazy<Dictionary<string, byte[]>> _stringByteArrayDictionary;
+        protected readonly Lazy<Dictionary<byte[], byte[]>> _dictionaryByteArrayByteArray;
+        protected readonly Lazy<Dictionary<string, string>> _dictionaryStringString;
+        protected readonly Lazy<Dictionary<string, byte[]>> _dictionaryStringByteArray;
 
         public Hit(_DictionaryFetchResponse response)
         {
             items = response.Found.Items;
-            _byteArrayByteArrayDictionary = new(() =>
+            _dictionaryByteArrayByteArray = new(() =>
             {
                 return new Dictionary<byte[], byte[]>(
                     items.Select(kv => new KeyValuePair<byte[], byte[]>(kv.Field.ToByteArray(), kv.Value.ToByteArray())),
                     Utils.ByteArrayComparer);
             });
 
-            _stringStringDictionary = new(() =>
+            _dictionaryStringString = new(() =>
             {
                 return new Dictionary<string, string>(
                     items.Select(kv => new KeyValuePair<string, string>(kv.Field.ToStringUtf8(), kv.Value.ToStringUtf8())));
             });
-            _stringByteArrayDictionary = new(() =>
+            _dictionaryStringByteArray = new(() =>
             {
                 return new Dictionary<string, byte[]>(
                     items.Select(kv => new KeyValuePair<string, byte[]>(kv.Field.ToStringUtf8(), kv.Value.ToByteArray())));
             });
         }
 
-        public Dictionary<byte[], byte[]> ByteArrayByteArrayDictionary { get => _byteArrayByteArrayDictionary.Value; }
+        public Dictionary<byte[], byte[]> ValueDictionaryByteArrayByteArray { get => _dictionaryByteArrayByteArray.Value; }
 
-        public Dictionary<string, string> StringStringDictionary() => _stringStringDictionary.Value;
+        public Dictionary<string, string> ValueDictionaryStringString { get => _dictionaryStringString.Value; }
 
-        public Dictionary<string, byte[]> StringByteArrayDictionary() => _stringByteArrayDictionary.Value;
+        public Dictionary<string, byte[]> ValueDictionaryStringByteArray { get => _dictionaryStringByteArray.Value; }
     }
 
     public class Miss : CacheDictionaryFetchResponse
