@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 
@@ -22,7 +23,18 @@ public class SimpleCacheClientFixture : IDisposable
         CacheName = Environment.GetEnvironmentVariable("TEST_CACHE_NAME") ??
             throw new NullReferenceException("TEST_CACHE_NAME environment variable must be set.");
         CacheName += "-incubating";
-        Client = SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest(), AuthProvider, defaultTtl: DefaultTtl);
+        Client = SimpleCacheClientFactory.CreateClient(Configurations.Laptop.Latest().WithLoggerFactory(
+                LoggerFactory.Create(builder => {
+                    builder.AddSimpleConsole(options =>
+                    {
+                        options.IncludeScopes = true;
+                        options.SingleLine = true;
+                        options.TimestampFormat = "hh:mm:ss ";
+                    });
+                    builder.AddFilter("Grpc.Net.Client", LogLevel.Error);
+                    builder.SetMinimumLevel(LogLevel.Trace);
+                })),
+            AuthProvider, defaultTtl: DefaultTtl);
 
 
         try
