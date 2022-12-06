@@ -225,7 +225,7 @@ namespace Momento.Sdk.Incubating.Internal
         {
             if (_logger.IsEnabled(LogLevel.Trace))
             {
-                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; error: {}", requestType, cacheName, collectionName, success);
+                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; success: {}", requestType, cacheName, collectionName, success);
             }
             return success;
         }
@@ -246,7 +246,7 @@ namespace Momento.Sdk.Incubating.Internal
         {
             if (_logger.IsEnabled(LogLevel.Trace))
             {
-                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; field: {}; ttl: {}; error: {}", requestType, cacheName, collectionName, field, ttl, success);
+                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; field: {}; ttl: {}; success: {}", requestType, cacheName, collectionName, field, ttl, success);
             }
             return success;
         }
@@ -268,7 +268,7 @@ namespace Momento.Sdk.Incubating.Internal
             if (_logger.IsEnabled(LogLevel.Trace))
             {
                 var readableField = ReadableByteString(field);
-                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; field: {}; ttl: {}; error: {}", requestType, cacheName, collectionName, readableField, ttl, success);
+                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; field: {}; ttl: {}; success: {}", requestType, cacheName, collectionName, readableField, ttl, success);
             }
             return success;
         }
@@ -290,7 +290,7 @@ namespace Momento.Sdk.Incubating.Internal
             if (_logger.IsEnabled(LogLevel.Trace))
             {
                 var readableFields = String.Join(", ", fields.Select(k => ReadableByteString(k)));
-                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; fields: {}; ttl: {}; error: {}", requestType, cacheName, collectionName, readableFields, ttl, success);
+                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; fields: {}; ttl: {}; success: {}", requestType, cacheName, collectionName, readableFields, ttl, success);
             }
             return success;
         }
@@ -312,7 +312,7 @@ namespace Momento.Sdk.Incubating.Internal
             if (_logger.IsEnabled(LogLevel.Trace))
             {
                 var readableItems = String.Join(", ", items.Select(i => "(" + ReadableByteString(i.Field) + " -> " + ReadableByteString(i.Value) + ")"));
-                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; fields: {}; ttl: {}; error: {}", requestType, cacheName, collectionName, readableItems, ttl, success);
+                _logger.LogTrace("Successfully executed '{}' request: cacheName: {}; collectionName: {}; fields: {}; ttl: {}; success: {}", requestType, cacheName, collectionName, readableItems, ttl, success);
             }
             return success;
         }
