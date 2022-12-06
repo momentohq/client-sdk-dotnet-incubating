@@ -2,6 +2,7 @@ using System;
 using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal.ExtensionMethods;
+using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -860,22 +861,13 @@ public class DictionaryTest : TestBase
         Assert.Same(hitResponse.ValueDictionaryByteArrayByteArray, hitResponse.ValueDictionaryByteArrayByteArray);
     }
 
-    [Theory]
-    [InlineData(null, "my-dictionary")]
-    [InlineData("my-cache", null)]
-    public async Task DictionaryDeleteAsync_NullChecks_IsError(string cacheName, string dictionaryName)
-    {
-        CacheDictionaryDeleteResponse response = await client.DictionaryDeleteAsync(cacheName, dictionaryName);
-        Assert.True(response is CacheDictionaryDeleteResponse.Error, $"Unexpected response: {response}");
-        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheDictionaryDeleteResponse.Error)response).ErrorCode);
-    }
-
     [Fact]
     public async Task DictionaryDeleteAsync_DictionaryDoesNotExist_Noop()
     {
         var dictionaryName = Utils.NewGuidString();
         Assert.True((await client.DictionaryFetchAsync(cacheName, dictionaryName)) is CacheDictionaryFetchResponse.Miss);
-        await client.DictionaryDeleteAsync(cacheName, dictionaryName);
+        var deleteResponse = await client.DeleteAsync(cacheName, dictionaryName);
+        Assert.True(deleteResponse is CacheDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
         Assert.True((await client.DictionaryFetchAsync(cacheName, dictionaryName)) is CacheDictionaryFetchResponse.Miss);
     }
 
@@ -888,7 +880,8 @@ public class DictionaryTest : TestBase
         await client.DictionarySetFieldAsync(cacheName, dictionaryName, Utils.NewGuidString(), Utils.NewGuidString());
 
         Assert.True((await client.DictionaryFetchAsync(cacheName, dictionaryName)) is CacheDictionaryFetchResponse.Hit);
-        await client.DictionaryDeleteAsync(cacheName, dictionaryName);
+        var deleteResponse = await client.DeleteAsync(cacheName, dictionaryName);
+        Assert.True(deleteResponse is CacheDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
         Assert.True((await client.DictionaryFetchAsync(cacheName, dictionaryName)) is CacheDictionaryFetchResponse.Miss);
     }
 

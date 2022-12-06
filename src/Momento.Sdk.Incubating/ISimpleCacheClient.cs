@@ -160,16 +160,6 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     public Task<CacheDictionaryFetchResponse> DictionaryFetchAsync(string cacheName, string dictionaryName);
 
     /// <summary>
-    /// Remove the dictionary from the cache.
-    ///
-    /// Performs a no-op if <paramref name="dictionaryName"/> does not exist.
-    /// </summary>
-    /// <param name="cacheName">Name of the cache to delete the dictionary from.</param>
-    /// <param name="dictionaryName">Name of the dictionary to delete.</param>
-    /// <returns>Task representing the result of the delete operation.</returns>
-    public Task<CacheDictionaryDeleteResponse> DictionaryDeleteAsync(string cacheName, string dictionaryName);
-
-    /// <summary>
     /// Remove a field from a dictionary.
     ///
     /// Performs a no-op if <paramref name="dictionaryName"/> or <paramref name="field"/> does not exist.
@@ -268,16 +258,6 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     public Task<CacheSetFetchResponse> SetFetchAsync(string cacheName, string setName);
 
     /// <summary>
-    /// Remove the set from the cache.
-    ///
-    /// Performs a no-op if <paramref name="setName"/> does not exist.
-    /// </summary>
-    /// <param name="cacheName">Name of the cache to delete the set from.</param>
-    /// <param name="setName">Name of the set to delete.</param>
-    /// <returns>Task representing the result of the delete operation.</returns>
-    public Task<CacheSetDeleteResponse> SetDeleteAsync(string cacheName, string setName);
-
-    /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
     /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>
@@ -352,14 +332,4 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     /// <param name="listName">The list to calculate length.</param>
     /// <returns>Task representing the length of the list.</returns>
     public Task<CacheListLengthResponse> ListLengthAsync(string cacheName, string listName);
-
-    /// <summary>
-    /// Remove the list from the cache.
-    ///
-    /// Performs a no-op if <paramref name="listName"/> does not exist.
-    /// </summary>
-    /// <param name="cacheName">Name of the cache to delete the list from.</param>
-    /// <param name="listName">Name of the list to delete.</param>
-    /// <returns>Task representing the result of the delete operation.</returns>
-    public Task<CacheListDeleteResponse> ListDeleteAsync(string cacheName, string listName);
 }

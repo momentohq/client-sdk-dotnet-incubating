@@ -202,11 +202,6 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return await SendDictionaryIncrementAsync(cacheName, dictionaryName, field, amount, ttl);
     }
 
-    public async Task<CacheDictionaryDeleteResponse> DictionaryDeleteAsync(string cacheName, string dictionaryName)
-    {
-        return await SendDictionaryDeleteAsync(cacheName, dictionaryName);
-    }
-
     public async Task<CacheDictionaryRemoveFieldResponse> DictionaryRemoveFieldAsync(string cacheName, string dictionaryName, byte[] field)
     {
         return await SendDictionaryRemoveFieldAsync(cacheName, dictionaryName, field.ToByteString());
@@ -272,11 +267,6 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return await SendSetFetchAsync(cacheName, setName);
     }
 
-    public async Task<CacheSetDeleteResponse> SetDeleteAsync(string cacheName, string setName)
-    {
-        return await SendSetDeleteAsync(cacheName, setName);
-    }
-
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), truncateBackToSize, ttl);
@@ -325,11 +315,6 @@ internal sealed class ScsDataClient : ScsDataClientBase
     public async Task<CacheListLengthResponse> ListLengthAsync(string cacheName, string listName)
     {
         return await SendListLengthAsync(cacheName, listName);
-    }
-    
-    public async Task<CacheListDeleteResponse> ListDeleteAsync(string cacheName, string listName)
-    {
-        return await SendListDeleteAsync(cacheName, listName);
     }
 
 
@@ -504,29 +489,6 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_INCREMENT, cacheName, dictionaryName, field, ttl, new CacheDictionaryIncrementResponse.Success(response));
     }
 
-    const string REQUEST_TYPE_DICTIONARY_DELETE = "DICTIONARY_DELETE";
-    private async Task<CacheDictionaryDeleteResponse> SendDictionaryDeleteAsync(string cacheName, string dictionaryName)
-    {
-        _DictionaryDeleteRequest request = new()
-        {
-            DictionaryName = dictionaryName.ToByteString(),
-            All = new()
-        };
-        var metadata = MetadataWithCache(cacheName);
-
-        try
-        {
-            this._logger.LogTraceExecutingCollectionRequest(REQUEST_TYPE_DICTIONARY_DELETE, cacheName, dictionaryName);
-            await this.grpcManager.Client.DictionaryDeleteAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
-        }
-        catch (Exception e)
-        {
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_DELETE, cacheName, dictionaryName, new CacheDictionaryDeleteResponse.Error(_exceptionMapper.Convert(e, metadata)));
-        }
-
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_DELETE, cacheName, dictionaryName, new CacheDictionaryDeleteResponse.Success());
-    }
-
     const string REQUEST_TYPE_DICTIONARY_REMOVE_FIELD = "DICTIONARY_REMOVE_FIELD";
     private async Task<CacheDictionaryRemoveFieldResponse> SendDictionaryRemoveFieldAsync(string cacheName, string dictionaryName, ByteString field)
     {
@@ -695,29 +657,6 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
 
         return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_SET_FETCH, cacheName, setName, new CacheSetFetchResponse.Miss());
-    }
-
-    const string REQUEST_TYPE_SET_DELETE = "SET_DELETE";
-    private async Task<CacheSetDeleteResponse> SendSetDeleteAsync(string cacheName, string setName)
-    {
-        _SetDifferenceRequest request = new()
-        {
-            SetName = setName.ToByteString(),
-            Subtrahend = new() { Identity = new() }
-        };
-        var metadata = MetadataWithCache(cacheName);
-
-        try
-        {
-            this._logger.LogTraceExecutingCollectionRequest(REQUEST_TYPE_SET_DELETE, cacheName, setName);
-            await this.grpcManager.Client.SetDifferenceAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
-        }
-        catch (Exception e)
-        {
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_SET_FETCH, cacheName, setName, new CacheSetDeleteResponse.Error(_exceptionMapper.Convert(e, metadata)));
-        }
-
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_SET_FETCH, cacheName, setName, new CacheSetDeleteResponse.Success());
     }
 
     const string REQUEST_TYPE_LIST_PUSH_FRONT = "LIST_PUSH_FRONT";
@@ -893,29 +832,5 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
 
         return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_LIST_LENGTH, cacheName, listName, new CacheListLengthResponse.Success(response));
-    }
-
-    const string REQUEST_TYPE_LIST_DELETE = "LIST_DELETE";
-    private async Task<CacheListDeleteResponse> SendListDeleteAsync(string cacheName, string listName)
-    {
-        _ListEraseRequest request = new()
-        {
-            ListName = listName.ToByteString(),
-            All = new()
-        };
-        _ListEraseResponse response;
-        var metadata = MetadataWithCache(cacheName);
-
-        try
-        {
-            this._logger.LogTraceExecutingCollectionRequest(REQUEST_TYPE_LIST_DELETE, cacheName, listName);
-            response = await this.grpcManager.Client.ListEraseAsync(request, new CallOptions(headers: metadata, deadline: CalculateDeadline()));
-        }
-        catch (Exception e)
-        {
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_LIST_DELETE, cacheName, listName, new CacheListDeleteResponse.Error(_exceptionMapper.Convert(e, metadata)));
-        }
-
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_LIST_DELETE, cacheName, listName, new CacheListDeleteResponse.Success());
     }
 }
