@@ -16,7 +16,7 @@ namespace MomentoApplicationPresignedUrl
         private static readonly string CACHE_NAME = Environment.GetEnvironmentVariable("CACHE_NAME");
         private static readonly string OBJECT_KEY = "MyKey";
         private static readonly string OBJECT_VALUE = "MyData";
-        private static readonly uint OBJECT_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
+        private static readonly TimeSpan OBJECT_TTL = TimeSpan.FromDays(14);
 
         private static readonly HttpClient client = new HttpClient();
 
@@ -52,10 +52,10 @@ namespace MomentoApplicationPresignedUrl
             }
 
             // prepare requests
-            uint expiryEpochSeconds = (uint)DateTimeOffset.UtcNow.AddMinutes(URL_TTL_MINUTES).ToUnixTimeSeconds();
-            var setReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.SET, expiryEpochSeconds) { TtlSeconds = OBJECT_TTL_SECONDS };
-            var getReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.GET, expiryEpochSeconds);
-            Console.WriteLine($"Request claims: exp = {expiryEpochSeconds}, cache = {cacheName}, key = {OBJECT_KEY}, ttl (for set) = {OBJECT_TTL_SECONDS}");
+            int expiryEpochSeconds = (int)DateTimeOffset.UtcNow.AddMinutes(URL_TTL_MINUTES).ToUnixTimeSeconds();
+            var setReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.SET, TimeSpan.FromSeconds(expiryEpochSeconds)) { TtlSeconds = (int)OBJECT_TTL.TotalSeconds };
+            var getReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.GET, TimeSpan.FromSeconds(expiryEpochSeconds));
+            Console.WriteLine($"Request claims: exp = {expiryEpochSeconds}, cache = {cacheName}, key = {OBJECT_KEY}, ttl (for set) = {OBJECT_TTL.ToString()}");
 
             // create presigned urls
             MomentoSigner signer = new MomentoSigner(SIGNING_KEY);
