@@ -568,23 +568,13 @@ public class SetTest : TestBase
         Assert.Same(set1, set2);
     }
 
-    [Theory]
-    [InlineData(null, "my-set")]
-    [InlineData("my-cache", null)]
-    public async Task SetDeleteAsync_NullChecks_IsError(string cacheName, string setName)
-    {
-        CacheSetDeleteResponse response = await client.SetDeleteAsync(cacheName, setName);
-        Assert.True(response is CacheSetDeleteResponse.Error, $"Unexpected response: {response}");
-        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheSetDeleteResponse.Error)response).ErrorCode);
-    }
-
     [Fact]
     public async Task SetDeleteAsync_SetDoesNotExist_Noop()
     {
         var setName = Utils.NewGuidString();
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
-        CacheSetDeleteResponse response = await client.SetDeleteAsync(cacheName, setName);
-        Assert.True(response is CacheSetDeleteResponse.Success, $"Unexpected response: {response}");
+        var response = await client.DeleteAsync(cacheName, setName);
+        Assert.True(response is CacheDeleteResponse.Success, $"Unexpected response: {response}");
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 
@@ -600,8 +590,8 @@ public class SetTest : TestBase
         Assert.True(response is CacheSetAddElementResponse.Success, $"Unexpected response: {response}");
 
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Hit);
-        CacheSetDeleteResponse deleteResponse = await client.SetDeleteAsync(cacheName, setName);
-        Assert.True(deleteResponse is CacheSetDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
+        var deleteResponse = await client.DeleteAsync(cacheName, setName);
+        Assert.True(deleteResponse is CacheDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
         Assert.True(await client.SetFetchAsync(cacheName, setName) is CacheSetFetchResponse.Miss);
     }
 }
