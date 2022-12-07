@@ -1,6 +1,7 @@
 using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal.ExtensionMethods;
+using Momento.Sdk.Responses;
 
 namespace Momento.Sdk.Incubating.Tests;
 
@@ -742,23 +743,13 @@ public class ListTest : TestBase
         Assert.Equal(10, successResponse.Length);
     }
 
-    [Theory]
-    [InlineData(null, "my-list")]
-    [InlineData("my-cache", null)]
-    public async Task ListDeleteAsync_NullChecks_IsError(string cacheName, string listName)
-    {
-        var response = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(response is CacheListDeleteResponse.Error, $"Unexpected response: {response}");
-        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListDeleteResponse.Error)response).ErrorCode);
-    }
-
     [Fact]
     public async Task ListDeleteAsync_ListDoesNotExist_Noop()
     {
         var listName = Utils.NewGuidString();
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
-        var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(deleteResponse is CacheListDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
+        var deleteResponse = await client.DeleteAsync(cacheName, listName);
+        Assert.True(deleteResponse is CacheDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Miss);
     }
 
@@ -774,8 +765,8 @@ public class ListTest : TestBase
         Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
 
         Assert.True((await client.ListFetchAsync(cacheName, listName)) is CacheListFetchResponse.Hit);
-        var deleteResponse = await client.ListDeleteAsync(cacheName, listName);
-        Assert.True(deleteResponse is CacheListDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
+        var deleteResponse = await client.DeleteAsync(cacheName, listName);
+        Assert.True(deleteResponse is CacheDeleteResponse.Success, $"Unexpected response: {deleteResponse}");
 
         var fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Miss, $"Unexpected response: {fetchResponse}");

@@ -382,23 +382,6 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheDictionaryDeleteResponse> DictionaryDeleteAsync(string cacheName, string dictionaryName)
-    {
-        try
-        {
-            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-            Utils.ArgumentNotNull(dictionaryName, nameof(dictionaryName));
-        }
-        catch (ArgumentNullException e)
-        {
-            return new CacheDictionaryDeleteResponse.Error(new InvalidArgumentException(e.Message));
-        }
-
-
-        return await this.dataClient.DictionaryDeleteAsync(cacheName, dictionaryName);
-    }
-
-    /// <inheritdoc />
     public async Task<CacheDictionaryRemoveFieldResponse> DictionaryRemoveFieldAsync(string cacheName, string dictionaryName, byte[] field)
     {
         try
@@ -629,22 +612,6 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
     }
 
     /// <inheritdoc />
-    public async Task<CacheSetDeleteResponse> SetDeleteAsync(string cacheName, string setName)
-    {
-        try
-        {
-            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-            Utils.ArgumentNotNull(setName, nameof(setName));
-        }
-        catch (ArgumentNullException e)
-        {
-            return new CacheSetDeleteResponse.Error(new InvalidArgumentException(e.Message));
-        }
-
-        return await this.dataClient.SetDeleteAsync(cacheName, setName);
-    }
-
-    /// <inheritdoc />
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
         try
@@ -830,23 +797,6 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
             return new CacheListLengthResponse.Error(new InvalidArgumentException(e.Message));
         }
         return await this.dataClient.ListLengthAsync(cacheName, listName);
-    }
-
-    /// <inheritdoc />
-    public async Task<CacheListDeleteResponse> ListDeleteAsync(string cacheName, string listName)
-    {
-        try
-        {
-            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
-            Utils.ArgumentNotNull(listName, nameof(listName));
-        }
-        catch (ArgumentNullException e)
-        {
-            return new CacheListDeleteResponse.Error(new InvalidArgumentException(e.Message));
-        }
-
-
-        return await this.dataClient.ListDeleteAsync(cacheName, listName);
     }
 
     /// <inheritdoc />
