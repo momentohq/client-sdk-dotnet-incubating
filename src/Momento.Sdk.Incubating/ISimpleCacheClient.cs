@@ -261,8 +261,8 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     /// Push multiple values to the beginning of a list.
     /// </summary>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
-    /// <param name="listName">The list to push the value on.</param>
-    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="listName">The list to concatenate the values on.</param>
+    /// <param name="values">The values to concatenate to the front of the list.</param>
     /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateBackToSize">Ensure the list does not exceed this length. Remove excess from the end of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
@@ -275,8 +275,8 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     /// Push multiple values to the back of a list.
     /// </summary>
     /// <param name="cacheName">Name of the cache to store the list in.</param>
-    /// <param name="listName">The list to push the value on.</param>
-    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="listName">The list to concatenate the values on.</param>
+    /// <param name="values">The values to concatenate to the front of the list.</param>
     /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
     /// <param name="truncateFrontToSize">Ensure the list does not exceed this length. Remove excess from the front of the list. Must be a positive number.</param>
     /// <returns>Task representing the result of the push operation.</returns>
