@@ -258,6 +258,34 @@ public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
     public Task<CacheSetFetchResponse> SetFetchAsync(string cacheName, string setName);
 
     /// <summary>
+    /// Push multiple values to the beginning of a list.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the list in.</param>
+    /// <param name="listName">The list to push the value on.</param>
+    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="truncateBackToSize">Ensure the list does not exceed this length. Remove excess from the end of the list. Must be a positive number.</param>
+    /// <returns>Task representing the result of the push operation.</returns>
+    public Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl));
+
+    /// <inheritdoc cref="ListConcatenateFrontAsync(string, string, IEnumerable{byte[]}, int?, CollectionTtl)"/>
+    public Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<string> value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl));
+
+    /// <summary>
+    /// Push multiple values to the back of a list.
+    /// </summary>
+    /// <param name="cacheName">Name of the cache to store the list in.</param>
+    /// <param name="listName">The list to push the value on.</param>
+    /// <param name="values">The values to push to the front of the list.</param>
+    /// <param name="ttl">TTL for the list in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
+    /// <param name="truncateFrontToSize">Ensure the list does not exceed this length. Remove excess from the front of the list. Must be a positive number.</param>
+    /// <returns>Task representing the result of the push operation.</returns>
+    public Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl));
+
+    /// <inheritdoc cref="ListConcatenateBackAsync(string, string, IEnumerable{byte[]}, int?, CollectionTtl)"/>
+    public Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<string> value, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl));
+
+    /// <summary>
     /// Push a value to the beginning of a list.
     /// </summary>
     /// <inheritdoc cref="DictionarySetFieldAsync(string, string, byte[], byte[], CollectionTtl)" path="remark"/>

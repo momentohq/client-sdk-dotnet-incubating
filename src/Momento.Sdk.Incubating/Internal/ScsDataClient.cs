@@ -267,6 +267,26 @@ internal sealed class ScsDataClient : ScsDataClientBase
         return await SendSetFetchAsync(cacheName, setName);
     }
 
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        return await SendListConcatenateFrontAsync(cacheName, listName, values.Select(value => value.ToByteString()), truncateBackToSize, ttl);
+    }
+
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<string> values, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        return await SendListConcatenateFrontAsync(cacheName, listName, values.Select(value => value.ToByteString()), truncateBackToSize, ttl);
+    }
+
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        return await SendListConcatenateBackAsync(cacheName, listName, values.Select(value => value.ToByteString()), truncateFrontToSize, ttl);
+    }
+
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<string> values, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        return await SendListConcatenateBackAsync(cacheName, listName, values.Select(value => value.ToByteString()), truncateFrontToSize, ttl);
+    }
+
     public async Task<CacheListPushFrontResponse> ListPushFrontAsync(string cacheName, string listName, byte[] value, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
     {
         return await SendListPushFrontAsync(cacheName, listName, value.ToByteString(), truncateBackToSize, ttl);
@@ -657,6 +677,60 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
 
         return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_SET_FETCH, cacheName, setName, new CacheSetFetchResponse.Miss());
+    }
+
+    const string REQUEST_TYPE_LIST_CONCATENATE_FRONT = "LIST_CONCATENATE_FRONT";
+
+    private async Task<CacheListConcatenateFrontResponse> SendListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<ByteString> values, int? truncateBackToSize, CollectionTtl ttl)
+    {
+        _ListConcatenateFrontRequest request = new()
+        {
+            TruncateBackToSize = Convert.ToUInt32(truncateBackToSize.GetValueOrDefault()),
+            ListName = listName.ToByteString(),
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
+        };
+        request.Values.AddRange(values);
+        _ListConcatenateFrontResponse response;
+        var metadata = MetadataWithCache(cacheName);
+
+        try
+        {
+            this._logger.LogTraceExecutingCollectionRequest(REQUEST_TYPE_LIST_CONCATENATE_FRONT, cacheName, listName, values, ttl);
+            response = await this.grpcManager.Client.ListConcatenateFrontAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+        }
+        catch (Exception e)
+        {
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_LIST_CONCATENATE_FRONT, cacheName, listName, values, ttl, new CacheListConcatenateFrontResponse.Error(_exceptionMapper.Convert(e, metadata)));
+        }
+        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_LIST_CONCATENATE_FRONT, cacheName, listName, values, ttl, new CacheListConcatenateFrontResponse.Success(response));
+    }
+
+    const string REQUEST_TYPE_LIST_CONCATENATE_BACK = "LIST_CONCATENATE_BACK";
+
+    private async Task<CacheListConcatenateBackResponse> SendListConcatenateBackAsync(string cacheName, string listName, IEnumerable<ByteString> values, int? truncateFrontToSize, CollectionTtl ttl)
+    {
+        _ListConcatenateBackRequest request = new()
+        {
+            TruncateFrontToSize = Convert.ToUInt32(truncateFrontToSize.GetValueOrDefault()),
+            ListName = listName.ToByteString(),
+            RefreshTtl = ttl.RefreshTtl,
+            TtlMilliseconds = TtlToMilliseconds(ttl.Ttl)
+        };
+        request.Values.AddRange(values);
+        _ListConcatenateBackResponse response;
+        var metadata = MetadataWithCache(cacheName);
+
+        try
+        {
+            this._logger.LogTraceExecutingCollectionRequest(REQUEST_TYPE_LIST_CONCATENATE_BACK, cacheName, listName, values, ttl);
+            response = await this.grpcManager.Client.ListConcatenateBackAsync(request, new CallOptions(headers: MetadataWithCache(cacheName), deadline: CalculateDeadline()));
+        }
+        catch (Exception e)
+        {
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_LIST_CONCATENATE_BACK, cacheName, listName, values, ttl, new CacheListConcatenateBackResponse.Error(_exceptionMapper.Convert(e, metadata)));
+        }
+        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_LIST_CONCATENATE_BACK, cacheName, listName, values, ttl, new CacheListConcatenateBackResponse.Success(response));
     }
 
     const string REQUEST_TYPE_LIST_PUSH_FRONT = "LIST_PUSH_FRONT";
