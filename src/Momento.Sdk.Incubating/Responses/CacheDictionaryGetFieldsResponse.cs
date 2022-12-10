@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf;
-using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal;

@@ -1,4 +1,3 @@
-using System;
 using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Internal.ExtensionMethods;

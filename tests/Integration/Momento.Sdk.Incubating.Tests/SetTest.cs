@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;

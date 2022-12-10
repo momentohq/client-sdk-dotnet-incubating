@@ -1,5 +1,4 @@
 ﻿using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal.ExtensionMethods;
