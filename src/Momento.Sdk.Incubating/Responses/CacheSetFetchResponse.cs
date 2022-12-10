@@ -6,7 +6,7 @@ using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal;
-using Momento.Sdk.Responses;
+using Momento.Sdk.Internal.ExtensionMethods;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -39,6 +39,14 @@ public abstract class CacheSetFetchResponse
         public HashSet<byte[]> ValueSetByteArray { get => _byteArraySet.Value; }
 
         public HashSet<string> ValueSetString { get => _stringSet.Value; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var stringRepresentation = String.Join(", ", ValueSetString.Select(value => $"\"{value}\""));
+            var byteArrayRepresentation = String.Join(", ", ValueSetByteArray.Select(value => $"\"{value.ToPrettyHexString()}\""));
+            return $"{base.ToString()}: ValueSetString: {{{stringRepresentation.Truncate()}}} ValueSetByteArray: {{{byteArrayRepresentation.Truncate()}}}";
+        }
     }
 
     public class Miss : CacheSetFetchResponse
@@ -69,9 +77,10 @@ public abstract class CacheSetFetchResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

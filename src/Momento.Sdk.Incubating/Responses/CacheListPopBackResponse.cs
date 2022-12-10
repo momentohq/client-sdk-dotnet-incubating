@@ -1,7 +1,7 @@
 ﻿using Google.Protobuf;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
-using Momento.Sdk.Responses;
+using Momento.Sdk.Internal.ExtensionMethods;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -22,6 +22,12 @@ public abstract class CacheListPopBackResponse
         }
 
         public string ValueString { get => value.ToStringUtf8(); }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: ValueString: \"{ValueString.Truncate()}\" ValueByteArray: \"{ValueByteArray.ToPrettyHexString().Truncate()}\"";
+        }
     }
 
     public class Miss : CacheListPopBackResponse
@@ -52,9 +58,10 @@ public abstract class CacheListPopBackResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

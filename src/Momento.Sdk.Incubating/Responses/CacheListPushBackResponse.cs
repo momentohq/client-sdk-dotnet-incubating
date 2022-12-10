@@ -15,6 +15,12 @@ public abstract class CacheListPushBackResponse
         {
             ListLength = checked((int)response.ListLength);
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: ListLength: {ListLength}";
+        }
     }
     public class Error : CacheListPushBackResponse
     {
@@ -39,9 +45,10 @@ public abstract class CacheListPushBackResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 

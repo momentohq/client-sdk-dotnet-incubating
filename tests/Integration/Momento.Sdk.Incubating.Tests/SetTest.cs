@@ -569,6 +569,19 @@ public class SetTest : TestBase
     }
 
     [Fact]
+    public async Task CacheSetFetchResponse_ToString_HappyPath()
+    {
+        var setName = Utils.NewGuidString();
+        await client.SetAddElementAsync(cacheName, setName, "a");
+
+        CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
+
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheSetFetchResponse+Hit: ValueSetString: {\"a\"} ValueSetByteArray: {\"61\"}", hitResponse.ToString());
+    }
+
+    [Fact]
     public async Task SetDeleteAsync_SetDoesNotExist_Noop()
     {
         var setName = Utils.NewGuidString();
