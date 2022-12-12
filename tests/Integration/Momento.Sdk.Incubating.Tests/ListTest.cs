@@ -13,6 +13,358 @@ public class ListTest : TestBase
     }
 
     [Theory]
+    [InlineData(null, "my-list", new string[] { "value" })]
+    [InlineData("cache", null, new string[] { "value" })]
+    [InlineData("cache", "my-list", null)]
+    public async Task ListConcatenateFrontAsync_NullChecksStringArray_IsError(string cacheName, string listName, IEnumerable<string> values)
+    {
+        CacheListConcatenateFrontResponse response = await client.ListConcatenateFrontAsync(cacheName, listName, values);
+        Assert.True(response is CacheListConcatenateFrontResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateFrontResponse.Error)response).ErrorCode);
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsByteArray_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values1 = new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() };
+
+        CacheListConcatenateFrontResponse concatenateResponse = await client.ListConcatenateFrontAsync(cacheName, listName, values1);
+        Assert.True(concatenateResponse is CacheListConcatenateFrontResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var success = (CacheListConcatenateFrontResponse.Success)concatenateResponse;
+        Assert.Equal(2, success.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListConcatenateFrontResponse+Success: ListLength: 2", success.ToString());
+
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+
+        var list = hitResponse.ValueListByteArray;
+        Assert.NotEmpty(list);
+        foreach (byte[] value in values1)
+        {
+            Assert.Contains(value, list);
+        }
+
+        // Test adding at the front semantics
+        byte[][] values2 = new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() };
+        concatenateResponse = await client.ListConcatenateFrontAsync(cacheName, listName, values2);
+        Assert.True(concatenateResponse is CacheListConcatenateFrontResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var successResponse = (CacheListConcatenateFrontResponse.Success)concatenateResponse;
+        Assert.Equal(4, successResponse.ListLength);
+
+        fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ValueListByteArray!;
+        for (int i = 0; i < values2.Length; i++)
+        {
+            Assert.Equal(values2[i], list[i]);
+        }
+        foreach (byte[] value in values1)
+        {
+            Assert.Contains(value, list);
+        }
+    }
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsByteArray_NoRefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values = new byte[][] { Utils.NewGuidByteArray() };
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(100);
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(4900);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsByteArray_RefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values = new byte[][] { Utils.NewGuidByteArray() };
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)));
+        await Task.Delay(2000);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ValueListByteArray!.Count);
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontAsync_ValueIsByteArrayTruncateBackToSizeIsZero_IsError()
+    {
+        byte[][] values = new byte[][] { };
+        var response = await client.ListConcatenateFrontAsync("myCache", "listName", values, truncateBackToSize: 0);
+        Assert.True(response is CacheListConcatenateFrontResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateFrontResponse.Error)response).ErrorCode);
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsStringArray_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values1 = new string[] { Utils.NewGuidString(), Utils.NewGuidString() };
+
+        CacheListConcatenateFrontResponse concatenateResponse = await client.ListConcatenateFrontAsync(cacheName, listName, values1);
+        Assert.True(concatenateResponse is CacheListConcatenateFrontResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var success = (CacheListConcatenateFrontResponse.Success)concatenateResponse;
+        Assert.Equal(2, success.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListConcatenateFrontResponse+Success: ListLength: 2", success.ToString());
+
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+
+        var list = hitResponse.ValueListString!;
+        Assert.NotEmpty(list);
+        foreach (string value in values1)
+        {
+            Assert.Contains(value, list);
+        }
+
+        // Test adding at the front semantics
+        string[] values2 = new string[] { Utils.NewGuidString(), Utils.NewGuidString() };
+        concatenateResponse = await client.ListConcatenateFrontAsync(cacheName, listName, values2);
+        Assert.True(concatenateResponse is CacheListConcatenateFrontResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var successResponse = (CacheListConcatenateFrontResponse.Success)concatenateResponse;
+        Assert.Equal(4, successResponse.ListLength);
+
+        fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ValueListString!;
+        var values3 = new List<String>(values2);
+        values3.AddRange(values1);
+        Assert.Equal(values3, list);
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsStringArray_NoRefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values = new string[] { Utils.NewGuidString() };
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(100);
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(4900);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontFetch_ValueIsStringArray_RefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values = new string[] { Utils.NewGuidString() };
+
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(2)).WithNoRefreshTtlOnUpdates());
+        await client.ListConcatenateFrontAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithRefreshTtlOnUpdates());
+        await Task.Delay(2000);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ValueListByteArray!.Count);
+    }
+
+    [Fact]
+    public async Task ListConcatenateFrontAsync_ValueIsStringArrayTruncateBackToSizeIsZero_IsError()
+    {
+        string[] values = new string[] { };
+        var response = await client.ListConcatenateFrontAsync("myCache", "listName", values, truncateBackToSize: 0);
+        Assert.True(response is CacheListConcatenateFrontResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateFrontResponse.Error)response).ErrorCode);
+    }
+
+    [Theory]
+    [InlineData(null, "my-list", new string[] { "value" })]
+    [InlineData("cache", null, new string[] { "value" })]
+    [InlineData("cache", "my-list", null)]
+    public async Task ListConcatenateBackAsync_NullChecksStringArray_IsError(string cacheName, string listName, IEnumerable<string> values)
+    {
+        CacheListConcatenateBackResponse response = await client.ListConcatenateBackAsync(cacheName, listName, values);
+        Assert.True(response is CacheListConcatenateBackResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateBackResponse.Error)response).ErrorCode);
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsByteArray_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values1 = new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() };
+
+        CacheListConcatenateBackResponse concatenateResponse = await client.ListConcatenateBackAsync(cacheName, listName, values1);
+        Assert.True(concatenateResponse is CacheListConcatenateBackResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var success = (CacheListConcatenateBackResponse.Success)concatenateResponse;
+        Assert.Equal(2, success.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListConcatenateBackResponse+Success: ListLength: 2", success.ToString());
+
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+
+        var list = hitResponse.ValueListByteArray;
+        Assert.NotEmpty(list);
+        foreach (byte[] value in values1)
+        {
+            Assert.Contains(value, list);
+        }
+
+        // Test adding at the front semantics
+        byte[][] values2 = new byte[][] { Utils.NewGuidByteArray(), Utils.NewGuidByteArray() };
+        concatenateResponse = await client.ListConcatenateBackAsync(cacheName, listName, values2);
+        Assert.True(concatenateResponse is CacheListConcatenateBackResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var successResponse = (CacheListConcatenateBackResponse.Success)concatenateResponse;
+        Assert.Equal(4, successResponse.ListLength);
+
+        fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ValueListByteArray!;
+        for (int i = 0; i < values2.Length; i++)
+        {
+            Assert.Equal(values1[i], list[i]);
+        }
+        foreach (byte[] value in values2)
+        {
+            Assert.Contains(value, list);
+        }
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsByteArray_NoRefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values = new byte[][] { Utils.NewGuidByteArray() };
+
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(100);
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(4900);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsByteArray_RefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        byte[][] values = new byte[][] { Utils.NewGuidByteArray() };
+
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithRefreshTtlOnUpdates());
+        await Task.Delay(2000);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ValueListByteArray!.Count);
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackAsync_ValueIsByteArrayTruncateFrontoSizeIsZero_IsError()
+    {
+        byte[][] values = new byte[][] { };
+        var response = await client.ListConcatenateBackAsync("myCache", "listName", values, truncateFrontToSize: 0);
+        Assert.True(response is CacheListConcatenateBackResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateBackResponse.Error)response).ErrorCode);
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsStringArray_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values1 = new string[] { Utils.NewGuidString(), Utils.NewGuidString() };
+
+        CacheListConcatenateBackResponse concatenateResponse = await client.ListConcatenateBackAsync(cacheName, listName, values1);
+        Assert.True(concatenateResponse is CacheListConcatenateBackResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var success = (CacheListConcatenateBackResponse.Success)concatenateResponse;
+        Assert.Equal(2, success.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListConcatenateBackResponse+Success: ListLength: 2", success.ToString());
+
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+
+        var list = hitResponse.ValueListString!;
+        Assert.NotEmpty(list);
+        foreach (string value in values1)
+        {
+            Assert.Contains(value, list);
+        }
+
+        // Test adding at the front semantics
+        string[] values2 = new string[] { Utils.NewGuidString(), Utils.NewGuidString() };
+        concatenateResponse = await client.ListConcatenateBackAsync(cacheName, listName, values2);
+        Assert.True(concatenateResponse is CacheListConcatenateBackResponse.Success, $"Unexpected response: {concatenateResponse}");
+        var successResponse = (CacheListConcatenateBackResponse.Success)concatenateResponse;
+        Assert.Equal(4, successResponse.ListLength);
+
+        fetchResponse = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        list = hitResponse.ValueListString!;
+        var values3 = new List<String>(values1);
+        values3.AddRange(values2);
+        Assert.Equal(values3, list);
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsStringArray_NoRefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values = new string[] { Utils.NewGuidString() };
+
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(100);
+
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(4900);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Miss, $"Unexpected response: {response}");
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackFetch_ValueIsStringArray_RefreshTtl()
+    {
+        var listName = Utils.NewGuidString();
+        string[] values = new string[] { Utils.NewGuidString() };
+
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(5)).WithNoRefreshTtlOnUpdates());
+        await client.ListConcatenateBackAsync(cacheName, listName, values, ttl: CollectionTtl.Of(TimeSpan.FromSeconds(10)).WithNoRefreshTtlOnUpdates());
+        await Task.Delay(2000);
+
+        CacheListFetchResponse response = await client.ListFetchAsync(cacheName, listName);
+        Assert.True(response is CacheListFetchResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListFetchResponse.Hit)response;
+        Assert.Equal(2, hitResponse.ValueListByteArray!.Count);
+    }
+
+    [Fact]
+    public async Task ListConcatenateBackAsync_ValueIsStringArrayTruncateBackToSizeIsZero_IsError()
+    {
+        string[] values = new string[] { };
+        var response = await client.ListConcatenateBackAsync("myCache", "listName", values, truncateFrontToSize: 0);
+        Assert.True(response is CacheListConcatenateBackResponse.Error, $"Unexpected response: {response}");
+        Assert.Equal(MomentoErrorCode.INVALID_ARGUMENT_ERROR, ((CacheListConcatenateBackResponse.Error)response).ErrorCode);
+    }
+
+    ///////////
+
+    [Theory]
     [InlineData(null, "my-list", new byte[] { 0x00 })]
     [InlineData("cache", null, new byte[] { 0x00 })]
     [InlineData("cache", "my-list", null)]
@@ -31,7 +383,9 @@ public class ListTest : TestBase
 
         CacheListPushFrontResponse pushResponse = await client.ListPushFrontAsync(cacheName, listName, value1);
         Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
-        Assert.Equal(1, ((CacheListPushFrontResponse.Success)pushResponse).ListLength);
+        var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        Assert.Equal(1, successResponse.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPushFrontResponse+Success: ListLength: 1", successResponse.ToString());
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
@@ -45,7 +399,7 @@ public class ListTest : TestBase
         var value2 = Utils.NewGuidByteArray();
         pushResponse = await client.ListPushFrontAsync(cacheName, listName, value2);
         Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
-        var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
+        successResponse = (CacheListPushFrontResponse.Success)pushResponse;
         Assert.Equal(2, successResponse.ListLength);
 
         fetchResponse = await client.ListFetchAsync(cacheName, listName);
@@ -117,6 +471,8 @@ public class ListTest : TestBase
         Assert.True(pushResponse is CacheListPushFrontResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushFrontResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPushFrontResponse+Success: ListLength: 1", successResponse.ToString());
+        successResponse = (CacheListPushFrontResponse.Success)pushResponse;
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
@@ -202,6 +558,7 @@ public class ListTest : TestBase
         Assert.True(pushResponse is CacheListPushBackResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushBackResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPushBackResponse+Success: ListLength: 1", successResponse.ToString());
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
@@ -359,6 +716,7 @@ public class ListTest : TestBase
         Assert.True(pushResponse is CacheListPushBackResponse.Success, $"Unexpected response: {pushResponse}");
         var successResponse = (CacheListPushBackResponse.Success)pushResponse;
         Assert.Equal(1, successResponse.ListLength);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPushBackResponse+Success: ListLength: 1", successResponse.ToString());
 
         CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
         Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
@@ -473,6 +831,19 @@ public class ListTest : TestBase
         Assert.Equal(value2, hitResponse.ValueString);
     }
 
+    [Fact]
+    public async Task CacheListPopFrontReponse_ToString_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        var value = "a";
+
+        await client.ListPushFrontAsync(cacheName, listName, value);
+        CacheListPopFrontResponse response = await client.ListPopFrontAsync(cacheName, listName);
+        Assert.True(response is CacheListPopFrontResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListPopFrontResponse.Hit)response;
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPopFrontResponse+Hit: ValueString: \"a\" ValueByteArray: \"61\"", hitResponse.ToString());
+    }
+
     [Theory]
     [InlineData(null, "my-list")]
     [InlineData("cache", null)]
@@ -521,6 +892,19 @@ public class ListTest : TestBase
         var hitResponse = (CacheListPopBackResponse.Hit)response;
 
         Assert.Equal(value2, hitResponse.ValueString);
+    }
+
+    [Fact]
+    public async Task CacheListPopBackReponse_ToString_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        var value = "a";
+
+        await client.ListPushBackAsync(cacheName, listName, value);
+        CacheListPopBackResponse response = await client.ListPopBackAsync(cacheName, listName);
+        Assert.True(response is CacheListPopBackResponse.Hit, $"Unexpected response: {response}");
+        var hitResponse = (CacheListPopBackResponse.Hit)response;
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListPopBackResponse+Hit: ValueString: \"a\" ValueByteArray: \"61\"", hitResponse.ToString());
     }
 
     [Theory]
@@ -577,6 +961,19 @@ public class ListTest : TestBase
         Assert.Contains(field1, hitResponse.ValueListByteArray!);
         Assert.Contains(field2, hitResponse.ValueListByteArray!);
         Assert.Equal(2, hitResponse.ValueListByteArray!.Count);
+    }
+
+    [Fact]
+    public async Task CacheListFetchResponse_ToString_HappyPath()
+    {
+        var listName = Utils.NewGuidString();
+        await client.ListConcatenateBackAsync(cacheName, listName, new string[] { "a", "b" });
+
+        CacheListFetchResponse fetchResponse = await client.ListFetchAsync(cacheName, listName);
+
+        Assert.True(fetchResponse is CacheListFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheListFetchResponse.Hit)fetchResponse;
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListFetchResponse+Hit: ValueListString: [\"a\", \"b\"] ValueListByteArray: [\"61\", \"62\"]", hitResponse.ToString());
     }
 
     [Theory]
@@ -741,6 +1138,7 @@ public class ListTest : TestBase
         Assert.True(lengthResponse is CacheListLengthResponse.Success, $"Unexpected response: {lengthResponse}");
         var successResponse = (CacheListLengthResponse.Success)lengthResponse;
         Assert.Equal(10, successResponse.Length);
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheListLengthResponse+Success: Length: 10", successResponse.ToString());
     }
 
     [Fact]

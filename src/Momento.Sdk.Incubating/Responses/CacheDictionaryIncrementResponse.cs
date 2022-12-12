@@ -12,6 +12,12 @@ public abstract class CacheDictionaryIncrementResponse
         {
             Value = response.Value;
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: Value: {Value}";
+        }
     }
 
     public class Error : CacheDictionaryIncrementResponse
@@ -37,9 +43,10 @@ public abstract class CacheDictionaryIncrementResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

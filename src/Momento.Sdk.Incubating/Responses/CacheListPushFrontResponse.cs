@@ -16,6 +16,12 @@ public abstract class CacheListPushFrontResponse
         {
             ListLength = checked((int)response.ListLength);
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: ListLength: {ListLength}";
+        }
     }
     public class Error : CacheListPushFrontResponse
     {
@@ -40,9 +46,10 @@ public abstract class CacheListPushFrontResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 

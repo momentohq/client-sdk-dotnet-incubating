@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
@@ -609,6 +608,99 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
         }
 
         return await this.dataClient.SetFetchAsync(cacheName, setName);
+    }
+
+    /// <inheritdoc />
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateFrontAsync(cacheName, listName, values, truncateBackToSize, ttl);
+    }
+
+
+    /// <inheritdoc />
+    public async Task<CacheListConcatenateFrontResponse> ListConcatenateFrontAsync(string cacheName, string listName, IEnumerable<string> values, int? truncateBackToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateBackToSize, nameof(truncateBackToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateFrontResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateFrontAsync(cacheName, listName, values, truncateBackToSize, ttl);
+    }
+
+    /// <inheritdoc />
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<byte[]> values, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateBackAsync(cacheName, listName, values, truncateFrontToSize, ttl);
+    }
+
+    /// <inheritdoc />
+    public async Task<CacheListConcatenateBackResponse> ListConcatenateBackAsync(string cacheName, string listName, IEnumerable<string> values, int? truncateFrontToSize = null, CollectionTtl ttl = default(CollectionTtl))
+    {
+        try
+        {
+            Utils.ArgumentNotNull(cacheName, nameof(cacheName));
+            Utils.ArgumentNotNull(listName, nameof(listName));
+            Utils.ArgumentNotNull(values, nameof(values));
+            Utils.ElementsNotNull(values, nameof(values));
+            Utils.ArgumentStrictlyPositive(truncateFrontToSize, nameof(truncateFrontToSize));
+        }
+        catch (ArgumentNullException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            return new CacheListConcatenateBackResponse.Error(new InvalidArgumentException(e.Message));
+        }
+
+        return await this.dataClient.ListConcatenateBackAsync(cacheName, listName, values, truncateFrontToSize, ttl);
     }
 
     /// <inheritdoc />

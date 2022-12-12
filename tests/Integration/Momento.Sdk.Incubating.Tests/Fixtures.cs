@@ -32,7 +32,7 @@ public class SimpleCacheClientFixture : IDisposable
                         options.TimestampFormat = "hh:mm:ss ";
                     });
                     builder.AddFilter("Grpc.Net.Client", LogLevel.Error);
-                    builder.SetMinimumLevel(LogLevel.Trace);
+                    builder.SetMinimumLevel(LogLevel.Information);
                 })),
             AuthProvider, defaultTtl: DefaultTtl);
 

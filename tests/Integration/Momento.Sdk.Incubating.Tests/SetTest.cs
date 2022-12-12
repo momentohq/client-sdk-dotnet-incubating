@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
@@ -566,6 +565,19 @@ public class SetTest : TestBase
         var set1 = hitResponse.ValueSetString;
         var set2 = hitResponse.ValueSetString;
         Assert.Same(set1, set2);
+    }
+
+    [Fact]
+    public async Task CacheSetFetchResponse_ToString_HappyPath()
+    {
+        var setName = Utils.NewGuidString();
+        await client.SetAddElementAsync(cacheName, setName, "a");
+
+        CacheSetFetchResponse fetchResponse = await client.SetFetchAsync(cacheName, setName);
+
+        Assert.True(fetchResponse is CacheSetFetchResponse.Hit, $"Unexpected response: {fetchResponse}");
+        var hitResponse = (CacheSetFetchResponse.Hit)fetchResponse;
+        Assert.Equal("Momento.Sdk.Incubating.Responses.CacheSetFetchResponse+Hit: ValueSetString: {\"a\"} ValueSetByteArray: {\"61\"}", hitResponse.ToString());
     }
 
     [Fact]

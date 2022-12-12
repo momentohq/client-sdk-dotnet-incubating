@@ -1,8 +1,7 @@
 ﻿using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
-using Momento.Sdk.Responses;
+using Momento.Sdk.Internal.ExtensionMethods;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -28,6 +27,12 @@ public abstract class CacheDictionaryGetFieldResponse
         }
 
         public string ValueString { get => value.ToStringUtf8(); }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: ValueString: \"{ValueString.Truncate()}\" ValueByteArray: \"{ValueByteArray.ToPrettyHexString().Truncate()}\"";
+        }
     }
 
     public class Miss : CacheDictionaryGetFieldResponse
@@ -58,9 +63,10 @@ public abstract class CacheDictionaryGetFieldResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

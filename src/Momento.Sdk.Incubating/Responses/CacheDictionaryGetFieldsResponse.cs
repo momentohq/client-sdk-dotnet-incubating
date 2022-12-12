@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf;
-using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Internal;
+using Momento.Sdk.Internal.ExtensionMethods;
 using static Momento.Protos.CacheClient._DictionaryGetResponse.Types;
 
 namespace Momento.Sdk.Incubating.Responses;
@@ -69,6 +69,14 @@ public abstract class CacheDictionaryGetFieldsResponse
         public Dictionary<string, string> ValueDictionaryStringString { get => _dictionaryStringString.Value; }
 
         public Dictionary<string, byte[]> ValueDictionaryStringByteArray { get => _dictionaryStringByteArray.Value; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var stringRepresentation = String.Join(", ", ValueDictionaryStringString.Select(kv => $"\"{kv.Key}\": \"{kv.Value}\""));
+            var byteArrayRepresentation = String.Join(", ", ValueDictionaryByteArrayByteArray.Select(kv => $"\"{kv.Key.ToPrettyHexString()}\": \"{kv.Value.ToPrettyHexString()}\""));
+            return $"{base.ToString()}: ValueDictionaryStringString: {{{stringRepresentation.Truncate()}}} ValueDictionaryByteArrayByteArray: {{{byteArrayRepresentation.Truncate()}}}";
+        }
     }
 
     public class Miss : CacheDictionaryGetFieldsResponse
@@ -99,9 +107,10 @@ public abstract class CacheDictionaryGetFieldsResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

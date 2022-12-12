@@ -4,6 +4,7 @@ using Momento.Sdk.Auth;
 using Momento.Sdk.Config;
 using Momento.Sdk.Exceptions;
 using Momento.Sdk.Incubating;
+using Momento.Sdk.Incubating.Requests;
 using Momento.Sdk.Incubating.Responses;
 using Momento.Sdk.Responses;
 
@@ -31,24 +32,24 @@ public class Driver
 
         // Set a value
         var dictionaryName = "my-dictionary";
-        var setResponse = await client.DictionarySetAsync(cacheName: cacheName, dictionaryName: dictionaryName,
-            field: "my-field", value: "my-value", refreshTtl: false, ttl: TimeSpan.FromSeconds(60));
-        if (setResponse is CacheDictionarySetResponse.Error setError)
+        var setResponse = await client.DictionarySetFieldAsync(cacheName: cacheName, dictionaryName: dictionaryName,
+            field: "my-field", value: "my-value", CollectionTtl.FromCacheTtl());
+        if (setResponse is CacheDictionarySetFieldResponse.Error setError)
         {
             _logger.LogInformation($"Error setting a value in a dictionary: {setError.Message}");
             Environment.Exit(1);
         }
 
         // Set multiple values
-        var setBatchResponse = await client.DictionarySetBatchAsync(
+        var setBatchResponse = await client.DictionarySetFieldsAsync(
             cacheName: cacheName,
             dictionaryName: dictionaryName,
             new Dictionary<string, string>() {
                 { "field1", "value1" },
                 { "field2", "value2" },
                 { "field3", "value3" }},
-            refreshTtl: false);
-        if (setBatchResponse is CacheDictionarySetBatchResponse.Error setBatchError)
+            CollectionTtl.FromCacheTtl());
+        if (setBatchResponse is CacheDictionarySetFieldsResponse.Error setBatchError)
         {
             _logger.LogInformation($"Error setting a values in a dictionary: {setBatchError.Message}");
             Environment.Exit(1);
@@ -56,19 +57,19 @@ public class Driver
 
         // Get a value
         var field = "field1";
-        var getResponse = await client.DictionaryGetAsync(
+        var getResponse = await client.DictionaryGetFieldAsync(
             cacheName: cacheName,
             dictionaryName: dictionaryName,
             field: field);
 
         var status = "";
         var value = "";
-        if (getResponse is CacheDictionaryGetResponse.Hit unaryHit)
+        if (getResponse is CacheDictionaryGetFieldResponse.Hit unaryHit)
         {
             status = "HIT";
-            value = unaryHit.String();
+            value = unaryHit.ValueString;
         }
-        else if (getResponse is CacheDictionaryGetResponse.Miss)
+        else if (getResponse is CacheDictionaryGetFieldResponse.Miss)
         {
             // In this example you can get here if you:
             // - change the field name to one that does not exist, or if you
@@ -76,7 +77,7 @@ public class Driver
             status = "MISS";
             value = "<NONE; operation was a MISS>";
         }
-        else if (getResponse is CacheDictionaryGetResponse.Error getError)
+        else if (getResponse is CacheDictionaryGetFieldResponse.Error getError)
         {
             _logger.LogInformation($"Error getting value from a dictionary: {getError.Message}");
             Environment.Exit(1);
@@ -87,11 +88,11 @@ public class Driver
 
         // Get multiple values
         var batchFieldList = new string[] { "field1", "field2", "field3", "field4" };
-        var getBatchResponse = await client.DictionaryGetBatchAsync(
+        var getBatchResponse = await client.DictionaryGetFieldsAsync(
             cacheName: cacheName,
             dictionaryName: dictionaryName,
             fields: batchFieldList);
-        if (getBatchResponse is CacheDictionaryGetBatchResponse.Success responses)
+        if (getBatchResponse is CacheDictionaryGetFieldsResponse.Hit responses)
         {
             _logger.LogInformation("");
             _logger.LogInformation("Displaying the result of dictionary get batch:");
@@ -99,15 +100,15 @@ public class Driver
             {
                 status = "MISS";
                 value = "<NONE; field was a MISS>";
-                if (response is CacheDictionaryGetResponse.Hit hit_)
+                if (response is CacheDictionaryGetFieldResponse.Hit hit_)
                 {
                     status = "HIT";
-                    value = hit_.String();
+                    value = hit_.ValueString;
                 }
                 _logger.LogInformation($"- field={batchField}; status={status}; value={value}");
             }
         }
-        else if (getBatchResponse is CacheDictionaryGetBatchResponse.Error getBatchError)
+        else if (getBatchResponse is CacheDictionaryGetFieldsResponse.Error getBatchError)
         {
             _logger.LogInformation($"Error getting value from a dictionary: {getBatchError.Message}");
             Environment.Exit(1);
@@ -119,7 +120,7 @@ public class Driver
             dictionaryName: dictionaryName);
         if (fetchResponse is CacheDictionaryFetchResponse.Hit fetchHit)
         {
-            var dictionary = fetchHit.StringStringDictionary();
+            var dictionary = fetchHit.ValueDictionaryStringString;
             _logger.LogInformation("");
             _logger.LogInformation($"Accessing an entry of {dictionaryName} using a native Dictionary: {dictionary["field1"]}");
 
@@ -195,7 +196,7 @@ public class Driver
         return cacheName;
     }
 
-    private static async Task EnsureCacheExistsAsync(SimpleCacheClient client, string cacheName)
+    private static async Task EnsureCacheExistsAsync(ISimpleCacheClient client, string cacheName)
     {
         _logger.LogInformation($"Creating cache {cacheName} if it doesn't already exist.");
         var createCacheResponse = await client.CreateCacheAsync(cacheName);

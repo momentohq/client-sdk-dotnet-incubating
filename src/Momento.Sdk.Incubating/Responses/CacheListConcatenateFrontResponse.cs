@@ -1,13 +1,29 @@
+using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
 
 namespace Momento.Sdk.Incubating.Responses;
 
-public abstract class CacheDictionaryRemoveFieldResponse
+/// <summary>
+/// The result of a <c>ListConcatenateFront</c> command
+/// </summary>
+///
+public abstract class CacheListConcatenateFrontResponse
 {
-    public class Success : CacheDictionaryRemoveFieldResponse
+    public class Success : CacheListConcatenateFrontResponse
     {
+        public int ListLength { get; private set; }
+        public Success(_ListConcatenateFrontResponse response)
+        {
+            ListLength = checked((int)response.ListLength);
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: ListLength: {ListLength}";
+        }
     }
-    public class Error : CacheDictionaryRemoveFieldResponse
+    public class Error : CacheListConcatenateFrontResponse
     {
         private readonly SdkException _error;
         public Error(SdkException error)
@@ -36,4 +52,5 @@ public abstract class CacheDictionaryRemoveFieldResponse
             return $"{base.ToString()}: {Message}";
         }
     }
+
 }
