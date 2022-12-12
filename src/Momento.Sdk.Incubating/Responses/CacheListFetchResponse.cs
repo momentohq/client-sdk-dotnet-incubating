@@ -5,7 +5,7 @@ using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Momento.Protos.CacheClient;
 using Momento.Sdk.Exceptions;
-using Momento.Sdk.Responses;
+using Momento.Sdk.Internal.ExtensionMethods;
 
 namespace Momento.Sdk.Incubating.Responses;
 
@@ -34,6 +34,14 @@ public abstract class CacheListFetchResponse
         public List<byte[]> ValueListByteArray { get => _byteArrayList.Value; }
 
         public List<string> ValueListString { get => _stringList.Value; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var stringRepresentation = String.Join(", ", ValueListString.Select(value => $"\"{value}\""));
+            var byteArrayRepresentation = String.Join(", ", ValueListByteArray.Select(value => $"\"{value.ToPrettyHexString()}\""));
+            return $"{base.ToString()}: ValueListString: [{stringRepresentation.Truncate()}] ValueListByteArray: [{byteArrayRepresentation.Truncate()}]";
+        }
     }
 
     public class Miss : CacheListFetchResponse
@@ -64,9 +72,10 @@ public abstract class CacheListFetchResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 }

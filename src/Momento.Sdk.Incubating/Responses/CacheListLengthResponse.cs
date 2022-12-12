@@ -15,6 +15,12 @@ public abstract class CacheListLengthResponse
                 Length = checked((int)response.Found.Length);
             }
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{base.ToString()}: Length: {Length}";
+        }
     }
     public class Error : CacheListLengthResponse
     {
@@ -39,9 +45,10 @@ public abstract class CacheListLengthResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString() + ": " + Message;
+            return $"{base.ToString()}: {Message}";
         }
     }
 
