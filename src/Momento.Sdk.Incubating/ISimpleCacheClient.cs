@@ -13,31 +13,6 @@ namespace Momento.Sdk.Incubating;
 /// </summary>
 public interface ISimpleCacheClient : Momento.Sdk.ISimpleCacheClient
 {
-#if USE_UNARY_BATCH
-    /// <summary>
-    /// Gets multiple values from the cache.
-    /// </summary>
-    /// <param name="cacheName">Name of the cache to perform the lookup in.</param>
-    /// <param name="keys">The keys to get.</param>
-    /// <returns>Task object representing the statuses of the get operation and the associated values.</returns>
-    public Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<byte[]> keys);
-
-    /// <inheritdoc cref="GetBatchAsync(string, IEnumerable{byte[]})"/>
-    public Task<CacheGetBatchResponse> GetBatchAsync(string cacheName, IEnumerable<string> keys);
-
-    /// <summary>
-    /// Sets multiple items in the cache. Overwrites existing items.
-    /// </summary>
-    /// <param name="cacheName">Name of the cache to store the items in.</param>
-    /// <param name="items">The items to set.</param>
-    /// <param name="ttl">TTL for the item in cache. This TTL takes precedence over the TTL used when initializing a cache client. Defaults to client TTL.</param>
-    /// <returns>Task object representing the result of the set operation.</returns>
-    public Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<byte[], byte[]>> items, TimeSpan? ttl = null);
-
-    /// <inheritdoc cref="SetBatchAsync(string, IEnumerable{KeyValuePair{byte[], byte[]}}, TimeSpan?)"/>
-    public Task<CacheSetBatchResponse> SetBatchAsync(string cacheName, IEnumerable<KeyValuePair<string, string>> items, TimeSpan? ttl = null);
-#endif
-
     /// <summary>
     /// Set the dictionary field to a value with a given time to live (TTL) seconds.
     /// </summary>
