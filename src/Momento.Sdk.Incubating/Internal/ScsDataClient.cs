@@ -291,7 +291,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(fields));
         }
 
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(fields, response));
+        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(fields.ToList()[0], response));
     }
 
     const string REQUEST_TYPE_DICTIONARY_GET_FIELDS = "DICTIONARY_GET_FIELDS";
