@@ -75,6 +75,11 @@ public abstract class CacheDictionaryGetFieldResponse
         private readonly SdkException _error;
         protected readonly ByteString field;
 
+        public Error(SdkException error)
+        {
+            _error = error;
+        }
+
         public Error(IEnumerable<ByteString> fields, SdkException error)
         {
             this.field = fields.ToList()[0];

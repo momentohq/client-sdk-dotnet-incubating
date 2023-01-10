@@ -187,7 +187,11 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-            return new CacheDictionaryGetFieldResponse.Error(field.ToSingletonByteString(), new InvalidArgumentException(e.Message));
+            if (field != null)
+            {
+                return new CacheDictionaryGetFieldResponse.Error(field.ToSingletonByteString(), new InvalidArgumentException(e.Message));
+            }
+            return new CacheDictionaryGetFieldResponse.Error(new InvalidArgumentException(e.Message));
         }
 
         return await this.dataClient.DictionaryGetFieldAsync(cacheName, dictionaryName, field);
