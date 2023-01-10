@@ -272,26 +272,26 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(_exceptionMapper.Convert(e, metadata)));
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(fields, _exceptionMapper.Convert(e, metadata)));
         }
 
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Missing)
         {
-            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss());
+            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(fields));
         }
 
         if (response.Found.Items.Count == 0)
         {
             var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"), metadata);
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(exc));
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(fields, exc));
         }
 
         if (response.Found.Items[0].Result == ECacheResult.Miss)
         {
-            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss());
+            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(fields));
         }
 
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(response));
+        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(fields, response));
     }
 
     const string REQUEST_TYPE_DICTIONARY_GET_FIELDS = "DICTIONARY_GET_FIELDS";
