@@ -191,7 +191,10 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
         }
         catch (ArgumentNullException e)
         {
-
+            if (field == null)
+            {
+                return new CacheDictionaryGetFieldResponse.Error(Google.Protobuf.ByteString.Empty, new InvalidArgumentException(e.Message));
+            }
             return new CacheDictionaryGetFieldResponse.Error(field.ToByteString(), new InvalidArgumentException(e.Message));
 
         }
