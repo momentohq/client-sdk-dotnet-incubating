@@ -13,15 +13,15 @@ public abstract class CacheDictionaryGetFieldResponse
     public class Hit : CacheDictionaryGetFieldResponse
     {
         protected readonly ByteString value;
-        protected readonly ByteString? field;
+        protected readonly ByteString field;
 
-        public Hit(ByteString? field, _DictionaryGetResponse response)
+        public Hit(ByteString field, _DictionaryGetResponse response)
         {
             this.value = response.Found.Items[0].CacheBody;
             this.field = field;
         }
 
-        public Hit(ByteString? field, ByteString cacheBody)
+        public Hit(ByteString field, ByteString cacheBody)
         {
             this.value = cacheBody;
             this.field = field;
@@ -32,14 +32,14 @@ public abstract class CacheDictionaryGetFieldResponse
             get => value.ToByteArray();
         }
 
-        public byte[]? FieldByteArray
+        public byte[] FieldByteArray
         {
-            get => field?.ToByteArray();
+            get => field.ToByteArray();
         }
 
         public string ValueString { get => value.ToStringUtf8(); }
 
-        public string? FieldString { get => field?.ToStringUtf8(); }
+        public string FieldString { get => field.ToStringUtf8(); }
 
         /// <inheritdoc />
         public override string ToString()
@@ -50,27 +50,27 @@ public abstract class CacheDictionaryGetFieldResponse
 
     public class Miss : CacheDictionaryGetFieldResponse
     {
-        protected readonly ByteString? field;
+        protected readonly ByteString field;
 
-        public Miss(ByteString? field)
+        public Miss(ByteString field)
         {
             this.field = field;
         }
 
-        public byte[]? FieldByteArray
+        public byte[] FieldByteArray
         {
-            get => field?.ToByteArray();
+            get => field.ToByteArray();
         }
 
-        public string? FieldString { get => field?.ToStringUtf8(); }
+        public string FieldString { get => field.ToStringUtf8(); }
     }
 
     public class Error : CacheDictionaryGetFieldResponse
     {
         private readonly SdkException _error;
-        protected readonly ByteString? field;
+        protected readonly ByteString field;
 
-        public Error(ByteString? field, SdkException error)
+        public Error(ByteString field, SdkException error)
         {
             this.field = field;
             _error = error;
@@ -91,14 +91,14 @@ public abstract class CacheDictionaryGetFieldResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
-        public byte[]? FieldByteArray
+        public byte[] FieldByteArray
         {
-            get => field?.ToByteArray();
+            get => field.ToByteArray();
         }
 
-        public string? FieldString
+        public string FieldString
         {
-            get => field?.ToStringUtf8();
+            get => field.ToStringUtf8();
         }
 
         /// <inheritdoc />
