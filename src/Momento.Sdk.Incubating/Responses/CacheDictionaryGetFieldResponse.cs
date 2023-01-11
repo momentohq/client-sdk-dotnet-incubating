@@ -52,11 +52,6 @@ public abstract class CacheDictionaryGetFieldResponse
     {
         protected readonly ByteString field;
 
-        public Miss(IEnumerable<ByteString> fields)
-        {
-            this.field = fields.ToList()[0];
-        }
-
         public Miss(ByteString field)
         {
             this.field = field;
@@ -73,20 +68,9 @@ public abstract class CacheDictionaryGetFieldResponse
     public class Error : CacheDictionaryGetFieldResponse
     {
         private readonly SdkException _error;
-        protected readonly ByteString field;
+        protected readonly ByteString? field;
 
-        public Error(SdkException error)
-        {
-            _error = error;
-        }
-
-        public Error(IEnumerable<ByteString> fields, SdkException error)
-        {
-            this.field = fields.ToList()[0];
-            _error = error;
-        }
-
-        public Error(ByteString field, SdkException error)
+        public Error(ByteString? field, SdkException error)
         {
             this.field = field;
             _error = error;
@@ -107,12 +91,29 @@ public abstract class CacheDictionaryGetFieldResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
-        public byte[] FieldByteArray
+        public byte[]? FieldByteArray
         {
-            get => field.ToByteArray();
+            get
+            {
+                if (field != null)
+                {
+                    return field.ToByteArray();
+                }
+                return null;
+            }
         }
 
-        public string FieldString { get => field.ToStringUtf8(); }
+        public string? FieldString
+        {
+            get
+            {
+                if (field != null)
+                {
+                    return field.ToStringUtf8();
+                }
+                return null;
+            }
+        }
 
         /// <inheritdoc />
         public override string ToString()

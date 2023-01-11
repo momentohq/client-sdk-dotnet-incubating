@@ -264,6 +264,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
         request.Fields.Add(fields);
         _DictionaryGetResponse response;
         var metadata = MetadataWithCache(cacheName);
+        var field = fields.ToList()[0];
 
         try
         {
@@ -272,23 +273,23 @@ internal sealed class ScsDataClient : ScsDataClientBase
         }
         catch (Exception e)
         {
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(fields, _exceptionMapper.Convert(e, metadata)));
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(field, _exceptionMapper.Convert(e, metadata)));
         }
 
         if (response.DictionaryCase == _DictionaryGetResponse.DictionaryOneofCase.Missing)
         {
-            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(fields));
+            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(field));
         }
 
         if (response.Found.Items.Count == 0)
         {
             var exc = _exceptionMapper.Convert(new Exception("_DictionaryGetResponseResponse contained no data but was found"), metadata);
-            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(fields, exc));
+            return this._logger.LogTraceCollectionRequestError(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Error(field, exc));
         }
 
         if (response.Found.Items[0].Result == ECacheResult.Miss)
         {
-            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(fields));
+            return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(field));
         }
 
         return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(fields.ToList()[0], response));
