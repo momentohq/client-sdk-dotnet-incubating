@@ -264,7 +264,11 @@ internal sealed class ScsDataClient : ScsDataClientBase
         request.Fields.Add(fields);
         _DictionaryGetResponse response;
         var metadata = MetadataWithCache(cacheName);
-        var field = fields.ToList()[0];
+        ByteString? field = null;
+        if (fields.ToList().Count != 0)
+        {
+            field = fields.ToList()[0];
+        }
 
         try
         {
@@ -292,7 +296,7 @@ internal sealed class ScsDataClient : ScsDataClientBase
             return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Miss(field));
         }
 
-        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(fields.ToList()[0], response));
+        return this._logger.LogTraceCollectionRequestSuccess(REQUEST_TYPE_DICTIONARY_GET_FIELD, cacheName, dictionaryName, fields, null, new CacheDictionaryGetFieldResponse.Hit(field, response));
     }
 
     const string REQUEST_TYPE_DICTIONARY_GET_FIELDS = "DICTIONARY_GET_FIELDS";

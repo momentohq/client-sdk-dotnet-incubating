@@ -13,7 +13,7 @@ public abstract class CacheDictionaryGetFieldResponse
     public class Hit : CacheDictionaryGetFieldResponse
     {
         protected readonly ByteString value;
-        protected readonly ByteString field;
+        protected readonly ByteString? field;
 
         public Hit(ByteString field, _DictionaryGetResponse response)
         {
@@ -21,7 +21,7 @@ public abstract class CacheDictionaryGetFieldResponse
             this.field = field;
         }
 
-        public Hit(ByteString field, ByteString cacheBody)
+        public Hit(ByteString? field, ByteString cacheBody)
         {
             this.value = cacheBody;
             this.field = field;
@@ -32,14 +32,14 @@ public abstract class CacheDictionaryGetFieldResponse
             get => value.ToByteArray();
         }
 
-        public byte[] FieldByteArray
+        public byte[]? FieldByteArray
         {
-            get => field.ToByteArray();
+            get => field?.ToByteArray();
         }
 
         public string ValueString { get => value.ToStringUtf8(); }
 
-        public string FieldString { get => field.ToStringUtf8(); }
+        public string? FieldString { get => field?.ToStringUtf8(); }
 
         /// <inheritdoc />
         public override string ToString()
@@ -50,19 +50,19 @@ public abstract class CacheDictionaryGetFieldResponse
 
     public class Miss : CacheDictionaryGetFieldResponse
     {
-        protected readonly ByteString field;
+        protected readonly ByteString? field;
 
-        public Miss(ByteString field)
+        public Miss(ByteString? field)
         {
             this.field = field;
         }
 
-        public byte[] FieldByteArray
+        public byte[]? FieldByteArray
         {
-            get => field.ToByteArray();
+            get => field?.ToByteArray();
         }
 
-        public string FieldString { get => field.ToStringUtf8(); }
+        public string? FieldString { get => field?.ToStringUtf8(); }
     }
 
     public class Error : CacheDictionaryGetFieldResponse
@@ -93,26 +93,12 @@ public abstract class CacheDictionaryGetFieldResponse
 
         public byte[]? FieldByteArray
         {
-            get
-            {
-                if (field != null)
-                {
-                    return field.ToByteArray();
-                }
-                return null;
-            }
+            get => field?.ToByteArray();
         }
 
         public string? FieldString
         {
-            get
-            {
-                if (field != null)
-                {
-                    return field.ToStringUtf8();
-                }
-                return null;
-            }
+            get => field?.ToStringUtf8();
         }
 
         /// <inheritdoc />
