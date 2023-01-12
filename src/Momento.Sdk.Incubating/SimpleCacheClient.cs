@@ -172,7 +172,7 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
         {
             if (field == null)
             {
-                return new CacheDictionaryGetFieldResponse.Error(Google.Protobuf.ByteString.Empty, new InvalidArgumentException(e.Message));
+                return new CacheDictionaryGetFieldResponse.Error(null, new InvalidArgumentException(e.Message));
             }
             return new CacheDictionaryGetFieldResponse.Error(field.ToByteString(), new InvalidArgumentException(e.Message));
         }
@@ -193,7 +193,7 @@ public class SimpleCacheClient : Momento.Sdk.Incubating.ISimpleCacheClient
         {
             if (field == null)
             {
-                return new CacheDictionaryGetFieldResponse.Error(Google.Protobuf.ByteString.Empty, new InvalidArgumentException(e.Message));
+                return new CacheDictionaryGetFieldResponse.Error(null, new InvalidArgumentException(e.Message));
             }
             return new CacheDictionaryGetFieldResponse.Error(field.ToByteString(), new InvalidArgumentException(e.Message));
 

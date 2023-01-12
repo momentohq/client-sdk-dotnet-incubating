@@ -68,9 +68,9 @@ public abstract class CacheDictionaryGetFieldResponse
     public class Error : CacheDictionaryGetFieldResponse
     {
         private readonly SdkException _error;
-        protected readonly ByteString field;
+        protected readonly ByteString? field;
 
-        public Error(ByteString field, SdkException error)
+        public Error(ByteString? field, SdkException error)
         {
             this.field = field;
             _error = error;
@@ -91,14 +91,14 @@ public abstract class CacheDictionaryGetFieldResponse
             get => $"{_error.MessageWrapper}: {_error.Message}";
         }
 
-        public byte[] FieldByteArray
+        public byte[]? FieldByteArray
         {
-            get => field.ToByteArray();
+            get => field?.ToByteArray();
         }
 
-        public string FieldString
+        public string? FieldString
         {
-            get => field.ToStringUtf8();
+            get => field?.ToStringUtf8();
         }
 
         /// <inheritdoc />
