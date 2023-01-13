@@ -22,20 +22,23 @@ public abstract class CacheDictionaryGetFieldsResponse
         public Hit(IEnumerable<ByteString> fields, _DictionaryGetResponse responses)
         {
             var responsesList = new List<CacheDictionaryGetFieldResponse>();
+            List<ByteString> fieldsList = fields.ToList();
+            var counter = 0;
             foreach (_DictionaryGetResponsePart response in responses.Found.Items)
             {
                 if (response.Result == ECacheResult.Hit)
                 {
-                    responsesList.Add(new CacheDictionaryGetFieldResponse.Hit(response.CacheBody));
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Hit(fieldsList[counter], response.CacheBody));
                 }
                 else if (response.Result == ECacheResult.Miss)
                 {
-                    responsesList.Add(new CacheDictionaryGetFieldResponse.Miss());
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Miss(fieldsList[counter]));
                 }
                 else
                 {
-                    responsesList.Add(new CacheDictionaryGetFieldResponse.Error(new UnknownException(response.Result.ToString())));
+                    responsesList.Add(new CacheDictionaryGetFieldResponse.Error(fieldsList[counter], new UnknownException(response.Result.ToString())));
                 }
+                counter++;
             }
             this.Responses = responsesList;
 
